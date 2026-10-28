@@ -30,8 +30,25 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+# Windows
+Thumbs.db
+Desktop.ini
+
+# IDEs
+.idea/
+*.iml
+
+# Claude Code
+.claude/
+
+# logs
+*.log
+
+# env files (commit .env.example with placeholder values instead)
+.env
+.env.*
+!.env.example
+mobile-theme-tokens.ts
 
 # typescript
 *.tsbuildinfo
