@@ -28,6 +28,14 @@
       "expo-router",
       "./plugins/with-release-signing",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "GuardGo uses your photos so you can attach images, like a profile photo or an incident picture.",
+          "cameraPermission": "GuardGo uses the camera so you can take photos, like a profile photo or an incident picture.",
+          "microphonePermission": false
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#208AEF",

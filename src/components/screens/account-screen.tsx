@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { View } from 'react-native';
 
 import { Badge } from '@/components/ui/badge';
@@ -52,6 +53,8 @@ export function AccountScreen() {
       </View>
 
       <Button title="Log out" variant="secondary" onPress={logout} loading={loggingOut} />
+
+      {__DEV__ ? <Button title="Preview form components" variant="link" onPress={() => router.push('/form-preview')} /> : null}
     </TabScreen>
   );
 }

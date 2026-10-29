@@ -42,7 +42,7 @@ GUARDGO_UPLOAD_KEY_PASSWORD=...
 
 ### Windows notes
 
-- Gradle needs a JDK it supports. Use Android Studio's bundled one: set `JAVA_HOME` to `C:\Program Files\Android\Android Studio\jbr`.
+- Gradle needs a JDK it supports (Java 27 fails with "Unsupported class file major version 71"). `npm run android`, `test-build` and `release-build` use Android Studio's bundled JDK automatically when `JAVA_HOME` isn't set; to use another one, set `JAVA_HOME`.
 - The native C++ build can fail with `ninja: error: mkdir(...): No such file or directory` because of the 260-character path limit. Install CMake 3.31+ in the Android SDK and add it to `android/local.properties`:
 
   ```properties

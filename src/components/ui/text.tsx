@@ -1,6 +1,8 @@
 import { Text as RNText, type TextProps as RNTextProps } from 'react-native';
 
 const variants = {
+  /** Largest heading, for entry screens like login. */
+  display: 'font-sans-bold text-4xl tracking-tight',
   title: 'font-sans-semibold text-3xl',
   heading: 'font-sans-semibold text-xl',
   body: 'font-sans text-base',

@@ -12,7 +12,7 @@ export function ThemeSwitcher() {
   const current: ThemePreference = hasAdaptiveThemes ? 'system' : (theme as ThemePreference);
 
   return (
-    <View accessibilityRole="radiogroup" className="flex-row rounded-lg bg-surface-muted p-1">
+    <View accessibilityRole="radiogroup" className="flex-row rounded-[14px] bg-segment p-1">
       {THEME_OPTIONS.map((option) => {
         const selected = option.value === current;
         return (
@@ -21,8 +21,9 @@ export function ThemeSwitcher() {
             accessibilityRole="radio"
             accessibilityState={{ checked: selected }}
             onPress={() => setThemePreference(option.value)}
-            className={`min-h-9 flex-1 items-center justify-center rounded-md ${selected ? 'bg-surface shadow-sm' : ''}`}>
-            <Text variant="label" tone={selected ? 'default' : 'muted'}>
+            style={selected ? { boxShadow: '0 1px 3px rgba(0, 0, 0, 0.12)' } : undefined}
+            className={`min-h-10 flex-1 items-center justify-center rounded-[10px] ${selected ? 'bg-segment-selected' : 'active:opacity-70'}`}>
+            <Text variant="label" tone={selected ? 'default' : 'muted'} className={selected ? 'font-sans-semibold' : ''}>
               {option.label}
             </Text>
           </Pressable>

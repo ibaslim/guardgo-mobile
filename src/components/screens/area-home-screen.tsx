@@ -2,6 +2,7 @@ import { router, type Href } from 'expo-router';
 import { View } from 'react-native';
 
 import { Badge } from '@/components/ui/badge';
+import { Entrance } from '@/components/ui/entrance';
 import { Icon } from '@/components/ui/icon';
 import { ListGroup, ListRow } from '@/components/ui/list';
 import { TabScreen } from '@/components/ui/tab-screen';
@@ -18,43 +19,52 @@ export function AreaHomeScreen({ area }: { area: RoleArea }) {
   const [homeTab, ...otherTabs] = config.tabs;
   const sectionTabs = otherTabs.filter((tab) => tab.name !== 'account');
 
+  // Builds in step by step when the user arrives after sign-in: name, role, main item, shortcuts.
   const header = (
     <View className="gap-2">
-      <Text variant="title" accessibilityRole="header" numberOfLines={1}>
-        {session?.username ?? 'Welcome'}
-      </Text>
-      <View className="flex-row items-center gap-2">
-        <Text tone="secondary">{session ? roleLabelFor(session.role) : config.label}</Text>
-        {session?.status ? <Badge label={session.status} /> : null}
-      </View>
+      <Entrance step={0}>
+        <Text variant="title" accessibilityRole="header" numberOfLines={1}>
+          {session?.username ?? 'Welcome'}
+        </Text>
+      </Entrance>
+      <Entrance step={1}>
+        <View className="flex-row items-center gap-2">
+          <Text tone="secondary">{session ? roleLabelFor(session.role) : config.label}</Text>
+          {session?.status ? <Badge label={session.status} /> : null}
+        </View>
+      </Entrance>
     </View>
   );
 
   return (
     <TabScreen title={homeTab.title} header={header}>
-      <View className="gap-3 rounded-lg bg-primary-soft p-5">
-        <View className="flex-row items-center gap-2">
-          <Icon icon={homeTab.icon} size={18} tone="primary-soft" />
-          <Text variant="label" tone="inherit" className="text-primary-soft-content">
-            {config.focus.title}
+      <Entrance step={2}>
+        <View className="gap-3 rounded-[14px] bg-primary-soft p-5">
+          <View className="flex-row items-center gap-2">
+            <Icon icon={homeTab.icon} size={18} tone="primary-soft" />
+            <Text variant="label" tone="inherit" className="text-primary-soft-content">
+              {config.focus.title}
+            </Text>
+          </View>
+          <Text tone="inherit" className="text-primary-soft-content">
+            {config.focus.empty}
           </Text>
         </View>
-        <Text tone="inherit" className="text-primary-soft-content">
-          {config.focus.empty}
-        </Text>
-      </View>
+      </Entrance>
 
-      <ListGroup>
-        {sectionTabs.map((tab) => (
-          <ListRow
-            key={tab.name}
-            title={tab.title}
-            description={tab.description}
-            icon={tab.icon}
-            onPress={() => router.navigate(`${AREA_HOME[area]}/${tab.name}` as Href)}
-          />
-        ))}
-      </ListGroup>
+      <Entrance step={3}>
+        <ListGroup>
+          {sectionTabs.map((tab) => (
+            <ListRow
+              key={tab.name}
+              title={tab.title}
+              description={tab.description}
+              icon={tab.icon}
+              onPress={() => router.navigate(`${AREA_HOME[area]}/${tab.name}` as Href)}
+            />
+          ))}
+        </ListGroup>
+      </Entrance>
     </TabScreen>
   );
 }

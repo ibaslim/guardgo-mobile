@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import { Alert, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
+import { FormScrollView } from '@/components/ui/form-scroll-view';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { TextField } from '@/components/ui/text-field';
@@ -73,62 +74,60 @@ export default function ServerConfigScreen() {
 
   return (
     <Screen edges={['bottom']}>
-      <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerClassName="gap-4 p-6" keyboardShouldPersistTaps="handled">
-          <Text tone="muted">Enter the API server&apos;s IP address and port. All app traffic will go to this server.</Text>
+      <FormScrollView contentContainerStyle={{ gap: 16, padding: 24 }}>
+        <Text tone="muted">Enter the API server&apos;s IP address and port. All app traffic will go to this server.</Text>
 
-          <View className="gap-4 rounded-lg border border-border bg-surface p-5 shadow-sm">
-            <TextField
-              label="Server address"
-              value={address}
-              onChangeText={(text) => {
-                setAddress(text);
-                setStatus({ kind: 'idle' });
-              }}
-              placeholder="192.168.1.236:8080"
-              keyboardType="url"
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="done"
-              onSubmitEditing={onTest}
-              error={inputError}
-            />
+        <View className="gap-4 rounded-lg border border-border bg-surface p-5 shadow-sm">
+          <TextField
+            label="Server address"
+            value={address}
+            onChangeText={(text) => {
+              setAddress(text);
+              setStatus({ kind: 'idle' });
+            }}
+            placeholder="192.168.1.236:8080"
+            keyboardType="url"
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="done"
+            onSubmitEditing={onTest}
+            error={inputError}
+          />
 
-            {status.kind !== 'idle' ? (
-              <View
-                className={`rounded-md p-3 ${status.kind === 'ok' ? 'bg-surface-muted' : 'bg-danger-soft'}`}
-                accessibilityLiveRegion="polite">
-                <Text
-                  variant="small"
-                  tone={status.kind === 'ok' ? 'success' : 'inherit'}
-                  className={status.kind === 'error' ? 'text-danger-soft-content' : ''}>
-                  {status.message}
-                </Text>
-              </View>
-            ) : null}
-
-            <View className="gap-2">
-              <Button
-                title="Test connection"
-                variant="secondary"
-                onPress={onTest}
-                loading={busy === 'test'}
-                disabled={busy !== null}
-              />
-              <Button title="Save" onPress={onSave} loading={busy === 'save'} disabled={busy !== null} />
-            </View>
-          </View>
-
-          {DEFAULT_API_URL ? (
-            <View className="items-center">
-              <Text variant="caption" tone="muted">
-                Default: {DEFAULT_API_URL}
+          {status.kind !== 'idle' ? (
+            <View
+              className={`rounded-md p-3 ${status.kind === 'ok' ? 'bg-surface-muted' : 'bg-danger-soft'}`}
+              accessibilityLiveRegion="polite">
+              <Text
+                variant="small"
+                tone={status.kind === 'ok' ? 'success' : 'inherit'}
+                className={status.kind === 'error' ? 'text-danger-soft-content' : ''}>
+                {status.message}
               </Text>
-              <Button title="Reset to default" variant="link" onPress={onReset} disabled={busy !== null} />
             </View>
           ) : null}
-        </ScrollView>
-      </KeyboardAvoidingView>
+
+          <View className="gap-2">
+            <Button
+              title="Test connection"
+              variant="secondary"
+              onPress={onTest}
+              loading={busy === 'test'}
+              disabled={busy !== null}
+            />
+            <Button title="Save" onPress={onSave} loading={busy === 'save'} disabled={busy !== null} />
+          </View>
+        </View>
+
+        {DEFAULT_API_URL ? (
+          <View className="items-center">
+            <Text variant="caption" tone="muted">
+              Default: {DEFAULT_API_URL}
+            </Text>
+            <Button title="Reset to default" variant="link" onPress={onReset} disabled={busy !== null} />
+          </View>
+        ) : null}
+      </FormScrollView>
     </Screen>
   );
 }
