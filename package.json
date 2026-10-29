@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
+    "@expo-google-fonts/inter": "^0.4.2",
     "@expo/ui": "~58.0.23",
     "expo": "~58.0.19",
     "expo-constants": "~58.0.13",
     "expo-device": "~58.0.5",
+    "expo-file-system": "~58.0.12",
     "expo-font": "~58.0.10",
     "expo-glass-effect": "~58.0.5",
     "expo-image": "~58.0.17",
@@ -25,7 +27,9 @@
     "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "~4.30.0",
     "react-native-web": "~0.21.4",
-    "react-native-worklets": "0.13.0"
+    "react-native-worklets": "0.13.0",
+    "tailwindcss": "^4.3.3",
+    "uniwind": "^1.13.0"
   },
   "devDependencies": {
     "@types/react": "~19.3.0",
@@ -38,6 +42,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "test-build": "node scripts/build-android.js test",
+    "release-build": "node scripts/build-android.js production",
     "lint": "expo lint"
   },
   "private": true
