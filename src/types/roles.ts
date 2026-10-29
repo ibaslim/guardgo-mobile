@@ -1,7 +1,5 @@
-import type { AndroidSymbol } from 'expo-symbols';
-import type { SFSymbol } from 'sf-symbols-typescript';
+import type { SymbolIcon } from '@/types/ui';
 
-/** Roles from the GuardGo API (`session.role`), same set as the web access-control.helper.ts. */
 export type Role =
   | 'guard_admin'
   | 'client_admin'
@@ -15,7 +13,7 @@ export type Role =
 /** Part of the app a role signs in to. Each one is a route folder in src/app with its own tabs. */
 export type RoleArea = 'guard' | 'client' | 'provider' | 'platform';
 
-export type AreaIcon = { sf: SFSymbol; md: AndroidSymbol };
+export type AreaIcon = SymbolIcon;
 
 /** A tab of a role area. `name` is the route file inside the area folder. */
 export type AreaTab = {

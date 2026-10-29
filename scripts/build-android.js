@@ -10,6 +10,8 @@ const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+const { findJavaHome } = require('./java-home');
+
 const MODES = {
   test: {
     gradleArgs: ['-PreactNativeArchitectures=arm64-v8a'],
@@ -33,17 +35,6 @@ function run(command, args, options = {}) {
   if (result.status !== 0) {
     process.exit(result.status ?? 1);
   }
-}
-
-// Gradle does not support the newest JDKs yet; prefer the one bundled with Android Studio.
-function findJavaHome() {
-  if (process.env.JAVA_HOME) {
-    return process.env.JAVA_HOME;
-  }
-  const candidates = isWindows
-    ? ['C:\\Program Files\\Android\\Android Studio\\jbr']
-    : ['/Applications/Android Studio.app/Contents/jbr/Contents/Home'];
-  return candidates.find((dir) => fs.existsSync(dir));
 }
 
 function findAndroidSdk() {

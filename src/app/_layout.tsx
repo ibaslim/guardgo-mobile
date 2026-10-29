@@ -11,6 +11,7 @@ import { Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { useUniwind } from 'uniwind';
 
 import { useNavigationTheme } from '@/hooks/use-navigation-theme';
@@ -21,6 +22,12 @@ import { loadServerConfig } from '@/services/server-config';
 import { loadThemePreference } from '@/services/theme';
 
 SplashScreen.preventAutoHideAsync();
+
+// Screens shown when the session changes, with no swipe back since there is nothing to go back to.
+/** Signed in: an instant swap. Login animates out first and the home screen builds itself in. */
+const ENTER_APP = { animation: 'none', gestureEnabled: false } as const;
+/** Signed out (logout, expired session): the login screen fades in. */
+const SHOW_LOGIN = { animation: 'fade', animationDuration: 250, gestureEnabled: false } as const;
 
 export default function RootLayout() {
   const { theme } = useUniwind();
@@ -49,26 +56,40 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={navigationTheme}>
-      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={isLoggedIn}>
-          {/* index sends the user to their role's area; each area is only reachable with that role. */}
-          <Stack.Screen name="index" />
-          {ROLE_AREA_NAMES.map((name) => (
-            <Stack.Protected key={name} guard={area === name}>
-              <Stack.Screen name={name} options={{ animation: 'none' }} />
+    // KeyboardProvider tracks the keyboard for FormScrollView (keeps focused fields above it).
+    <KeyboardProvider>
+      <ThemeProvider value={navigationTheme}>
+        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+        {/*
+          When the session changes, the router moves to the first screen that is still allowed, in the
+          order below: after login that is the user's role area, after logout the login screen.
+        */}
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Protected guard={isLoggedIn}>
+            {ROLE_AREA_NAMES.map((name) => (
+              <Stack.Protected key={name} guard={area === name}>
+                <Stack.Screen name={name} options={ENTER_APP} />
+              </Stack.Protected>
+            ))}
+            {/* Signed in with a role the mobile app doesn't support. */}
+            <Stack.Protected guard={area === null}>
+              <Stack.Screen name="index" options={ENTER_APP} />
             </Stack.Protected>
-          ))}
-        </Stack.Protected>
-        <Stack.Protected guard={!isLoggedIn}>
-          <Stack.Screen name="login" />
+          </Stack.Protected>
+          <Stack.Protected guard={!isLoggedIn}>
+            <Stack.Screen name="login" options={SHOW_LOGIN} />
+            <Stack.Screen
+              name="server-config"
+              options={{ headerShown: true, title: 'IP Config', headerTitleStyle: { fontFamily: 'Inter_600SemiBold' } }}
+            />
+          </Stack.Protected>
+          {/* Last, so it is never the screen the router falls back to. */}
           <Stack.Screen
-            name="server-config"
-            options={{ headerShown: true, title: 'IP Config', headerTitleStyle: { fontFamily: 'Inter_600SemiBold' } }}
+            name="form-preview"
+            options={{ headerShown: true, title: 'Form components', headerTitleStyle: { fontFamily: 'Inter_600SemiBold' } }}
           />
-        </Stack.Protected>
-      </Stack>
-    </ThemeProvider>
+        </Stack>
+      </ThemeProvider>
+    </KeyboardProvider>
   );
 }

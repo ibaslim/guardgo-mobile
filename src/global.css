@@ -96,7 +96,20 @@
       --color-warning-soft-content: #92400e;
       --color-danger-soft: #fef2f2;
       --color-danger-soft-content: #991b1b;
-      --color-overlay: rgba(0, 0, 0, 0.5);
+      --color-field-error: #dc2626; /* invalid field border, error text and icon */
+      --color-overlay: rgba(15, 23, 42, 0.45);
+
+      /* Form fields (src/components/ui/field.tsx) */
+      --color-field: #ffffff;
+      --color-field-border: #dde2ea;
+      --color-field-icon: #8b95a7;
+      --color-field-dashed: #93c5fd; /* empty image field */
+      --color-segment: #e5e8ee; /* segmented control track */
+      --color-segment-selected: #ffffff;
+
+      /* Primary button glow and top highlight */
+      --color-btn-primary-glow: rgba(37, 99, 235, 0.32);
+      --color-btn-highlight: rgba(255, 255, 255, 0.2);
 
       /* button.component.html */
       --color-btn-secondary: #ffffff;
@@ -144,7 +157,18 @@
       --color-warning-soft-content: #fcd34d;
       --color-danger-soft: #7f1d1d;
       --color-danger-soft-content: #fca5a5;
-      --color-overlay: rgba(0, 0, 0, 0.5);
+      --color-field-error: #f87171; /* red-400: danger (#b91c1c) is too dark to read on dark surfaces */
+      --color-overlay: rgba(0, 0, 0, 0.6);
+
+      --color-field: #182233;
+      --color-field-border: #2b3649;
+      --color-field-icon: #7d889b;
+      --color-field-dashed: #3b5b8f;
+      --color-segment: #182233;
+      --color-segment-selected: #334155;
+
+      --color-btn-primary-glow: rgba(37, 99, 235, 0.45);
+      --color-btn-highlight: rgba(255, 255, 255, 0.14);
 
       --color-btn-secondary: #374151;
       --color-btn-secondary-pressed: #4b5563;
