@@ -1,28 +1,21 @@
-import { StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { Screen } from '@/components/ui/screen';
+import { Text } from '@/components/ui/text';
+import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 
 export default function HomeScreen() {
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="subtitle">GuardGo</ThemedText>
-      </SafeAreaView>
-    </ThemedView>
+    <Screen className="justify-center gap-6 p-6">
+      <Text variant="title" className="text-center">
+        GuardGo
+      </Text>
+      <View className="gap-3 rounded-lg border border-border bg-surface p-5 shadow-sm">
+        <Text variant="label" tone="secondary">
+          Appearance
+        </Text>
+        <ThemeSwitcher />
+      </View>
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-});

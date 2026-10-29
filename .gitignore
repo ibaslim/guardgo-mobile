@@ -16,7 +16,13 @@ expo-env.d.ts
 *.p8
 *.p12
 *.key
+*.keystore
 *.mobileprovision
+
+# build outputs
+builds/
+*.apk
+*.aab
 
 # Metro
 .metro-health-check*
