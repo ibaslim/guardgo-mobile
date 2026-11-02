@@ -1,27 +1,17 @@
 import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
-import { useRef, useState } from 'react';
-import { Alert, Linking, Pressable, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, View } from 'react-native';
 
 import { FieldFrame } from '@/components/ui/field';
 import { Icon } from '@/components/ui/icon';
-import { Sheet } from '@/components/ui/sheet';
+import { ImageSourceSheet } from '@/components/ui/image-source-sheet';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
-import type { FieldMeta, SymbolIcon } from '@/types/ui';
+import { pickImage, type ImageSource, type PickedImage } from '@/services/image-picker';
+import type { FieldMeta } from '@/types/ui';
 import { formatFileSize } from '@/utils/format';
 
-/** A chosen image, ready to upload (e.g. as FormData `{ uri, name, type }`). */
-export type PickedImage = {
-  uri: string;
-  width: number;
-  height: number;
-  fileName: string | null;
-  mimeType: string | null;
-  fileSize: number | null;
-};
-
-type Source = 'camera' | 'library';
+export type { PickedImage };
 
 export type ImageFieldProps = FieldMeta & {
   value: PickedImage | null;
@@ -38,17 +28,6 @@ export type ImageFieldProps = FieldMeta & {
   quality?: number;
 };
 
-function toPickedImage(asset: ImagePicker.ImagePickerAsset): PickedImage {
-  return {
-    uri: asset.uri,
-    width: asset.width,
-    height: asset.height,
-    fileName: asset.fileName ?? null,
-    mimeType: asset.mimeType ?? null,
-    fileSize: asset.fileSize ?? null,
-  };
-}
-
 /** Photo field: take a photo or choose one from the library, with a preview. */
 export function ImageField({
   value,
@@ -62,42 +41,11 @@ export function ImageField({
 }: ImageFieldProps) {
   const { label, error, disabled } = meta;
   const [sheetOpen, setSheetOpen] = useState(false);
-  // The picker opens only after the sheet has closed: iOS can't present two screens at once.
-  const pendingSource = useRef<Source | null>(null);
 
-  async function launch(source: Source) {
-    if (source === 'camera') {
-      const permission = await ImagePicker.requestCameraPermissionsAsync();
-      if (!permission.granted) {
-        Alert.alert('Camera access is off', 'Allow camera access in Settings to take a photo.', [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Open Settings', onPress: () => Linking.openSettings() },
-        ]);
-        onBlur?.();
-        return;
-      }
-    }
-
-    const options: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], allowsEditing, aspect, quality };
-    const result =
-      source === 'camera'
-        ? await ImagePicker.launchCameraAsync(options)
-        : await ImagePicker.launchImageLibraryAsync(options);
-    if (!result.canceled && result.assets[0]) {
-      onChange(toPickedImage(result.assets[0]));
-    }
+  async function launch(source: ImageSource) {
+    const picked = await pickImage(source, { allowsEditing, aspect, quality });
+    if (picked) onChange(picked);
     onBlur?.();
-  }
-
-  function choose(source: Source) {
-    pendingSource.current = source;
-    setSheetOpen(false);
-  }
-
-  function onSheetDismissed() {
-    const source = pendingSource.current;
-    pendingSource.current = null;
-    if (source) launch(source);
   }
 
   function onPress() {
@@ -119,7 +67,7 @@ export function ImageField({
         accessibilityState={{ disabled }}
         disabled={disabled}
         onPress={onPress}
-        className={`min-h-[88px] flex-row items-center gap-3.5 rounded-[14px] border-[1.5px] px-4 py-3.5 active:opacity-80 ${boxBorder} ${
+        className={`min-h-[72px] flex-row items-center gap-3 rounded-xl border-[1.5px] px-3.5 py-2.5 active:opacity-80 ${boxBorder} ${
           disabled ? 'bg-surface-muted opacity-60' : 'bg-field'
         }`}>
         {value ? (
@@ -159,40 +107,21 @@ export function ImageField({
         )}
       </Pressable>
 
-      <Sheet visible={sheetOpen} onClose={() => setSheetOpen(false)} title={label} onDismissed={onSheetDismissed}>
-        <View className="px-3 pb-2">
-          {allowCamera ? <SheetAction icon={ICONS.camera} title="Take photo" onPress={() => choose('camera')} /> : null}
-          <SheetAction icon={ICONS.library} title="Choose from library" onPress={() => choose('library')} />
-          {value ? (
-            <SheetAction
-              icon={ICONS.trash}
-              title="Remove photo"
-              destructive
-              onPress={() => {
+      <ImageSourceSheet
+        visible={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title={label}
+        allowCamera={allowCamera}
+        onPick={launch}
+        onRemove={
+          value
+            ? () => {
                 onChange(null);
-                setSheetOpen(false);
                 onBlur?.();
-              }}
-            />
-          ) : null}
-        </View>
-      </Sheet>
+              }
+            : undefined
+        }
+      />
     </FieldFrame>
-  );
-}
-
-type SheetActionProps = { icon: SymbolIcon; title: string; destructive?: boolean; onPress: () => void };
-
-function SheetAction({ icon, title, destructive, onPress }: SheetActionProps) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      className="min-h-14 flex-row items-center gap-3.5 rounded-[12px] px-3 active:bg-surface-muted">
-      <Icon icon={icon} size={20} tone={destructive ? 'danger' : 'secondary'} />
-      <Text tone="inherit" className={destructive ? 'text-field-error' : 'text-content'}>
-        {title}
-      </Text>
-    </Pressable>
   );
 }

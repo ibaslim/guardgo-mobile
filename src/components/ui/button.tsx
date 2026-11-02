@@ -53,8 +53,8 @@ const disabledStyle = {
 
 const sizes = {
   sm: { container: 'min-h-9 gap-1.5 rounded-[10px] px-3.5', text: 'text-[13px]', icon: 15 },
-  md: { container: 'min-h-[52px] gap-2 rounded-[14px] px-5', text: 'text-[15px]', icon: 18 },
-  lg: { container: 'min-h-14 gap-2.5 rounded-[14px] px-6', text: 'text-base', icon: 20 },
+  md: { container: 'min-h-11 gap-2 rounded-xl px-4', text: 'text-sm', icon: 18 },
+  lg: { container: 'min-h-12 gap-2.5 rounded-xl px-5', text: 'text-[15px]', icon: 20 },
 } as const;
 
 export type ButtonVariant = keyof typeof variants;

@@ -9,4 +9,7 @@ export {
   setAccessToken,
   startSessionMonitor,
   subscribeSession,
+  refreshSession,
+  restoreSession,
+  updateSession,
 } from './session';

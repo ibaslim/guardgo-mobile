@@ -91,11 +91,11 @@ export default function LoginScreen() {
                 <Text variant="display" accessibilityRole="header">
                   Sign in
                 </Text>
-                <Text tone="secondary">Use your GuardGo account, the same one you use on the web.</Text>
+                <Text tone="secondary">Sign in to your GuardGo account.</Text>
               </View>
             </View>
 
-            <View className="gap-4">
+            <View className="gap-4 rounded-xl border border-border bg-surface p-5 shadow-sm">
               <FormTextField
                 control={form.control}
                 name="username"
@@ -118,30 +118,48 @@ export default function LoginScreen() {
               />
               <FormError message={form.serverError} />
               <Button title="Sign in" size="lg" className="mt-2" onPress={onSubmit} loading={form.isSubmitting} />
+              <View className="flex-row flex-wrap items-center justify-center">
+                <Text variant="small" tone="secondary">
+                  Don&apos;t have an account?{' '}
+                </Text>
+                <Pressable
+                  accessibilityRole="link"
+                  hitSlop={8}
+                  onPress={() => router.push('/register')}
+                  className="active:opacity-70">
+                  <Text variant="label" tone="link">
+                    Create one now
+                  </Text>
+                </Pressable>
+              </View>
             </View>
           </View>
 
-          <View className="gap-3 border-t border-border pt-3">
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Server: ${server || 'not set'}`}
-              accessibilityHint="Opens IP Config to change the server"
-              onPress={() => router.push('/server-config')}
-              className="min-h-12 flex-row items-center gap-3 rounded-md active:opacity-70">
-              <Icon icon={ICONS.server} size={20} tone={server ? 'muted' : 'danger'} />
-              <View className="flex-1">
-                <Text variant="caption" tone="muted">
-                  Server
+          <View className="gap-3">
+            <View className="rounded-xl border border-border bg-surface px-4 py-1 shadow-sm">
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Server: ${server || 'not set'}`}
+                accessibilityHint="Opens IP Config to change the server"
+                onPress={() => router.push('/server-config')}
+                className="min-h-12 flex-row items-center gap-3 rounded-md active:opacity-70">
+                <Icon icon={ICONS.server} size={20} tone={server ? 'muted' : 'danger'} />
+                <View className="flex-1">
+                  <Text variant="caption" tone="muted">
+                    Server
+                  </Text>
+                  <Text variant="small" tone={server ? 'secondary' : 'inherit'} className={server ? '' : 'text-field-error'} numberOfLines={1}>
+                    {server || 'Not set. Add one to sign in.'}
+                  </Text>
+                </View>
+                <Text variant="label" tone="link">
+                  Change
                 </Text>
-                <Text variant="small" tone={server ? 'secondary' : 'inherit'} className={server ? '' : 'text-field-error'} numberOfLines={1}>
-                  {server || 'Not set. Add one to sign in.'}
-                </Text>
-              </View>
-              <Text variant="label" tone="link">
-                Change
-              </Text>
-            </Pressable>
-            <ThemeSwitcher />
+              </Pressable>
+            </View>
+            <View className="rounded-xl border border-border bg-surface p-3 shadow-sm">
+              <ThemeSwitcher />
+            </View>
           </View>
         </Animated.View>
       </FormScrollView>

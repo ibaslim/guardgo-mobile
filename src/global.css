@@ -57,12 +57,12 @@
   --color-amber-900: #78350f;
   --color-amber-950: #451a03;
 
-  /* Inter, the web UI font. React Native needs one family per weight, so use these instead of
+  /* IBM Plex Sans. React Native needs one family per weight, so use these instead of
      font-medium/font-bold. Loaded in src/app/_layout.tsx. */
-  --font-sans: Inter_400Regular;
-  --font-sans-medium: Inter_500Medium;
-  --font-sans-semibold: Inter_600SemiBold;
-  --font-sans-bold: Inter_700Bold;
+  --font-sans: IBMPlexSans_400Regular;
+  --font-sans-medium: IBMPlexSans_500Medium;
+  --font-sans-semibold: IBMPlexSans_600SemiBold;
+  --font-sans-bold: IBMPlexSans_700Bold;
   --font-mono: monospace;
 }
 
@@ -103,6 +103,7 @@
       --color-field: #ffffff;
       --color-field-border: #dde2ea;
       --color-field-icon: #8b95a7;
+      --color-field-label: #1f2937; /* gray-800 */
       --color-field-dashed: #93c5fd; /* empty image field */
       --color-segment: #e5e8ee; /* segmented control track */
       --color-segment-selected: #ffffff;
@@ -163,6 +164,7 @@
       --color-field: #182233;
       --color-field-border: #2b3649;
       --color-field-icon: #7d889b;
+      --color-field-label: #e5e7eb; /* gray-200: gray-800 would vanish on the dark surface */
       --color-field-dashed: #3b5b8f;
       --color-segment: #182233;
       --color-segment-selected: #334155;

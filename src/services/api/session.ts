@@ -13,6 +13,8 @@ import { AppState } from 'react-native';
 
 import { TOKEN_REFRESH_MARGIN_MS } from '@/constants/api';
 import { ENDPOINTS } from '@/constants/endpoints';
+import { SECURE_STORAGE_KEYS } from '@/constants/storage-keys';
+import { readSecret, removeSecret, writeSecret } from '@/lib/secure-storage';
 import { ApiError } from '@/services/api/errors';
 import { httpRequest } from '@/services/api/http';
 import type { Session, TokenResponse } from '@/types/auth';
@@ -27,6 +29,24 @@ let tokenExpiresAt: number | null = null;
 let refreshTimer: ReturnType<typeof setTimeout> | undefined;
 let refreshInFlight: Promise<void> | null = null;
 const sessionListeners = new Set<() => void>();
+
+// Saves and removals run one after another, so a slow save can't land after a logout and bring
+// the old sign-in back.
+let storageQueue: Promise<unknown> = Promise.resolve();
+function enqueueStorage(task: () => Promise<void>) {
+  storageQueue = storageQueue.then(task, task);
+}
+
+/** Keeps the current sign-in on the device so the user stays signed in after the app closes. */
+function persistSession() {
+  if (!accessToken) return;
+  const saved = JSON.stringify({ token: accessToken, session });
+  enqueueStorage(() => writeSecret(SECURE_STORAGE_KEYS.session, saved));
+}
+
+function forgetSavedSession() {
+  enqueueStorage(() => removeSecret(SECURE_STORAGE_KEYS.session));
+}
 
 /** Called whenever the token is set or cleared (for useSyncExternalStore). */
 export function subscribeSession(listener: () => void) {
@@ -58,6 +78,15 @@ export function setAccessToken(token: string, nextSession?: Session) {
   if (nextSession) session = nextSession;
   tokenExpiresAt = readTokenExpiry(token);
   scheduleRefresh();
+  persistSession();
+  notifySessionListeners();
+}
+
+/** Changes details of the current session without a new token, e.g. after onboarding is done. */
+export function updateSession(patch: Partial<Session>) {
+  if (!session) return;
+  session = { ...session, ...patch };
+  persistSession();
   notifySessionListeners();
 }
 
@@ -70,9 +99,10 @@ export function getSession() {
   return session;
 }
 
-/** Forgets the token locally (logout, or a session the server no longer accepts). */
+/** Forgets the token locally and on the device (logout, or a session the server no longer accepts). */
 export function clearSession() {
   if (!accessToken) return;
+  forgetSavedSession();
   clearTimeout(refreshTimer);
   accessToken = null;
   session = null;
@@ -80,8 +110,35 @@ export function clearSession() {
   notifySessionListeners();
 }
 
+/**
+ * Signs the user back in from the token saved on this device, if it has not expired yet. Call once
+ * at startup, after the server address is set.
+ *
+ * The backend has no long-lived refresh token (a login token lasts 30 minutes, a refreshed one 3),
+ * so this only helps when the app comes back within that time. After that the saved token is
+ * dropped and the user signs in again. A token the server no longer accepts is cleared by the first
+ * request that uses it (see client.ts).
+ */
+export async function restoreSession() {
+  if (accessToken) return;
+  const raw = await readSecret(SECURE_STORAGE_KEYS.session);
+  if (!raw) return;
+
+  try {
+    const saved = JSON.parse(raw) as { token?: unknown; session?: Session | null };
+    const expiresAt = typeof saved.token === 'string' ? readTokenExpiry(saved.token) : null;
+    if (typeof saved.token === 'string' && saved.session && expiresAt !== null && expiresAt > Date.now()) {
+      setAccessToken(saved.token, saved.session);
+      return;
+    }
+  } catch {
+    // Unreadable: treated like an expired sign-in.
+  }
+  forgetSavedSession();
+}
+
 /** Exchanges the current token for a fresh one. Concurrent callers share one request. */
-function refreshSession(): Promise<void> {
+export function refreshSession(): Promise<void> {
   if (!accessToken) return Promise.resolve();
   if (!refreshInFlight) {
     const token = accessToken;

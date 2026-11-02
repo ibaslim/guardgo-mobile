@@ -35,7 +35,7 @@ export function TextField({
     <FieldFrame label={label} hint={hint} error={error} optional={optional}>
       <View className={`${fieldBoxClassName(state)} ${multiline ? 'items-start' : ''}`}>
         {icon ? (
-          <View className={multiline ? 'pt-4' : ''}>
+          <View className={multiline ? 'pt-3.5' : ''}>
             <FieldIcon icon={icon} {...state} />
           </View>
         ) : null}
@@ -50,7 +50,7 @@ export function TextField({
           placeholderTextColorClassName="accent-content-muted"
           cursorColorClassName="accent-primary"
           selectionColorClassName="accent-primary"
-          className={`flex-1 font-sans text-base text-content ${multiline ? 'min-h-28 py-4' : 'min-h-14'} ${
+          className={`flex-1 font-sans text-base text-content ${multiline ? 'min-h-24 py-3' : 'min-h-12'} ${
             className ?? ''
           }`}
           onFocus={(event) => {

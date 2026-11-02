@@ -9,6 +9,7 @@ export const ICONS = {
   user: { sf: 'person', md: 'person' },
   lock: { sf: 'lock', md: 'lock' },
   mail: { sf: 'envelope', md: 'mail' },
+  mailUnread: { sf: 'envelope.badge', md: 'mark_email_unread' },
   location: { sf: 'mappin.and.ellipse', md: 'location_on' },
   note: { sf: 'text.alignleft', md: 'notes' },
   eye: { sf: 'eye', md: 'visibility' },
@@ -23,4 +24,5 @@ export const ICONS = {
   trash: { sf: 'trash', md: 'delete' },
   shield: { sf: 'shield.lefthalf.filled', md: 'shield' },
   server: { sf: 'server.rack', md: 'dns' },
-} as const satisfies Record<string, SymbolIcon>;
+  building: { sf: 'building.2', md: 'apartment' },
+  chevronRight: { sf: 'chevron.right', md: 'chevron_right' },} as const satisfies Record<string, SymbolIcon>;

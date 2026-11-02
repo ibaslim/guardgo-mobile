@@ -42,6 +42,13 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "GuardGo uses your location to fill in the coordinates of a site you add."
+        }
       ]
     ],
     "experiments": {

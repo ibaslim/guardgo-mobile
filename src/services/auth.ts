@@ -1,6 +1,6 @@
 import { ENDPOINTS } from '@/constants/endpoints';
 import { api, clearSession, setAccessToken } from '@/services/api';
-import type { TokenResponse } from '@/types/auth';
+import type { RegisterPayload, TokenResponse } from '@/types/auth';
 
 /** A login problem that isn't an HTTP error, with a message that can be shown to the user. */
 export class AuthError extends Error {
@@ -28,6 +28,11 @@ export async function requestLogin(username: string, password: string): Promise<
 /** Signs in with a result from `requestLogin`. The root layout then shows the user's area. */
 export function startSession(result: LoginResult) {
   setAccessToken(result.access_token, result.session);
+}
+
+/** Creates an account. It does not sign in. */
+export function register(payload: RegisterPayload) {
+  return api.post<unknown>(ENDPOINTS.auth.register, payload);
 }
 
 /** Logs in with username/email and password and stores the session token. */

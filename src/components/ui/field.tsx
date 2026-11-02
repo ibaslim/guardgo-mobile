@@ -12,7 +12,7 @@ export type FieldBoxState = { focused?: boolean; error?: string; disabled?: bool
 export function fieldBoxClassName({ focused, error, disabled }: FieldBoxState) {
   const border = error ? 'border-field-error' : focused ? 'border-primary' : 'border-field-border';
   const background = disabled ? 'bg-surface-muted opacity-60' : 'bg-field';
-  return `min-h-14 flex-row items-center gap-3 rounded-[14px] border px-4 ${border} ${background}`;
+  return `min-h-12 flex-row items-center gap-2.5 rounded-xl border px-3.5 ${border} ${background}`;
 }
 
 /** Icon at the start of a field box. Turns blue while the field is focused. */
@@ -25,9 +25,9 @@ export type FieldFrameProps = Omit<FieldMeta, 'disabled'> & { children: ReactNod
 /** Label above the field, hint or error below it. */
 export function FieldFrame({ label, hint, error, optional, children }: FieldFrameProps) {
   return (
-    <View className="gap-2">
+    <View className="gap-1.5">
       <View className="flex-row items-baseline justify-between gap-2 px-0.5">
-        <Text variant="label" tone="secondary" className="text-[13px]">
+        <Text variant="label" tone="inherit" className="font-sans-bold text-[13px] uppercase tracking-wide text-field-label">
           {label}
         </Text>
         {optional ? (

@@ -3,6 +3,7 @@
  * Submitting shows a fake server validation error, to check how server errors look.
  */
 import { Redirect } from 'expo-router';
+import { useState } from 'react';
 import { View } from 'react-native';
 import { z } from 'zod';
 
@@ -17,10 +18,12 @@ import {
 } from '@/components/form/form-fields';
 import { Button, type ButtonVariant } from '@/components/ui/button';
 import { FormScrollView } from '@/components/ui/form-scroll-view';
+import { ImageUploadCard } from '@/components/ui/image-upload-card';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
 import { useApiForm } from '@/hooks/use-api-form';
 import { ApiError } from '@/services/api';
+import type { PickedImage } from '@/services/image-picker';
 
 const SITES = [
   { value: 'north-gate', label: 'North Gate', description: 'Main entrance, 24/7' },
@@ -48,6 +51,8 @@ const schema = z.object({
 const VARIANTS: ButtonVariant[] = ['primary', 'secondary', 'info', 'outline', 'success', 'warning', 'danger', 'link'];
 
 export default function FormPreviewScreen() {
+  const [avatar, setAvatar] = useState<PickedImage | null>(null);
+  const [logo, setLogo] = useState<PickedImage | null>(null);
   const form = useApiForm({
     schema,
     defaultValues: { title: '', email: '', password: '', date: null, time: null, site: null, guard: null, photo: null, notes: '' },
@@ -78,6 +83,20 @@ export default function FormPreviewScreen() {
             <Button title="Disabled" disabled className="flex-1" />
             <Button title="Loading" loading className="flex-1" />
           </View>
+        </View>
+
+        <View className="gap-4">
+          <Text variant="heading">Photo cards</Text>
+          <ImageUploadCard label="Profile photo" value={avatar} onChange={setAvatar} fallbackText="Amina Yusuf" />
+          <ImageUploadCard
+            label="Company logo"
+            value={logo}
+            onChange={setLogo}
+            shape="square"
+            size="lg"
+            allowCamera={false}
+            hint="PNG or JPG, at least 400 × 400."
+          />
         </View>
 
         <View className="gap-5">
