@@ -93,7 +93,7 @@ export function Select<T extends SelectValue>({
         }>
         {searchable ? (
           <View className="px-5 pb-3">
-            <View className="min-h-12 flex-row items-center gap-2.5 rounded-[12px] bg-surface-muted px-3.5">
+            <View className="min-h-11 flex-row items-center gap-2.5 rounded-xl bg-surface-muted px-3.5">
               <Icon icon={ICONS.search} size={18} tone="field" />
               <TextInput
                 value={query}
@@ -106,7 +106,7 @@ export function Select<T extends SelectValue>({
                 placeholderTextColorClassName="accent-content-muted"
                 cursorColorClassName="accent-primary"
                 selectionColorClassName="accent-primary"
-                className="min-h-12 flex-1 font-sans text-base text-content"
+                className="min-h-11 flex-1 font-sans text-base text-content"
               />
               {query ? (
                 <Pressable accessibilityRole="button" accessibilityLabel="Clear search" hitSlop={8} onPress={() => setQuery('')}>
@@ -154,7 +154,7 @@ function OptionRow({ option, selected, onPress }: OptionRowProps) {
       accessibilityRole="radio"
       accessibilityState={{ checked: selected }}
       onPress={onPress}
-      className="min-h-14 flex-row items-center gap-3 rounded-[12px] px-3 py-3 active:bg-surface-muted">
+      className="min-h-12 flex-row items-center gap-3 rounded-xl px-3 py-2 active:bg-surface-muted">
       <View className="flex-1 gap-0.5">
         <Text variant="body" className={selected ? 'font-sans-semibold' : ''}>
           {option.label}

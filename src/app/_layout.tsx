@@ -1,12 +1,12 @@
 import '../global.css';
 
 import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
+  IBMPlexSans_400Regular,
+  IBMPlexSans_500Medium,
+  IBMPlexSans_600SemiBold,
+  IBMPlexSans_700Bold,
   useFonts,
-} from '@expo-google-fonts/inter';
+} from '@expo-google-fonts/ibm-plex-sans';
 import { Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -16,8 +16,8 @@ import { useUniwind } from 'uniwind';
 
 import { useNavigationTheme } from '@/hooks/use-navigation-theme';
 import { ROLE_AREA_NAMES } from '@/constants/roles';
-import { useIsLoggedIn, useRoleArea } from '@/hooks/use-session';
-import { startSessionMonitor } from '@/services/api';
+import { useIsLoggedIn, useNeedsOnboarding, useRoleArea } from '@/hooks/use-session';
+import { restoreSession, startSessionMonitor } from '@/services/api';
 import { loadServerConfig } from '@/services/server-config';
 import { loadThemePreference } from '@/services/theme';
 
@@ -34,12 +34,14 @@ export default function RootLayout() {
   const navigationTheme = useNavigationTheme();
   const isLoggedIn = useIsLoggedIn();
   const area = useRoleArea();
-  const [fontsLoaded, fontError] = useFonts({ Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold });
+  const needsOnboarding = useNeedsOnboarding();
+  const [fontsLoaded, fontError] = useFonts({ IBMPlexSans_400Regular, IBMPlexSans_500Medium, IBMPlexSans_600SemiBold, IBMPlexSans_700Bold });
   const [settingsLoaded, setSettingsLoaded] = useState(false);
 
-  // Apply the saved server and theme before any screen renders or makes API requests.
+  // Apply the saved server and theme, and sign back in from the saved token, before any screen
+  // renders or makes API requests. Signing in waits for the server address, which its refresh uses.
   useEffect(() => {
-    Promise.all([loadServerConfig(), loadThemePreference()]).finally(() => setSettingsLoaded(true));
+    Promise.all([loadServerConfig().then(restoreSession), loadThemePreference()]).finally(() => setSettingsLoaded(true));
   }, []);
 
   // Keep the session token fresh when the app returns from the background.
@@ -66,27 +68,36 @@ export default function RootLayout() {
         */}
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Protected guard={isLoggedIn}>
+            {/* First, so a user who still has to onboard lands here instead of on their home screen. */}
+            <Stack.Protected guard={needsOnboarding}>
+              <Stack.Screen name="onboarding" />
+            </Stack.Protected>
             {ROLE_AREA_NAMES.map((name) => (
-              <Stack.Protected key={name} guard={area === name}>
+              <Stack.Protected key={name} guard={area === name && !needsOnboarding}>
                 <Stack.Screen name={name} options={ENTER_APP} />
               </Stack.Protected>
             ))}
             {/* Signed in with a role the mobile app doesn't support. */}
-            <Stack.Protected guard={area === null}>
+            <Stack.Protected guard={area === null && !needsOnboarding}>
               <Stack.Screen name="index" options={ENTER_APP} />
             </Stack.Protected>
           </Stack.Protected>
           <Stack.Protected guard={!isLoggedIn}>
             <Stack.Screen name="login" options={SHOW_LOGIN} />
+            <Stack.Screen name="verify-email" />
+            <Stack.Screen
+              name="register"
+              options={{ headerShown: true, title: 'Create account', headerTitleStyle: { fontFamily: 'IBMPlexSans_600SemiBold' } }}
+            />
             <Stack.Screen
               name="server-config"
-              options={{ headerShown: true, title: 'IP Config', headerTitleStyle: { fontFamily: 'Inter_600SemiBold' } }}
+              options={{ headerShown: true, title: 'IP Config', headerTitleStyle: { fontFamily: 'IBMPlexSans_600SemiBold' } }}
             />
           </Stack.Protected>
           {/* Last, so it is never the screen the router falls back to. */}
           <Stack.Screen
             name="form-preview"
-            options={{ headerShown: true, title: 'Form components', headerTitleStyle: { fontFamily: 'Inter_600SemiBold' } }}
+            options={{ headerShown: true, title: 'Form components', headerTitleStyle: { fontFamily: 'IBMPlexSans_600SemiBold' } }}
           />
         </Stack>
       </ThemeProvider>

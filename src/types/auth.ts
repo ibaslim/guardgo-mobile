@@ -14,3 +14,13 @@ export type TokenResponse = {
   token_type: 'bearer';
   session?: Session;
 };
+
+/** Kind of account a new user signs up for. */
+export type TenantType = 'client' | 'guard' | 'service_provider';
+
+export type RegisterPayload = {
+  username: string;
+  email: string;
+  password: string;
+  tenant_type: TenantType;
+};

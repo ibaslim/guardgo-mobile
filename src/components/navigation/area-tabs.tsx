@@ -14,7 +14,7 @@ export function AreaTabs({ area }: { area: RoleArea }) {
     <NativeTabs
       tintColor={color(primary)}
       backgroundColor={color(surface)}
-      labelStyle={{ fontFamily: 'Inter_500Medium' }}>
+      labelStyle={{ fontFamily: 'IBMPlexSans_500Medium' }}>
       {AREA_CONFIGS[area].tabs.map((tab) => (
         <NativeTabs.Trigger key={tab.name} name={tab.name}>
           <NativeTabs.Trigger.Label>{tab.title}</NativeTabs.Trigger.Label>
