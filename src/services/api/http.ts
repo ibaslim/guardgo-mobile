@@ -77,6 +77,8 @@ export async function httpRequest<T>(
   } catch (error) {
     if (timedOut) throw new ApiError(408, 'Request timed out');
     if (options.signal?.aborted) throw error;
+    // The message shown to the user is generic; in development keep the real reason visible.
+    if (__DEV__) console.warn(`[api] ${method} ${path} failed:`, error);
     throw new ApiError(0, 'Cannot connect to server');
   } finally {
     clearTimeout(timeout);

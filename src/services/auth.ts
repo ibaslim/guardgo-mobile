@@ -1,5 +1,5 @@
 import { ENDPOINTS } from '@/constants/endpoints';
-import { api, clearSession, setAccessToken } from '@/services/api';
+import { api, ApiError, clearSession, setAccessToken } from '@/services/api';
 import type { RegisterPayload, TokenResponse } from '@/types/auth';
 
 /** A login problem that isn't an HTTP error, with a message that can be shown to the user. */
@@ -27,12 +27,42 @@ export async function requestLogin(username: string, password: string): Promise<
 
 /** Signs in with a result from `requestLogin`. The root layout then shows the user's area. */
 export function startSession(result: LoginResult) {
+  verificationCredentials = null;
   setAccessToken(result.access_token, result.session);
 }
 
 /** Creates an account. It does not sign in. */
 export function register(payload: RegisterPayload) {
   return api.post<unknown>(ENDPOINTS.auth.register, payload);
+}
+
+/** True when the server refused a sign-in because the account's email isn't confirmed yet. */
+export function isEmailVerificationPending(error: unknown) {
+  return error instanceof ApiError && error.status === 401 && /email verification pending/i.test(error.message);
+}
+
+export type VerificationCredentials = { username: string; email?: string; password: string };
+
+// Resending asks the server to check the password again, so the credentials the user just typed are
+// kept in memory (never saved, never put in a route) until the verify-email screen is left.
+let verificationCredentials: VerificationCredentials | null = null;
+
+export function setVerificationCredentials(credentials: VerificationCredentials | null) {
+  verificationCredentials = credentials;
+}
+
+export function hasVerificationCredentials() {
+  return verificationCredentials !== null;
+}
+
+/**
+ * Sends a new confirmation link to the account that was just registered or refused at sign-in.
+ * The server allows one email per minute (429 after that). Resolves with the address it was sent to.
+ */
+export async function resendVerificationEmail() {
+  if (!verificationCredentials) throw new AuthError('Sign in again to get a new confirmation email.');
+  const response = await api.post<{ email?: string }>(ENDPOINTS.auth.resendVerification, verificationCredentials);
+  return response.email ?? null;
 }
 
 /** Logs in with username/email and password and stores the session token. */

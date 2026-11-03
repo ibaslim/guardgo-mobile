@@ -11,7 +11,7 @@ import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
 import { useApiForm } from '@/hooks/use-api-form';
-import { register } from '@/services/auth';
+import { register, setVerificationCredentials } from '@/services/auth';
 import type { TenantType } from '@/types/auth';
 
 const ACCOUNT_TYPES: readonly { value: TenantType; label: string; description: string }[] = [
@@ -48,6 +48,7 @@ export default function RegisterScreen() {
     await register({ ...values, tenant_type: tenant_type as TenantType });
     // Clients and guards confirm their email first (link in the mail).
     if (tenant_type === 'client' || tenant_type === 'guard') {
+      setVerificationCredentials({ username: values.username, email: values.email, password: values.password });
       router.replace({ pathname: '/verify-email', params: { email: values.email } });
       return;
     }

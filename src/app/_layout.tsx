@@ -16,7 +16,8 @@ import { useUniwind } from 'uniwind';
 
 import { useNavigationTheme } from '@/hooks/use-navigation-theme';
 import { ROLE_AREA_NAMES } from '@/constants/roles';
-import { useIsLoggedIn, useNeedsOnboarding, useRoleArea } from '@/hooks/use-session';
+import { HeaderBackButton } from '@/components/navigation/header-back-button';
+import { useAwaitingApproval, useIsLoggedIn, useNeedsOnboarding, useOnboardingArea, useRoleArea } from '@/hooks/use-session';
 import { restoreSession, startSessionMonitor } from '@/services/api';
 import { loadServerConfig } from '@/services/server-config';
 import { loadThemePreference } from '@/services/theme';
@@ -35,6 +36,8 @@ export default function RootLayout() {
   const isLoggedIn = useIsLoggedIn();
   const area = useRoleArea();
   const needsOnboarding = useNeedsOnboarding();
+  const onboardingArea = useOnboardingArea();
+  const awaitingApproval = useAwaitingApproval();
   const [fontsLoaded, fontError] = useFonts({ IBMPlexSans_400Regular, IBMPlexSans_500Medium, IBMPlexSans_600SemiBold, IBMPlexSans_700Bold });
   const [settingsLoaded, setSettingsLoaded] = useState(false);
 
@@ -69,11 +72,18 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Protected guard={isLoggedIn}>
             {/* First, so a user who still has to onboard lands here instead of on their home screen. */}
-            <Stack.Protected guard={needsOnboarding}>
+            <Stack.Protected guard={onboardingArea === 'client'}>
               <Stack.Screen name="onboarding" />
             </Stack.Protected>
+            <Stack.Protected guard={onboardingArea === 'guard'}>
+              <Stack.Screen name="guard-onboarding" />
+            </Stack.Protected>
+            {/* A guard who finished onboarding waits here until an admin approves the profile. */}
+            <Stack.Protected guard={awaitingApproval && !needsOnboarding}>
+              <Stack.Screen name="under-review" options={ENTER_APP} />
+            </Stack.Protected>
             {ROLE_AREA_NAMES.map((name) => (
-              <Stack.Protected key={name} guard={area === name && !needsOnboarding}>
+              <Stack.Protected key={name} guard={area === name && !needsOnboarding && !awaitingApproval}>
                 <Stack.Screen name={name} options={ENTER_APP} />
               </Stack.Protected>
             ))}
@@ -94,11 +104,22 @@ export default function RootLayout() {
               options={{ headerShown: true, title: 'IP Config', headerTitleStyle: { fontFamily: 'IBMPlexSans_600SemiBold' } }}
             />
           </Stack.Protected>
-          {/* Last, so it is never the screen the router falls back to. */}
-          <Stack.Screen
-            name="form-preview"
-            options={{ headerShown: true, title: 'Form components', headerTitleStyle: { fontFamily: 'IBMPlexSans_600SemiBold' } }}
-          />
+          {/*
+            Development-only preview. It is only available once signed in and past onboarding: when the
+            current screen goes away, the router falls back to the first allowed route with the shortest
+            name, and 'form-preview' would beat 'guard-onboarding' and send guards here.
+          */}
+          <Stack.Protected guard={__DEV__ && isLoggedIn && !needsOnboarding && !awaitingApproval}>
+            <Stack.Screen
+              name="form-preview"
+              options={{
+                headerShown: true,
+                title: 'Form components',
+                headerTitleStyle: { fontFamily: 'IBMPlexSans_600SemiBold' },
+                headerLeft: () => <HeaderBackButton />,
+              }}
+            />
+          </Stack.Protected>
         </Stack>
       </ThemeProvider>
     </KeyboardProvider>

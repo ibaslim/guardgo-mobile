@@ -75,7 +75,8 @@ function scheduleRefresh() {
  */
 export function setAccessToken(token: string, nextSession?: Session) {
   accessToken = token;
-  if (nextSession) session = nextSession;
+  // The token response has no tenant review details, so a refresh keeps the ones already loaded.
+  if (nextSession) session = { ...nextSession, tenant: nextSession.tenant ?? session?.tenant };
   tokenExpiresAt = readTokenExpiry(token);
   scheduleRefresh();
   persistSession();

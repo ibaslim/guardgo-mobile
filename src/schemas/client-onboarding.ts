@@ -1,25 +1,10 @@
 import { z } from 'zod';
 
 import type { ClientOnboardingValues, OnboardingSite } from '@/types/onboarding';
+import { phoneDigits } from '@/utils/phone';
+import { CANADIAN_PHONE, CANADIAN_POSTAL_CODE, EMAIL, LETTERS_AND_SPACES, WEBSITE } from '@/utils/validation';
 
 // Same rules as the web client profile (client-setting.component.ts).
-const LETTERS_AND_SPACES = /^[a-zA-Z\s]+$/;
-const EMAIL = /^[\w.-]+@[\w.-]+\.\w+$/;
-const WEBSITE = /^(https?:\/\/)?[\w.-]+\.[a-z]{2,}(\/.*)?$/i;
-const CANADIAN_POSTAL_CODE = /^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/i;
-// Ten digits after the +1 country code; the area code can't start with 0 or 1.
-const CANADIAN_PHONE = /^[2-9]\d{9}$/;
-
-/** Digits of a typed phone number, without a leading country code 1. */
-export function phoneDigits(value: string) {
-  const digits = value.replace(/\D/g, '');
-  return digits.length === 11 && digits.startsWith('1') ? digits.slice(1) : digits;
-}
-
-/** "+14165550123", the format the server stores. */
-export function toE164(value: string) {
-  return `+1${phoneDigits(value)}`;
-}
 
 export const EMPTY_SITE: OnboardingSite = {
   site_name: '',

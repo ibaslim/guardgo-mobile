@@ -1,5 +1,8 @@
+import { File } from 'expo-file-system';
+
 import { ENDPOINTS } from '@/constants/endpoints';
-import { phoneDigits, toE164 } from '@/schemas/client-onboarding';
+import { formatPhone, toE164 } from '@/utils/phone';
+import { asObject, asText, cityCodeFor } from '@/utils/profile';
 import { api, getAccessToken, getApiUrl, refreshSession, updateSession } from '@/services/api';
 import type { PickedImage } from '@/services/image-picker';
 import type { ClientMetadata, ClientOnboardingValues, OnboardingSite } from '@/types/onboarding';
@@ -11,7 +14,19 @@ const TENANT_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
 type TenantUpdateResponse = { message?: string; id?: string; status?: string };
 
 /** The signed-in user's tenant, from `GET /api/tenant`. */
-export type TenantSnapshot = { id?: string; status?: string; profile?: Record<string, unknown> };
+export type TenantSnapshot = {
+  id?: string;
+  status?: string;
+  profile?: Record<string, unknown>;
+  /** 'service_provider' when a service provider owns this guard. */
+  ownership_type?: string | null;
+  service_provider_tenant_id?: string | null;
+};
+
+/** True for a guard that belongs to a service provider, which sets the guard's work area and availability. */
+export function isProviderOwned(tenant: TenantSnapshot | null) {
+  return tenant?.ownership_type === 'service_provider' && Boolean(tenant.service_provider_tenant_id);
+}
 
 export function getTenant() {
   return api.get<TenantSnapshot>(ENDPOINTS.tenant.profile);
@@ -40,14 +55,9 @@ export function checkTenantImage(image: PickedImage): string | null {
 
 /** Saves the company logo or profile photo: multipart form data with the file in the `file` field. */
 export function uploadTenantImage(image: PickedImage) {
-  const type = imageType(image) ?? 'image/jpeg';
   const body = new FormData();
-  // React Native reads a file from a { uri, name, type } object in place of a Blob.
-  body.append('file', {
-    uri: image.uri,
-    name: image.fileName ?? (type === 'image/png' ? 'logo.png' : 'logo.jpg'),
-    type,
-  } as unknown as Blob);
+  // Expo's fetch sends a File (name and type come from the picked file) and rejects { uri, name, type } objects.
+  body.append('file', new File(image.uri) as unknown as Blob);
   return api.put<unknown>(ENDPOINTS.tenant.image, body);
 }
 
@@ -89,26 +99,6 @@ export function deleteTenantImage() {
   return api.delete<unknown>(ENDPOINTS.tenant.image);
 }
 
-const asObject = (value: unknown): Record<string, unknown> =>
-  value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
-const asText = (value: unknown) => (value === null || value === undefined ? '' : String(value).trim());
-
-/** "4165550123" -> "416 555 0123" */
-function formatPhone(phone: unknown) {
-  const digits = phoneDigits(asText(phone));
-  return digits.length === 10 ? `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}` : digits;
-}
-
-/** A Canadian city's code from the name the server stores (or the code itself). */
-function cityCodeFor(metadata: ClientMetadata | null, province: string, name: string) {
-  const options = metadata?.canadianCitiesByProvince[province] ?? [];
-  return (
-    options.find((option) => option.value === name.toUpperCase())?.value ??
-    options.find((option) => option.label.toLowerCase() === name.toLowerCase())?.value ??
-    null
-  );
-}
-
 /** Saved operational sites as form values (the reverse of the `sites` built in `buildClientProfile`). */
 function parseSites(value: unknown, metadata: ClientMetadata | null): OnboardingSite[] {
   if (!Array.isArray(value)) return [];
@@ -125,7 +115,7 @@ function parseSites(value: unknown, metadata: ClientMetadata | null): Onboarding
       guards_required: guards,
       street: asText(address.street),
       province: province || null,
-      city: cityCodeFor(metadata, province, asText(address.city)),
+      city: cityCodeFor(metadata?.canadianCitiesByProvince, province, asText(address.city)),
       postal_code: asText(address.postal_code),
       latitude: asText(address.latitude),
       longitude: asText(address.longitude),
@@ -152,7 +142,7 @@ export function parseClientProfile(
   const country = asText(address.country) || 'CA';
   const province = asText(address.province);
   const cityName = asText(address.city);
-  const cityCode = cityCodeFor(metadata, province, cityName);
+  const cityCode = cityCodeFor(metadata?.canadianCitiesByProvince, province, cityName);
 
   const year = asText(card.expiry_year);
   const month = asText(card.expiry_month);
