@@ -31,4 +31,11 @@ export type AreaConfig = {
   focus: { title: string; empty: string };
   /** Tabs in tab bar order. The first is the area's index route; Android allows at most 5. */
   tabs: readonly AreaTab[];
+  /** Words for the "under review" screen. Only areas in REVIEW_AREAS have them. */
+  review?: {
+    /** What the pass card says the user is, e.g. "Security guard". */
+    pass: string;
+    /** The last step of the review timeline: what opens up once approved. */
+    ready: string;
+  };
 };

@@ -25,4 +25,6 @@ export const ICONS = {
   shield: { sf: 'shield.lefthalf.filled', md: 'shield' },
   server: { sf: 'server.rack', md: 'dns' },
   building: { sf: 'building.2', md: 'apartment' },
-  chevronRight: { sf: 'chevron.right', md: 'chevron_right' },} as const satisfies Record<string, SymbolIcon>;
+  chevronRight: { sf: 'chevron.right', md: 'chevron_right' },
+  blocked: { sf: 'nosign', md: 'block' },
+} as const satisfies Record<string, SymbolIcon>;

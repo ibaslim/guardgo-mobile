@@ -7,11 +7,12 @@ import { FormError } from '@/components/form/form-error';
 import { FormPasswordField, FormSelect, FormTextField } from '@/components/form/form-fields';
 import { Button } from '@/components/ui/button';
 import { FormScrollView } from '@/components/ui/form-scroll-view';
+import { Icon } from '@/components/ui/icon';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
 import { useApiForm } from '@/hooks/use-api-form';
-import { register } from '@/services/auth';
+import { register, setVerificationCredentials } from '@/services/auth';
 import type { TenantType } from '@/types/auth';
 
 const ACCOUNT_TYPES: readonly { value: TenantType; label: string; description: string }[] = [
@@ -48,6 +49,7 @@ export default function RegisterScreen() {
     await register({ ...values, tenant_type: tenant_type as TenantType });
     // Clients and guards confirm their email first (link in the mail).
     if (tenant_type === 'client' || tenant_type === 'guard') {
+      setVerificationCredentials({ username: values.username, email: values.email, password: values.password });
       router.replace({ pathname: '/verify-email', params: { email: values.email } });
       return;
     }
@@ -56,7 +58,7 @@ export default function RegisterScreen() {
 
   if (created) {
     return (
-      <Screen edges={['bottom']}>
+      <Screen>
         <View className="flex-1 justify-center gap-6 p-6">
           <View className="gap-1.5">
             <Text variant="title" accessibilityRole="header">
@@ -71,9 +73,20 @@ export default function RegisterScreen() {
   }
 
   return (
-    <Screen edges={['bottom']}>
-      <FormScrollView contentContainerStyle={{ gap: 16, padding: 24 }}>
-        <Text tone="muted">Create a GuardGo account.</Text>
+    <Screen>
+      <FormScrollView contentContainerStyle={{ gap: 24, paddingHorizontal: 24, paddingTop: 24, paddingBottom: 16 }}>
+        {/* Same heading as the sign-in screen. */}
+        <View className="gap-5">
+          <View className="size-14 items-center justify-center rounded-2xl bg-primary" accessible={false}>
+            <Icon icon={ICONS.shield} size={30} colorVar="--color-on-primary" />
+          </View>
+          <View className="gap-1.5">
+            <Text variant="display" accessibilityRole="header">
+              Sign up
+            </Text>
+            <Text tone="secondary">Create your GuardGo account.</Text>
+          </View>
+        </View>
 
         <View className="gap-4 rounded-xl border border-border bg-surface p-5 shadow-sm">
           <FormSelect

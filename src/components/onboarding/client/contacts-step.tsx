@@ -2,11 +2,11 @@ import { View } from 'react-native';
 
 import { FormTextField } from '@/components/form/form-fields';
 import { StepHeading } from '@/components/onboarding/step-heading';
-import type { OnboardingForm } from '@/components/onboarding/onboarding-types';
+import type { ClientForm } from '@/components/onboarding/client/client-form';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
 
-type ContactCardProps = { form: OnboardingForm; contact: 'primary' | 'secondary'; title: string; next?: 'secondary_name' };
+type ContactCardProps = { form: ClientForm; contact: 'primary' | 'secondary'; title: string; next?: 'secondary_name' };
 
 function ContactCard({ form, contact, title, next }: ContactCardProps) {
   return (
@@ -55,7 +55,7 @@ function ContactCard({ form, contact, title, next }: ContactCardProps) {
 }
 
 /** Two people we can reach: a primary and a secondary contact. */
-export function ContactsStep({ form }: { form: OnboardingForm }) {
+export function ContactsStep({ form }: { form: ClientForm }) {
   return (
     <View className="gap-6">
       <StepHeading

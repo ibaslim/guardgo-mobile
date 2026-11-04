@@ -17,7 +17,7 @@ import { FORM_SERVER_ERROR } from '@/constants/form';
 import { ICONS } from '@/constants/icons';
 import { useApiForm } from '@/hooks/use-api-form';
 import { ApiError, getApiUrl } from '@/services/api';
-import { AuthError, requestLogin, startSession } from '@/services/auth';
+import { AuthError, isAccountBlocked, isEmailVerificationPending, requestLogin, setVerificationCredentials, startSession } from '@/services/auth';
 
 const schema = z.object({
   username: z.string().trim().min(1, 'Enter your username or email.'),
@@ -66,6 +66,17 @@ export default function LoginScreen() {
     } catch (error) {
       if (error instanceof AuthError) {
         form.setError(`root.${FORM_SERVER_ERROR}`, { type: 'server', message: error.message });
+        return;
+      }
+      // Registered but never confirmed the email: send them to the screen that can resend the link.
+      if (isEmailVerificationPending(error)) {
+        setVerificationCredentials({ username, password });
+        router.push({ pathname: '/verify-email', params: { reason: 'sign-in', ...(username.includes('@') ? { email: username } : {}) } });
+        return;
+      }
+      // Banned or blocked: signing in again won't help, so explain it on its own screen.
+      if (isAccountBlocked(error)) {
+        router.push('/account-blocked');
         return;
       }
       // The server only says "Invalid credentials".

@@ -3,7 +3,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { useWatch } from 'react-hook-form';
 
 import { FormSelect, FormTextField } from '@/components/form/form-fields';
-import type { OnboardingForm } from '@/components/onboarding/onboarding-types';
+import type { ClientForm } from '@/components/onboarding/client/client-form';
 import { StepHeading } from '@/components/onboarding/step-heading';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -27,7 +27,7 @@ const YEARS = Array.from({ length: 11 }, (_, index) => {
 });
 
 /** Billing address and the card on file. Province and city lists come from the server. */
-export function BillingStep({ form }: { form: OnboardingForm }) {
+export function BillingStep({ form }: { form: ClientForm }) {
   const { metadata, loading, failed, retry } = useClientMetadata();
   const country = useWatch({ control: form.control, name: 'billing_country' });
   const province = useWatch({ control: form.control, name: 'billing_province' });

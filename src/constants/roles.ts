@@ -33,6 +33,31 @@ export const AREA_HOME = {
 
 export const ROLE_AREA_NAMES = Object.keys(AREA_HOME) as RoleArea[];
 
+/**
+ * Areas whose users fill in a profile on first sign-in (tenant status "onboarding"), and the route
+ * file of each one's onboarding screen. Add a line here and a `Stack.Screen` appears in _layout.tsx.
+ */
+export const ONBOARDING_ROUTES = {
+  client: 'onboarding',
+  guard: 'guard-onboarding',
+} as const satisfies Partial<Record<RoleArea, string>>;
+
+export type OnboardingArea = keyof typeof ONBOARDING_ROUTES;
+
+export const ONBOARDING_AREAS = Object.keys(ONBOARDING_ROUTES) as OnboardingArea[];
+
+/**
+ * Areas whose profile an admin approves before the area opens (tenant status "pending_activation").
+ * Clients are activated as soon as they finish onboarding, so they are not listed.
+ */
+export const REVIEW_AREAS = ['guard', 'provider'] as const satisfies readonly RoleArea[];
+
+export type ReviewArea = (typeof REVIEW_AREAS)[number];
+
+export function isReviewArea(area: RoleArea | null): area is ReviewArea {
+  return area !== null && (REVIEW_AREAS as readonly RoleArea[]).includes(area);
+}
+
 const accountTab: AreaTab = {
   name: 'account',
   title: 'Account',
@@ -51,6 +76,7 @@ const homeTab = (description: string): AreaTab => ({
 export const AREA_CONFIGS: Readonly<Record<RoleArea, AreaConfig>> = {
   guard: {
     label: 'Guard',
+    review: { pass: 'Security guard', ready: 'Start taking jobs' },
     focus: { title: 'Next shift', empty: 'No upcoming shifts. Shifts appear here once a job is assigned to you.' },
     tabs: [
       homeTab('Your next shift and recent activity.'),
@@ -72,6 +98,7 @@ export const AREA_CONFIGS: Readonly<Record<RoleArea, AreaConfig>> = {
   },
   provider: {
     label: 'Service provider',
+    review: { pass: 'Service provider', ready: 'Start receiving requests' },
     focus: { title: 'Requests to staff', empty: 'Nothing to staff right now. New requests for your guards appear here.' },
     tabs: [
       homeTab('Requests to staff and guard activity.'),

@@ -1,13 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { View } from 'react-native';
 import { useFieldArray, useWatch } from 'react-hook-form';
-import * as Location from 'expo-location';
 
+import { CoordinatesField } from '@/components/form/coordinates-field';
 import { FormSelect, FormTextField } from '@/components/form/form-fields';
-import type { OnboardingForm } from '@/components/onboarding/onboarding-types';
+import type { ClientForm } from '@/components/onboarding/client/client-form';
 import { StepHeading } from '@/components/onboarding/step-heading';
 import { Button } from '@/components/ui/button';
-import { MapPicker } from '@/components/ui/map-picker';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
 import { useClientMetadata } from '@/hooks/use-client-metadata';
@@ -21,13 +20,10 @@ const FALLBACK_SITE_TYPES = [
   { value: 'residential', label: 'Residential' },
 ];
 
-type SiteCardProps = { form: OnboardingForm; index: number; onRemove: () => void };
+type SiteCardProps = { form: ClientForm; index: number; onRemove: () => void };
 
 function SiteCard({ form, index, onRemove }: SiteCardProps) {
   const { metadata } = useClientMetadata();
-  const [locating, setLocating] = useState(false);
-  const [mapOpen, setMapOpen] = useState(false);
-  const [locationError, setLocationError] = useState<string>();
   const province = useWatch({ control: form.control, name: `sites.${index}.province` });
 
   // A new province makes the old city meaningless. Only reset on a real change, not on first show.
@@ -37,36 +33,10 @@ function SiteCard({ form, index, onRemove }: SiteCardProps) {
     previousProvince.current = province;
   }, [province, form, index]);
 
-  const latitude = useWatch({ control: form.control, name: `sites.${index}.latitude` });
-  const longitude = useWatch({ control: form.control, name: `sites.${index}.longitude` });
-  const lat = Number(latitude);
-  const lng = Number(longitude);
-  const initialPin = latitude && longitude && Number.isFinite(lat) && Number.isFinite(lng) ? { latitude: lat, longitude: lng } : null;
-
   const cities = useMemo(
     () => (province ? (metadata?.canadianCitiesByProvince[province] ?? []) : []),
     [metadata, province]
   );
-
-  async function useCurrentLocation() {
-    setLocating(true);
-    setLocationError(undefined);
-    try {
-      const { granted } = await Location.requestForegroundPermissionsAsync();
-      if (!granted) {
-        setLocationError('Location permission was denied. Allow it in Settings, or type the coordinates.');
-        return;
-      }
-      const { coords } = await Location.getCurrentPositionAsync({});
-      const options = { shouldValidate: true, shouldDirty: true } as const;
-      form.setValue(`sites.${index}.latitude`, coords.latitude.toFixed(6), options);
-      form.setValue(`sites.${index}.longitude`, coords.longitude.toFixed(6), options);
-    } catch {
-      setLocationError('Could not get your location. Turn on location services, or type the coordinates.');
-    } finally {
-      setLocating(false);
-    }
-  }
 
   return (
     <View className="gap-4 rounded-xl border border-border bg-surface p-5 shadow-sm">
@@ -173,60 +143,23 @@ function SiteCard({ form, index, onRemove }: SiteCardProps) {
         onSubmitEditing={() => form.setFocus(`sites.${index}.latitude`)}
       />
 
-      <Text variant="label">Coordinates</Text>
-      <Text tone="secondary">Needed to match and dispatch guards. Stand at the site and use your location, or type them.</Text>
-      <Button title="Choose on map" variant="outline" icon={ICONS.location} onPress={() => setMapOpen(true)} />
-      <Button
-        title="Use my current location"
-        variant="secondary"
-        icon={ICONS.location}
-        loading={locating}
-        onPress={useCurrentLocation}
-      />
-      <MapPicker
-        visible={mapOpen}
-        initial={initialPin}
-        onClose={() => setMapOpen(false)}
-        onConfirm={(pin) => {
+      <CoordinatesField
+        control={form.control}
+        latitudeName={`sites.${index}.latitude`}
+        longitudeName={`sites.${index}.longitude`}
+        description="Needed to match and dispatch guards. Stand at the site and use your location, or type them."
+        onPick={(latitude, longitude) => {
           const options = { shouldValidate: true, shouldDirty: true } as const;
-          form.setValue(`sites.${index}.latitude`, pin.latitude.toFixed(6), options);
-          form.setValue(`sites.${index}.longitude`, pin.longitude.toFixed(6), options);
-          setMapOpen(false);
+          form.setValue(`sites.${index}.latitude`, latitude, options);
+          form.setValue(`sites.${index}.longitude`, longitude, options);
         }}
       />
-      {locationError ? <Text tone="muted">{locationError}</Text> : null}
-      <View className="flex-row gap-3">
-        <View className="flex-1">
-          <FormTextField
-            control={form.control}
-            name={`sites.${index}.latitude`}
-            label="Latitude"
-            placeholder="43.6532"
-            keyboardType="numbers-and-punctuation"
-            autoCorrect={false}
-            returnKeyType="next"
-            submitBehavior="submit"
-            onSubmitEditing={() => form.setFocus(`sites.${index}.longitude`)}
-          />
-        </View>
-        <View className="flex-1">
-          <FormTextField
-            control={form.control}
-            name={`sites.${index}.longitude`}
-            label="Longitude"
-            placeholder="-79.3832"
-            keyboardType="numbers-and-punctuation"
-            autoCorrect={false}
-            returnKeyType="done"
-          />
-        </View>
-      </View>
     </View>
   );
 }
 
 /** Operational sites the client wants guards at. Optional; each one added must be complete. */
-export function SitesStep({ form }: { form: OnboardingForm }) {
+export function SitesStep({ form }: { form: ClientForm }) {
   const { fields, append, remove } = useFieldArray({ control: form.control, name: 'sites' });
 
   return (

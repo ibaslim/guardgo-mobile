@@ -3,11 +3,11 @@ import { View } from 'react-native';
 
 import { FormTextField } from '@/components/form/form-fields';
 import { StepHeading } from '@/components/onboarding/step-heading';
-import type { OnboardingForm } from '@/components/onboarding/onboarding-types';
+import type { ClientForm } from '@/components/onboarding/client/client-form';
 import type { ClientKind } from '@/types/onboarding';
 
 /** Who the client is: an optional logo or photo, then a person's full name or a company's legal details. */
-export function IdentityStep({ form, kind, logo }: { form: OnboardingForm; kind: ClientKind; logo?: ReactNode }) {
+export function IdentityStep({ form, kind, logo }: { form: ClientForm; kind: ClientKind; logo?: ReactNode }) {
   const company = kind === 'company';
 
   return (

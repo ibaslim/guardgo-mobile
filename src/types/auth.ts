@@ -1,3 +1,13 @@
+/** Where the signed-in user's tenant stands in the admin review. Loaded from GET /api/tenant, not part of the token response. */
+export type TenantReview = {
+  /** "pending_activation" while the profile waits for approval, "active" once approved. */
+  status: string;
+  /** The tenant's id, used to load its profile photo. */
+  id?: string;
+  /** True for a guard owned by a service provider, whose provider approves the profile. */
+  providerOwned: boolean;
+};
+
 /** User session details returned with a token (login, refresh). */
 export type Session = {
   username: string;
@@ -7,6 +17,8 @@ export type Session = {
   subscription: boolean;
   verificationDate: string | null;
   licenses: string[];
+  /** Set by `syncTenantReview`. A token refresh keeps it, since the token response doesn't include it. */
+  tenant?: TenantReview;
 };
 
 export type TokenResponse = {

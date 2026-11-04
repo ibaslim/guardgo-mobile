@@ -10,7 +10,9 @@ import { DateField, TimeField, type DateFieldProps } from '@/components/ui/date-
 import { ImageField, type ImageFieldProps } from '@/components/ui/image-field';
 import { PasswordField, type PasswordFieldProps } from '@/components/ui/password-field';
 import { Select, type SelectProps, type SelectValue } from '@/components/ui/select';
+import { TimePickerField, type TimePickerFieldProps } from '@/components/ui/time-picker-field';
 import { TextField, type TextFieldProps } from '@/components/ui/text-field';
+import { WheelTimePickerField, type WheelTimePickerFieldProps } from '@/components/ui/wheel-time-picker-field';
 
 type ControlProps<T extends FieldValues, N extends FieldPath<T>> = {
   // `any` for the context and parsed-output types, so forms with a Zod transform are accepted too.
@@ -69,6 +71,26 @@ export function FormTimeField<T extends FieldValues, N extends FieldPath<T>>({
 }: ControlProps<T, N> & Omit<DateFieldProps, Connected>) {
   const { value, onChange, onBlur, error } = useField({ control, name });
   return <TimeField {...props} value={value ?? null} onChange={onChange} onBlur={onBlur} error={error} />;
+}
+
+/** 12-hour time picker. The form value is text like "09:30 AM", or an empty string. */
+export function FormTimePicker<T extends FieldValues, N extends FieldPath<T>>({
+  control,
+  name,
+  ...props
+}: ControlProps<T, N> & Omit<TimePickerFieldProps, Connected>) {
+  const { value, onChange, error } = useField({ control, name });
+  return <TimePickerField {...props} value={value ?? ''} onChange={onChange} error={error} />;
+}
+
+/** Scrolling-wheel 12-hour time picker, like the iPhone's. Same form value as `FormTimePicker`. */
+export function FormWheelTimePicker<T extends FieldValues, N extends FieldPath<T>>({
+  control,
+  name,
+  ...props
+}: ControlProps<T, N> & Omit<WheelTimePickerFieldProps, Connected>) {
+  const { value, onChange, error } = useField({ control, name });
+  return <WheelTimePickerField {...props} value={value ?? ''} onChange={onChange} error={error} />;
 }
 
 export function FormSelect<T extends FieldValues, N extends FieldPath<T>, V extends SelectValue>({
