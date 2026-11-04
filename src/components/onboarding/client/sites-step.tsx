@@ -179,7 +179,7 @@ export function SitesStep({ form }: { form: ClientForm }) {
         <SiteCard key={field.id} form={form} index={index} onRemove={() => remove(index)} />
       ))}
 
-      <Button title="Add a site" variant="outline" icon={ICONS.building} onPress={() => append({ ...EMPTY_SITE })} />
+      <Button title="Add a site" variant="outline" icon={ICONS.building} onPress={() => append({ ...EMPTY_SITE }, { shouldFocus: false })} />
     </View>
   );
 }

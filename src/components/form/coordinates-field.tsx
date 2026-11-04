@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Keyboard, View } from 'react-native';
 import { useWatch, type Control, type FieldPath, type FieldValues } from 'react-hook-form';
 import * as Location from 'expo-location';
 
@@ -65,7 +65,12 @@ export function CoordinatesField<T extends FieldValues>({
     <View className="gap-4">
       <Text variant="label">Coordinates</Text>
       {description ? <Text tone="secondary">{description}</Text> : null}
-      <Button title="Choose on map" variant="outline" icon={ICONS.location} onPress={() => setMapOpen(true)} />
+      <Button title="Choose on map" variant="outline" icon={ICONS.location} onPress={() => {
+          // Drop the focus of a field typed in earlier, or it takes focus back when the map closes.
+          Keyboard.dismiss();
+          setMapOpen(true);
+        }}
+      />
       <Button
         title="Use my current location"
         variant="secondary"

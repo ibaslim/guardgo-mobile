@@ -1,9 +1,8 @@
 import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Alert, View } from 'react-native';
-import { useController } from 'react-hook-form';
+import { useController, type Control, type FieldPath, type FieldValues } from 'react-hook-form';
 
-import type { GuardForm } from '@/components/onboarding/guard/guard-form';
 import { Button } from '@/components/ui/button';
 import { ImageSourceSheet } from '@/components/ui/image-source-sheet';
 import { Text } from '@/components/ui/text';
@@ -136,14 +135,19 @@ export function DocumentFileField({ kind, label, value, onChange, onUploading, h
   );
 }
 
-type FileFieldName = `${'identification' | 'security_licenses' | 'police_clearances' | 'training_certificates'}.${number}.file`;
-
-/** `DocumentFileField` connected to the form field that holds the document's file. */
-export function FormDocumentFile({
+/**
+ * `DocumentFileField` connected to the form field that holds the document's file (like
+ * `security_licenses.0.file`). Used by the guard and the service provider onboarding forms.
+ */
+export function FormDocumentFile<T extends FieldValues>({
   control,
   name,
   ...props
-}: { control: GuardForm['control']; name: FileFieldName } & Omit<DocumentFileFieldProps, 'value' | 'onChange'>) {
+}: {
+  // `any` for the context and parsed-output types, like the other connected fields.
+  control: Control<T, any, any>;
+  name: FieldPath<T>;
+} & Omit<DocumentFileFieldProps, 'value' | 'onChange'>) {
   const { field } = useController({ control, name });
-  return <DocumentFileField {...props} value={field.value ?? null} onChange={field.onChange} />;
+  return <DocumentFileField {...props} value={(field.value as UploadedFile | null | undefined) ?? null} onChange={field.onChange} />;
 }

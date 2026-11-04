@@ -40,6 +40,7 @@ export const ROLE_AREA_NAMES = Object.keys(AREA_HOME) as RoleArea[];
 export const ONBOARDING_ROUTES = {
   client: 'onboarding',
   guard: 'guard-onboarding',
+  provider: 'provider-onboarding',
 } as const satisfies Partial<Record<RoleArea, string>>;
 
 export type OnboardingArea = keyof typeof ONBOARDING_ROUTES;

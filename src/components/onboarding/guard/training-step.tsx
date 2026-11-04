@@ -103,7 +103,7 @@ export function TrainingStep(props: GuardStepProps) {
           title="Add a certificate"
           variant="outline"
           icon={ICONS.shield}
-          onPress={() => append({ ...EMPTY_TRAINING_CERTIFICATE })}
+          onPress={() => append({ ...EMPTY_TRAINING_CERTIFICATE }, { shouldFocus: false })}
         />
       ) : null}
     </View>
