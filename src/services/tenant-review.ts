@@ -2,9 +2,8 @@ import { ENDPOINTS } from '@/constants/endpoints';
 import { api, updateSession } from '@/services/api';
 
 type TenantReviewResponse = {
+  id?: string;
   status?: string;
-  approvals_required?: number;
-  approvals_done?: number;
   ownership_type?: string | null;
   service_provider_tenant_id?: string | null;
 };
@@ -25,8 +24,7 @@ export async function syncTenantReview() {
   updateSession({
     tenant: {
       status: String(tenant.status ?? '').trim().toLowerCase(),
-      approvalsRequired: Math.max(Number(tenant.approvals_required) || 1, 1),
-      approvalsDone: Math.max(Number(tenant.approvals_done) || 0, 0),
+      id: tenant.id ? String(tenant.id) : undefined,
       providerOwned: tenant.ownership_type === 'service_provider' && Boolean(tenant.service_provider_tenant_id),
     },
   });

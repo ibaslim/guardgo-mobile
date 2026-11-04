@@ -41,6 +41,14 @@ export function isEmailVerificationPending(error: unknown) {
   return error instanceof ApiError && error.status === 401 && /email verification pending/i.test(error.message);
 }
 
+/**
+ * True when the server refused a sign-in because the account is blocked: "account blocked" when the
+ * whole tenant is banned, "Account Blocked" when only this user is.
+ */
+export function isAccountBlocked(error: unknown) {
+  return error instanceof ApiError && error.status === 401 && /account blocked/i.test(error.message);
+}
+
 export type VerificationCredentials = { username: string; email?: string; password: string };
 
 // Resending asks the server to check the password again, so the credentials the user just typed are

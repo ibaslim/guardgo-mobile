@@ -13,16 +13,21 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useCSSVariable } from 'uniwind';
 
+import { Image } from 'expo-image';
+
 import { Button } from '@/components/ui/button';
 import { Entrance } from '@/components/ui/entrance';
 import { Icon } from '@/components/ui/icon';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
+import { AREA_CONFIGS, isReviewArea } from '@/constants/roles';
 import { useLogout } from '@/hooks/use-logout';
 import { useSession } from '@/hooks/use-session';
+import { fetchTenantLogo } from '@/services/tenant';
 import { syncTenantReview } from '@/services/tenant-review';
-import type { TenantReview } from '@/types/auth';
+import type { TenantImage } from '@/services/tenant';
+import { roleAreaFor } from '@/utils/role';
 
 const WINDOW_WIDTH = 84;
 const WINDOW_HEIGHT = 104;
@@ -43,7 +48,7 @@ function initialsOf(name: string | undefined) {
  * the pass fades out, rests a moment and starts again. Four corner marks frame it like a viewfinder.
  * With reduced motion it stands still, part-way through a scan.
  */
-function PassWindow({ initials }: { initials: string }) {
+function PassWindow({ initials, photo }: { initials: string; photo: TenantImage | null }) {
   const reduceMotion = useReducedMotion();
   const glowColor = useCSSVariable('--color-primary');
   // 0 to 1 is the beam travelling down; 1 to 1.3 is the scan fading out.
@@ -83,9 +88,18 @@ function PassWindow({ initials }: { initials: string }) {
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants">
       <View className="absolute inset-0 items-center justify-center">
-        <Text variant="title" tone="muted">
-          {initials}
-        </Text>
+        {photo ? (
+          <Image
+            source={{ uri: photo.uri, headers: photo.headers }}
+            contentFit="cover"
+            accessibilityIgnoresInvertColors
+            style={{ width: WINDOW_WIDTH, height: WINDOW_HEIGHT }}
+          />
+        ) : (
+          <Text variant="title" tone="muted">
+            {initials}
+          </Text>
+        )}
       </View>
 
       <Animated.View className="absolute left-0 right-0 top-0 overflow-hidden" style={scannedStyle}>
@@ -97,11 +111,13 @@ function PassWindow({ initials }: { initials: string }) {
               style={{ top: index * SCAN_LINE_GAP }}
             />
           ))}
-          <View className="absolute inset-0 items-center justify-center">
-            <Text variant="title" tone="inherit" className="text-primary">
-              {initials}
-            </Text>
-          </View>
+          {photo ? null : (
+            <View className="absolute inset-0 items-center justify-center">
+              <Text variant="title" tone="inherit" className="text-primary">
+                {initials}
+              </Text>
+            </View>
+          )}
         </View>
       </Animated.View>
 
@@ -131,33 +147,7 @@ function PassWindow({ initials }: { initials: string }) {
   );
 }
 
-/** One segment per approval the profile needs. Filled ones are done. */
-function ApprovalMeter({ tenant }: { tenant: TenantReview }) {
-  const label = tenant.providerOwned ? 'Service provider approval' : 'Admin approvals';
-  const done = Math.min(tenant.approvalsDone, tenant.approvalsRequired);
-  return (
-    <View
-      className="gap-2.5"
-      accessible
-      accessibilityLabel={`${label}: ${done} of ${tenant.approvalsRequired} done`}>
-      <View className="flex-row items-baseline justify-between">
-        <Text variant="label" tone="secondary">
-          {label}
-        </Text>
-        <Text variant="label">
-          {done} of {tenant.approvalsRequired}
-        </Text>
-      </View>
-      <View className="flex-row gap-1.5">
-        {Array.from({ length: tenant.approvalsRequired }, (_, index) => (
-          <View key={index} className={`h-1.5 flex-1 rounded-full ${index < done ? 'bg-primary' : 'bg-border'}`} />
-        ))}
-      </View>
-    </View>
-  );
-}
-
-function PassCard({ name, tenant }: { name: string | undefined; tenant: TenantReview }) {
+function PassCard({ name, role, photo }: { name: string | undefined; role: string; photo: TenantImage | null }) {
   return (
     <View className="rounded-3xl border border-border bg-surface px-5 pb-5 pt-3">
       {/* The slot a lanyard would go through. */}
@@ -169,14 +159,14 @@ function PassCard({ name, tenant }: { name: string | undefined; tenant: TenantRe
         </Text>
       </View>
       <View className="flex-row gap-4">
-        <PassWindow initials={initialsOf(name)} />
+        <PassWindow initials={initialsOf(name)} photo={photo} />
         <View className="flex-1 justify-between">
           <View className="gap-0.5">
             <Text variant="heading" numberOfLines={2}>
               {name || 'Your profile'}
             </Text>
             <Text variant="small" tone="muted">
-              Security guard
+              {role}
             </Text>
           </View>
           <View className="flex-row items-center gap-1.5 self-start rounded-full bg-warning-soft px-3 py-1.5">
@@ -187,8 +177,6 @@ function PassCard({ name, tenant }: { name: string | undefined; tenant: TenantRe
           </View>
         </View>
       </View>
-      <View className="my-5 h-px bg-border" />
-      <ApprovalMeter tenant={tenant} />
     </View>
   );
 }
@@ -236,6 +224,17 @@ export function UnderReviewScreen() {
   const [checking, setChecking] = useState(true);
   const [failed, setFailed] = useState(false);
   const spinnerColor = useCSSVariable('--color-primary');
+  const [photo, setPhoto] = useState<TenantImage | null>(null);
+  const tenantId = tenant?.id;
+
+  // The guard's own photo from onboarding goes in the pass; initials stay when there is none.
+  useEffect(() => {
+    let active = true;
+    fetchTenantLogo(tenantId).then((found) => active && setPhoto(found));
+    return () => {
+      active = false;
+    };
+  }, [tenantId]);
 
   const check = useCallback(async () => {
     setChecking(true);
@@ -285,6 +284,9 @@ export function UnderReviewScreen() {
     );
   }
 
+  const area = roleAreaFor(session?.role);
+  const copy = (isReviewArea(area) ? AREA_CONFIGS[area].review : undefined) ?? { pass: 'Your account', ready: 'Get started' };
+
   const body = tenant.providerOwned
     ? "Your service provider is checking it. We'll email you once it's approved."
     : "Admins are reviewing it, usually within 24 to 48 hours. We'll email you once it's approved.";
@@ -304,7 +306,7 @@ export function UnderReviewScreen() {
         </Entrance>
 
         <Entrance step={1}>
-          <PassCard name={session?.username} tenant={tenant} />
+          <PassCard name={session?.username} role={copy.pass} photo={photo} />
         </Entrance>
 
         <Entrance step={2}>
@@ -315,7 +317,7 @@ export function UnderReviewScreen() {
               title={tenant.providerOwned ? 'Review by your service provider' : 'Admin review'}
               detail="You don't need to do anything right now."
             />
-            <TimelineStep state="next" title="Start taking jobs" detail="The app opens up as soon as you're approved." last />
+            <TimelineStep state="next" title={copy.ready} detail="The app opens up as soon as you're approved." last />
           </View>
         </Entrance>
 

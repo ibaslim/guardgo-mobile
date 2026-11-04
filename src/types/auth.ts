@@ -2,8 +2,8 @@
 export type TenantReview = {
   /** "pending_activation" while the profile waits for approval, "active" once approved. */
   status: string;
-  approvalsRequired: number;
-  approvalsDone: number;
+  /** The tenant's id, used to load its profile photo. */
+  id?: string;
   /** True for a guard owned by a service provider, whose provider approves the profile. */
   providerOwned: boolean;
 };

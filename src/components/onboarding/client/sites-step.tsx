@@ -4,7 +4,7 @@ import { useFieldArray, useWatch } from 'react-hook-form';
 
 import { CoordinatesField } from '@/components/form/coordinates-field';
 import { FormSelect, FormTextField } from '@/components/form/form-fields';
-import type { OnboardingForm } from '@/components/onboarding/onboarding-types';
+import type { ClientForm } from '@/components/onboarding/client/client-form';
 import { StepHeading } from '@/components/onboarding/step-heading';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -20,7 +20,7 @@ const FALLBACK_SITE_TYPES = [
   { value: 'residential', label: 'Residential' },
 ];
 
-type SiteCardProps = { form: OnboardingForm; index: number; onRemove: () => void };
+type SiteCardProps = { form: ClientForm; index: number; onRemove: () => void };
 
 function SiteCard({ form, index, onRemove }: SiteCardProps) {
   const { metadata } = useClientMetadata();
@@ -159,7 +159,7 @@ function SiteCard({ form, index, onRemove }: SiteCardProps) {
 }
 
 /** Operational sites the client wants guards at. Optional; each one added must be complete. */
-export function SitesStep({ form }: { form: OnboardingForm }) {
+export function SitesStep({ form }: { form: ClientForm }) {
   const { fields, append, remove } = useFieldArray({ control: form.control, name: 'sites' });
 
   return (

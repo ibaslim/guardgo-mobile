@@ -4,11 +4,10 @@ import { useController, useFormState } from 'react-hook-form';
 import type { GuardForm } from '@/components/onboarding/guard/guard-form';
 import { StepHeading } from '@/components/onboarding/step-heading';
 import { Button } from '@/components/ui/button';
-import { TimeField } from '@/components/ui/date-field';
+import { TimePickerField } from '@/components/ui/time-picker-field';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
 import { WEEK_DAYS, type DayAvailabilityValue, type WeekDay, type WeeklyAvailabilityValues } from '@/types/guard-onboarding';
-import { formatTime12, timeToDate } from '@/utils/availability';
 
 type DayRowProps = {
   name: WeekDay;
@@ -23,8 +22,8 @@ function DayRow({ name, value, onChange }: DayRowProps) {
     onChange({ enabled, ranges });
   }
 
-  function setTime(index: number, part: 'start' | 'end', date: Date | null) {
-    const ranges = value.ranges.map((range, i) => (i === index ? { ...range, [part]: date ? formatTime12(date) : '' } : range));
+  function setTime(index: number, part: 'start' | 'end', time: string) {
+    const ranges = value.ranges.map((range, i) => (i === index ? { ...range, [part]: time } : range));
     onChange({ ...value, ranges });
   }
 
@@ -45,18 +44,18 @@ function DayRow({ name, value, onChange }: DayRowProps) {
             <View key={index} className="gap-3">
               <View className="flex-row gap-3">
                 <View className="flex-1">
-                  <TimeField
+                  <TimePickerField
                     label="From"
-                    value={timeToDate(range.start)}
-                    onChange={(date) => setTime(index, 'start', date)}
+                    value={range.start}
+                    onChange={(time) => setTime(index, 'start', time)}
                     placeholder="Start"
                   />
                 </View>
                 <View className="flex-1">
-                  <TimeField
+                  <TimePickerField
                     label="To"
-                    value={timeToDate(range.end)}
-                    onChange={(date) => setTime(index, 'end', date)}
+                    value={range.end}
+                    onChange={(time) => setTime(index, 'end', time)}
                     placeholder="End"
                   />
                 </View>

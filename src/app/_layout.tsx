@@ -15,7 +15,7 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { useUniwind } from 'uniwind';
 
 import { useNavigationTheme } from '@/hooks/use-navigation-theme';
-import { ROLE_AREA_NAMES } from '@/constants/roles';
+import { ONBOARDING_AREAS, ONBOARDING_ROUTES, ROLE_AREA_NAMES } from '@/constants/roles';
 import { HeaderBackButton } from '@/components/navigation/header-back-button';
 import { useAwaitingApproval, useIsLoggedIn, useNeedsOnboarding, useOnboardingArea, useRoleArea } from '@/hooks/use-session';
 import { restoreSession, startSessionMonitor } from '@/services/api';
@@ -72,13 +72,12 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Protected guard={isLoggedIn}>
             {/* First, so a user who still has to onboard lands here instead of on their home screen. */}
-            <Stack.Protected guard={onboardingArea === 'client'}>
-              <Stack.Screen name="onboarding" />
-            </Stack.Protected>
-            <Stack.Protected guard={onboardingArea === 'guard'}>
-              <Stack.Screen name="guard-onboarding" />
-            </Stack.Protected>
-            {/* A guard who finished onboarding waits here until an admin approves the profile. */}
+            {ONBOARDING_AREAS.map((name) => (
+              <Stack.Protected key={name} guard={onboardingArea === name}>
+                <Stack.Screen name={ONBOARDING_ROUTES[name]} />
+              </Stack.Protected>
+            ))}
+            {/* A user whose profile needs approval (a guard or service provider) waits here until an admin approves the profile. */}
             <Stack.Protected guard={awaitingApproval && !needsOnboarding}>
               <Stack.Screen name="under-review" options={ENTER_APP} />
             </Stack.Protected>
@@ -95,10 +94,8 @@ export default function RootLayout() {
           <Stack.Protected guard={!isLoggedIn}>
             <Stack.Screen name="login" options={SHOW_LOGIN} />
             <Stack.Screen name="verify-email" />
-            <Stack.Screen
-              name="register"
-              options={{ headerShown: true, title: 'Create account', headerTitleStyle: { fontFamily: 'IBMPlexSans_600SemiBold' } }}
-            />
+            <Stack.Screen name="account-blocked" />
+            <Stack.Screen name="register"/>
             <Stack.Screen
               name="server-config"
               options={{ headerShown: true, title: 'IP Config', headerTitleStyle: { fontFamily: 'IBMPlexSans_600SemiBold' } }}

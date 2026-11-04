@@ -11,6 +11,8 @@ export function FormScrollView({ children, ...props }: KeyboardAwareScrollViewPr
   return (
     <KeyboardAwareScrollView
       bottomOffset={KEYBOARD_GAP}
+      // Closing the keyboard (or opening a picker sheet over a focused field) leaves the scroll where it is.
+      disableScrollOnKeyboardHide
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="interactive"
       {...props}>
