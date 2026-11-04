@@ -5,8 +5,8 @@ import { api, getAccessToken, getApiUrl } from '@/services/api';
 import type { PickedImage } from '@/services/image-picker';
 import type { UploadedFile } from '@/types/guard-onboarding';
 
-/** The four kinds of guard document, each with its own upload folder on the server. */
-export type DocumentKind = 'identity' | 'securityLicense' | 'policeClearance' | 'trainingCertificate';
+/** The kinds of document, each with its own upload folder on the server. The first four are a guard's, insurance is a service provider's. */
+export type DocumentKind = 'identity' | 'securityLicense' | 'policeClearance' | 'trainingCertificate' | 'insurance';
 
 // Same limit as the server (`upload_tenant_*_document`): 10 MB, images or PDF.
 export const DOCUMENT_MAX_MB = 10;

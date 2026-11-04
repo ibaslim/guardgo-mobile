@@ -1,4 +1,4 @@
-import { Pressable } from 'react-native';
+import { Keyboard, Pressable } from 'react-native';
 
 import { FieldFrame, FieldIcon, fieldBoxClassName } from '@/components/ui/field';
 import { Icon } from '@/components/ui/icon';
@@ -41,7 +41,12 @@ export function PickerTrigger({
         accessibilityHint={error ?? hint}
         accessibilityState={{ disabled, expanded: open }}
         disabled={disabled}
-        onPress={onPress}
+        onPress={() => {
+          // A text field typed in earlier is still focused. It would take focus back when the picker closes,
+          // and the scroll view would scroll to it, so drop its focus before the picker opens.
+          Keyboard.dismiss();
+          onPress();
+        }}
         className={`${fieldBoxClassName(state)} active:opacity-80`}>
         {icon ? <FieldIcon icon={icon} {...state} /> : null}
         <Text tone={valueLabel ? 'default' : 'muted'} numberOfLines={1} className="flex-1">

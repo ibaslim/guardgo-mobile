@@ -198,7 +198,7 @@ export function LicensesStep(props: GuardStepProps) {
           title="Add another security license"
           variant="outline"
           icon={ICONS.shield}
-          onPress={() => licenses.append({ ...EMPTY_SECURITY_LICENSE })}
+          onPress={() => licenses.append({ ...EMPTY_SECURITY_LICENSE }, { shouldFocus: false })}
         />
       ) : null}
 
@@ -216,7 +216,7 @@ export function LicensesStep(props: GuardStepProps) {
           title="Add another police clearance"
           variant="outline"
           icon={ICONS.shield}
-          onPress={() => clearances.append({ ...EMPTY_POLICE_CLEARANCE })}
+          onPress={() => clearances.append({ ...EMPTY_POLICE_CLEARANCE }, { shouldFocus: false })}
         />
       ) : null}
     </View>

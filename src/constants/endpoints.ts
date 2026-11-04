@@ -19,6 +19,7 @@ export const ENDPOINTS = {
       securityLicense: '/api/tenant/files/security-license',
       policeClearance: '/api/tenant/files/police-clearance',
       trainingCertificate: '/api/tenant/files/training-certificate',
+      insurance: '/api/tenant/files/insurance',
     },
   },
   public: {

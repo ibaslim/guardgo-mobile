@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Modal, Platform, Pressable, useWindowDimensions, View } from 'react-native';
+import { Keyboard, Modal, Platform, Pressable, useWindowDimensions, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
@@ -42,6 +42,12 @@ export function Sheet({ visible, onClose, title, children, footer, size = 'auto'
   if (visible && !mounted) {
     setMounted(true);
   }
+
+  // A text field typed in earlier would take focus back when the sheet closes, and the scroll view
+  // would scroll to it. Drop its focus as the sheet opens (only then, so a search box can be used).
+  useEffect(() => {
+    if (visible) Keyboard.dismiss();
+  }, [visible]);
 
   useEffect(() => {
     if (!mounted) return;

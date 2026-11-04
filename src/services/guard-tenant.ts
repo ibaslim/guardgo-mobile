@@ -34,7 +34,7 @@ const asList = (value: unknown): Record<string, unknown>[] =>
   Array.isArray(value) ? value.map((entry) => asObject(entry)) : [];
 
 /** The file info saved on a document, or null when no file was attached. */
-function parseFile(entry: Record<string, unknown>): UploadedFile | null {
+export function parseFile(entry: Record<string, unknown>): UploadedFile | null {
   const id = asText(entry.document_file_id);
   const url = asText(entry.document_file_url);
   if (!id || !url) return null;
@@ -171,7 +171,7 @@ export function parseGuardProfile(
 // ---------------------------------------------------------------------------------------------
 
 /** The file keys the server keeps on a document, or nothing when no file was attached. */
-function fileFields(file: UploadedFile | null) {
+export function fileFields(file: UploadedFile | null) {
   if (!file) return {};
   return {
     document_file_id: file.id,

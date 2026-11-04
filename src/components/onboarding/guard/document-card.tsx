@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
-import { useFormState } from 'react-hook-form';
+import { useFormState, type Control, type FieldPath, type FieldValues } from 'react-hook-form';
 
-import type { GuardForm } from '@/components/onboarding/guard/guard-form';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
@@ -22,12 +21,18 @@ export function DocumentCard({ title, onRemove, children }: { title: string; onR
   );
 }
 
-type ListName = 'identification' | 'security_licenses' | 'police_clearances' | 'training_certificates';
-
 /** The message for the whole list (like "At least one license is required"), if there is one. */
-export function ListError({ form, name }: { form: GuardForm; name: ListName }) {
+export function ListError<T extends FieldValues>({
+  form,
+  name,
+}: {
+  // `any` for the context and parsed-output types, like the other connected fields.
+  form: { control: Control<T, any, any> };
+  name: FieldPath<T>;
+}) {
   const { errors } = useFormState({ control: form.control, name });
-  const message = errors[name]?.message ?? errors[name]?.root?.message;
+  const error = errors[name] as { message?: string; root?: { message?: string } } | undefined;
+  const message = error?.message ?? error?.root?.message;
   if (!message) return null;
   return (
     <Text variant="small" tone="danger" accessibilityRole="alert">
