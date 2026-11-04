@@ -14,7 +14,8 @@ import {
   FormPasswordField,
   FormSelect,
   FormTextField,
-  FormTimeField,
+  FormTimePicker,
+  FormWheelTimePicker,
 } from '@/components/form/form-fields';
 import { Button, type ButtonVariant } from '@/components/ui/button';
 import { FormScrollView } from '@/components/ui/form-scroll-view';
@@ -41,7 +42,8 @@ const schema = z.object({
   email: z.email('Enter a valid email, like name@example.com.'),
   password: z.string().min(8, 'Use at least 8 characters.'),
   date: z.date({ error: 'Choose a date.' }).nullable().refine((value) => value !== null, 'Choose a date.'),
-  time: z.date().nullable().refine((value) => value !== null, 'Choose a start time.'),
+  time: z.string().min(1, 'Choose a start time.'),
+  end_time: z.string().min(1, 'Choose an end time.'),
   site: z.string().nullable().refine((value) => value !== null, 'Choose a site.'),
   guard: z.string().nullable(),
   photo: z.custom<{ uri: string }>().nullable(),
@@ -55,7 +57,7 @@ export default function FormPreviewScreen() {
   const [logo, setLogo] = useState<PickedImage | null>(null);
   const form = useApiForm({
     schema,
-    defaultValues: { title: '', email: '', password: '', date: null, time: null, site: null, guard: null, photo: null, notes: '' },
+    defaultValues: { title: '', email: '', password: '', date: null, time: '', end_time: '', site: null, guard: null, photo: null, notes: '' },
   });
 
   if (!__DEV__) return <Redirect href="/" />;
@@ -120,9 +122,11 @@ export default function FormPreviewScreen() {
               <FormDateField control={form.control} name="date" label="Date" minimumDate={new Date()} />
             </View>
             <View className="flex-1">
-              <FormTimeField control={form.control} name="time" label="Start time" />
+              <FormTimePicker control={form.control} name="time" label="Start time" />
             </View>
           </View>
+          <FormWheelTimePicker control={form.control} name="end_time" label="End time" />
+
           <FormSelect control={form.control} name="site" label="Site" icon={ICONS.location} options={SITES} placeholder="Choose a site" />
           <FormSelect
             control={form.control}

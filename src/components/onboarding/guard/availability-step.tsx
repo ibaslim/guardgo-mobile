@@ -4,7 +4,7 @@ import { useController, useFormState } from 'react-hook-form';
 import type { GuardForm } from '@/components/onboarding/guard/guard-form';
 import { StepHeading } from '@/components/onboarding/step-heading';
 import { Button } from '@/components/ui/button';
-import { TimePickerField } from '@/components/ui/time-picker-field';
+import { WheelTimePickerField } from '@/components/ui/wheel-time-picker-field';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
 import { WEEK_DAYS, type DayAvailabilityValue, type WeekDay, type WeeklyAvailabilityValues } from '@/types/guard-onboarding';
@@ -44,7 +44,7 @@ function DayRow({ name, value, onChange }: DayRowProps) {
             <View key={index} className="gap-3">
               <View className="flex-row gap-3">
                 <View className="flex-1">
-                  <TimePickerField
+                  <WheelTimePickerField
                     label="From"
                     value={range.start}
                     onChange={(time) => setTime(index, 'start', time)}
@@ -52,7 +52,7 @@ function DayRow({ name, value, onChange }: DayRowProps) {
                   />
                 </View>
                 <View className="flex-1">
-                  <TimePickerField
+                  <WheelTimePickerField
                     label="To"
                     value={range.end}
                     onChange={(time) => setTime(index, 'end', time)}
