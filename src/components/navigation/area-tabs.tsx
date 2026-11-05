@@ -1,26 +1,21 @@
-import { NativeTabs } from 'expo-router/native-tabs';
-import { useCSSVariable } from 'uniwind';
+import { Tabs } from 'expo-router';
 
+import { TabDock } from '@/components/navigation/tab-dock';
 import { AREA_CONFIGS } from '@/constants/roles';
 import type { RoleArea } from '@/types/roles';
 
-const color = (value: string | number | undefined) => (typeof value === 'string' ? value : undefined);
-
-/** Native tab bar for a role area, built from its tabs in constants/roles.ts. Use as the area's _layout. */
+/**
+ * Tab bar for a role area, built from its tabs in constants/roles.ts. Use as the area's _layout.
+ * The bar itself is the floating TabDock.
+ */
 export function AreaTabs({ area }: { area: RoleArea }) {
-  const [primary, surface] = useCSSVariable(['--color-primary', '--color-surface']);
+  const { tabs } = AREA_CONFIGS[area];
 
   return (
-    <NativeTabs
-      tintColor={color(primary)}
-      backgroundColor={color(surface)}
-      labelStyle={{ fontFamily: 'IBMPlexSans_500Medium' }}>
-      {AREA_CONFIGS[area].tabs.map((tab) => (
-        <NativeTabs.Trigger key={tab.name} name={tab.name}>
-          <NativeTabs.Trigger.Label>{tab.title}</NativeTabs.Trigger.Label>
-          <NativeTabs.Trigger.Icon sf={tab.icon.sf} md={tab.icon.md} />
-        </NativeTabs.Trigger>
+    <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <TabDock {...props} tabs={tabs} />}>
+      {tabs.map((tab) => (
+        <Tabs.Screen key={tab.name} name={tab.name} options={{ title: tab.title }} />
       ))}
-    </NativeTabs>
+    </Tabs>
   );
 }
