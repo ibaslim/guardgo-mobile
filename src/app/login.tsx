@@ -127,6 +127,15 @@ export default function LoginScreen() {
                 returnKeyType="go"
                 onSubmitEditing={onSubmit}
               />
+              <Pressable
+                accessibilityRole="link"
+                hitSlop={8}
+                onPress={() => router.push('/forgot-password')}
+                className="-mb-1 self-end active:opacity-70">
+                <Text variant="label" tone="link">
+                  Forgot password?
+                </Text>
+              </Pressable>
               <FormError message={form.serverError} />
               <Button title="Sign in" size="lg" className="mt-2" onPress={onSubmit} loading={form.isSubmitting} />
               <View className="flex-row flex-wrap items-center justify-center">

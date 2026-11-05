@@ -10,6 +10,10 @@ export const ENDPOINTS = {
     /** GET <path>/<token> checks an invite link; POST activate sets the username and password. */
     inviteContext: '/api/invite/context',
     inviteActivate: '/api/invite/activate',
+    /** POST emails a password reset link. GET resetContext/<token> checks it; POST updatePassword sets the new password. */
+    forgotPassword: '/api/forgot',
+    resetContext: '/api/reset/context',
+    updatePassword: '/api/updatePassword',
   },
   tenant: {
     profile: '/api/tenant',

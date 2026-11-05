@@ -48,6 +48,21 @@ export function activateInvite(payload: { token: string; username: string; full_
   return api.post<unknown>(ENDPOINTS.auth.inviteActivate, payload);
 }
 
+/** Emails a link to reset the password. Rejects with a 404 when no account uses the email. */
+export function requestPasswordReset(email: string) {
+  return api.post<{ message?: string }>(ENDPOINTS.auth.forgotPassword, { email: email.trim() });
+}
+
+/** Checks a reset link. Rejects with a 404 (unknown link) or 400 (expired). */
+export function getResetContext(token: string) {
+  return api.get<InviteContext>(`${ENDPOINTS.auth.resetContext}/${encodeURIComponent(token)}`);
+}
+
+/** Sets a new password with the token from the reset email. It does not sign in. */
+export function resetPassword(token: string, password: string) {
+  return api.post<unknown>(ENDPOINTS.auth.updatePassword, { token, password });
+}
+
 /** True when the server refused a sign-in because the account's email isn't confirmed yet. */
 export function isEmailVerificationPending(error: unknown) {
   return error instanceof ApiError && error.status === 401 && /email verification pending/i.test(error.message);
