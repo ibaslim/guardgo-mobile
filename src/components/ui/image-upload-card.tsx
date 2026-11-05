@@ -153,11 +153,11 @@ export function ImageUploadCard({
             </Text>
           </View>
 
-          <View className="flex-row flex-wrap gap-2">
+          <View className="flex-row flex-wrap gap-1.5">
             <Button
               title={value ? 'Change' : 'Upload photo'}
               variant={value ? 'secondary' : 'primary'}
-              size="sm"
+              size="xs"
               icon={value ? ICONS.camera : ICONS.library}
               disabled={busy}
               onPress={startPick}
@@ -169,11 +169,11 @@ export function ImageUploadCard({
                 accessibilityState={{ disabled: busy }}
                 disabled={busy}
                 onPress={remove}
-                className={`min-h-9 flex-row items-center gap-1.5 rounded-[10px] border border-field-error px-3.5 active:opacity-70 ${
+                className={`min-h-8 flex-row items-center gap-1 rounded-lg border border-field-error px-2.5 active:opacity-70 ${
                   busy ? 'opacity-50' : ''
                 }`}>
-                <Icon icon={ICONS.trash} size={15} tone="danger" />
-                <Text variant="label" tone="inherit" className="font-sans-semibold text-[13px] text-field-error">
+                <Icon icon={ICONS.trash} size={13} tone="danger" />
+                <Text variant="label" tone="inherit" className="font-sans-semibold text-xs text-field-error">
                   Remove
                 </Text>
               </Pressable>

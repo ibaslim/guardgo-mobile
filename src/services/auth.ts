@@ -36,6 +36,18 @@ export function register(payload: RegisterPayload) {
   return api.post<unknown>(ENDPOINTS.auth.register, payload);
 }
 
+export type InviteContext = { invite_pending: boolean; email: string; username: string; full_name: string };
+
+/** Checks an invite link. Rejects with a 404 (unknown link) or 400 (expired, or already used). */
+export function getInviteContext(token: string) {
+  return api.get<InviteContext>(`${ENDPOINTS.auth.inviteContext}/${encodeURIComponent(token)}`);
+}
+
+/** Finishes an invited account by choosing its username and password. It does not sign in. */
+export function activateInvite(payload: { token: string; username: string; full_name: string; password: string }) {
+  return api.post<unknown>(ENDPOINTS.auth.inviteActivate, payload);
+}
+
 /** True when the server refused a sign-in because the account's email isn't confirmed yet. */
 export function isEmailVerificationPending(error: unknown) {
   return error instanceof ApiError && error.status === 401 && /email verification pending/i.test(error.message);

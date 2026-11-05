@@ -7,6 +7,9 @@ export const ENDPOINTS = {
     register: '/api/signup',
     /** Emails a new confirmation link. The server's path is misspelled ("verificaion"); keep it as is. */
     resendVerification: '/api/signup/verificaion',
+    /** GET <path>/<token> checks an invite link; POST activate sets the username and password. */
+    inviteContext: '/api/invite/context',
+    inviteActivate: '/api/invite/activate',
   },
   tenant: {
     profile: '/api/tenant',
@@ -21,6 +24,13 @@ export const ENDPOINTS = {
       trainingCertificate: '/api/tenant/files/training-certificate',
       insurance: '/api/tenant/files/insurance',
     },
+  },
+  /** Guards owned by the signed-in service provider. */
+  providerGuards: {
+    list: '/api/sp/guards',
+    invite: '/api/sp/guards/invite',
+    /** DELETE <path>/<guard tenant id> removes an expired invite. */
+    pendingInvite: '/api/sp/guards/pending',
   },
   public: {
     config: '/api/public',

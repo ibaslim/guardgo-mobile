@@ -64,3 +64,6 @@ example
 # generated native folders
 /ios
 /android
+
+# personal todo notes
+/todo

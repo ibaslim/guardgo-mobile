@@ -19,6 +19,8 @@ export type LogoFieldProps = {
   onValueChange: (value: TenantImage | null) => void;
   /** True while an upload or removal is running, so the parent can hold the Continue button. */
   onBusyChange: (busy: boolean) => void;
+  /** Overrides the picture's shape. By default a company logo is square and a profile photo is round. */
+  shape?: 'circle' | 'square';
 };
 
 /**
@@ -26,7 +28,7 @@ export type LogoFieldProps = {
  * uploads as soon as it is picked and is removed from the server as soon as the user removes it,
  * so finishing onboarding only has to save the profile.
  */
-export function LogoField({ kind, value, onValueChange, onBusyChange }: LogoFieldProps) {
+export function LogoField({ kind, value, onValueChange, onBusyChange, shape }: LogoFieldProps) {
   const company = kind === 'company';
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -77,7 +79,7 @@ export function LogoField({ kind, value, onValueChange, onBusyChange }: LogoFiel
   return (
     <ImageUploadCard
       label={company ? 'Company logo' : 'Profile photo'}
-      shape={company ? 'square' : 'circle'}
+      shape={shape ?? (company ? 'square' : 'circle')}
       size="lg"
       value={value}
       onChange={onChange}
