@@ -52,6 +52,7 @@ const disabledStyle = {
 };
 
 const sizes = {
+  xs: { container: 'min-h-8 gap-1 rounded-lg px-2.5', text: 'text-xs', icon: 13 },
   sm: { container: 'min-h-9 gap-1.5 rounded-[10px] px-3.5', text: 'text-[13px]', icon: 15 },
   md: { container: 'min-h-11 gap-2 rounded-xl px-4', text: 'text-sm', icon: 18 },
   lg: { container: 'min-h-12 gap-2.5 rounded-xl px-5', text: 'text-[15px]', icon: 20 },

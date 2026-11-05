@@ -133,7 +133,7 @@ export default function GuardOnboardingScreen() {
       {key === 'you' ? (
         <YouStep
           form={form}
-          photo={<LogoField kind="individual" value={photo} onValueChange={setPhoto} onBusyChange={setPhotoBusy} />}
+          photo={<LogoField kind="individual" shape="square" value={photo} onValueChange={setPhoto} onBusyChange={setPhotoBusy} />}
         />
       ) : null}
       {key === 'home' ? <HomeStep {...stepProps} /> : null}

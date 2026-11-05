@@ -83,13 +83,19 @@ export async function fetchTenantLogo(id: string | undefined): Promise<TenantIma
 
     const headers = { Cookie: `access_token=${token}` };
     const base = `${getApiUrl()}${ENDPOINTS.tenant.imageFile}`;
-    const [own, fallback] = await Promise.all([fetch(`${base}/${id}`, { headers }), fetch(`${base}/default`, { headers })]);
+    // The server sends no cache headers, so without a changing query the phone can keep serving the avatar it
+    // fetched before the photo was uploaded (the web adds the same timestamp).
+    const stamp = Date.now();
+    const [own, fallback] = await Promise.all([
+      fetch(`${base}/${id}?t=${stamp}`, { headers }),
+      fetch(`${base}/default?t=${stamp}`, { headers }),
+    ]);
     if (!own.ok || !fallback.ok) return null;
     const signature = fileSignature(own);
     if (signature === '||' || signature === fileSignature(fallback)) return null;
 
     // The timestamp stops a replaced logo from being served from the image cache.
-    return { uri: `${base}/${id}?t=${Date.now()}`, headers };
+    return { uri: `${base}/${id}?t=${stamp}`, headers };
   } catch {
     return null;
   }

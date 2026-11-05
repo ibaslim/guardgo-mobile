@@ -25,6 +25,13 @@ export const ENDPOINTS = {
       insurance: '/api/tenant/files/insurance',
     },
   },
+  /** Guards owned by the signed-in service provider. */
+  providerGuards: {
+    list: '/api/sp/guards',
+    invite: '/api/sp/guards/invite',
+    /** DELETE <path>/<guard tenant id> removes an expired invite. */
+    pendingInvite: '/api/sp/guards/pending',
+  },
   public: {
     config: '/api/public',
     clientMetadata: '/api/public/client-metadata',
