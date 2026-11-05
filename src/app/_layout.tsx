@@ -91,6 +91,8 @@ export default function RootLayout() {
               <Stack.Screen name="index" options={ENTER_APP} />
             </Stack.Protected>
           </Stack.Protected>
+          {/* Opened from an invite link, signed in or not. */}
+          <Stack.Screen name="invite/[token]" />
           <Stack.Protected guard={!isLoggedIn}>
             <Stack.Screen name="login" options={SHOW_LOGIN} />
             <Stack.Screen name="verify-email" />

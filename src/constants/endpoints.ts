@@ -7,6 +7,9 @@ export const ENDPOINTS = {
     register: '/api/signup',
     /** Emails a new confirmation link. The server's path is misspelled ("verificaion"); keep it as is. */
     resendVerification: '/api/signup/verificaion',
+    /** GET <path>/<token> checks an invite link; POST activate sets the username and password. */
+    inviteContext: '/api/invite/context',
+    inviteActivate: '/api/invite/activate',
   },
   tenant: {
     profile: '/api/tenant',
