@@ -1,58 +1,44 @@
 import { router } from 'expo-router';
-import { View } from 'react-native';
 
-import { Badge } from '@/components/ui/badge';
+import { AccountHeaderCard, ConfigurationsCard, ProfileCard } from '@/components/account/account-cards';
 import { Button } from '@/components/ui/button';
-import { ListGroup, ListRow } from '@/components/ui/list';
 import { TabScreen } from '@/components/ui/tab-screen';
-import { Text } from '@/components/ui/text';
-import { ThemeSwitcher } from '@/components/ui/theme-switcher';
+import { ICONS } from '@/constants/icons';
+import { useAccount } from '@/hooks/use-account';
 import { useLogout } from '@/hooks/use-logout';
 import { useSession } from '@/hooks/use-session';
+import { accountKind } from '@/services/account';
+import { accountName, profileRows } from '@/utils/account-profile';
 import { roleLabelFor } from '@/utils/role';
 
-function formatDate(value: string | null) {
-  if (!value) return 'Not verified';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
-}
-
-/** Account tab shared by every role area. */
+/**
+ * Account tab shared by every role area. The top card and the settings are the same for everyone;
+ * the Profile card lists what fits the kind of account (guard, a provider's guard, service provider,
+ * client). Pull down to reload.
+ */
 export function AccountScreen() {
   const session = useSession();
+  const { account, photo, refreshing, refresh } = useAccount();
   const { logout, loggingOut } = useLogout();
 
+  const kind = accountKind(session?.role, account);
+  const username = session?.username ?? '';
+
   return (
-    <TabScreen title="Account">
-      {session ? (
-        <ListGroup title="Profile">
-          <ListRow title="Username" value={session.username} />
-          <ListRow title="Role" value={roleLabelFor(session.role)} />
-          <ListRow title="Status" value={<Badge label={session.status} />} />
-          <ListRow title="Verified" value={formatDate(session.verificationDate)} />
-          {session.licenses.length > 0 ? (
-            <ListRow
-              title="Licenses"
-              value={
-                <View className="shrink flex-row flex-wrap justify-end gap-1">
-                  {session.licenses.map((license) => (
-                    <Badge key={license} label={license} kind="secondary" />
-                  ))}
-                </View>
-              }
-            />
-          ) : null}
-        </ListGroup>
-      ) : null}
+    <TabScreen title="Account" hideHeader refreshing={refreshing} onRefresh={refresh}>
+      <AccountHeaderCard
+        name={accountName(kind, account, username)}
+        role={roleLabelFor(session?.role)}
+        status={session?.status}
+        email={account?.user.email}
+        photo={photo}
+      />
 
-      <View className="gap-2">
-        <Text variant="label" tone="muted" className="px-1">
-          Appearance
-        </Text>
-        <ThemeSwitcher />
-      </View>
+      <ProfileCard rows={profileRows(kind, account, session)} />
 
-      <Button title="Log out" variant="secondary" onPress={logout} loading={loggingOut} />
+      <ConfigurationsCard />
+
+      <Button title="Log out" variant="danger" size="lg" icon={ICONS.logout} onPress={logout} loading={loggingOut} />
 
       {__DEV__ ? <Button title="Preview form components" variant="link" onPress={() => router.push('/form-preview')} /> : null}
     </TabScreen>

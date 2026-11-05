@@ -27,4 +27,6 @@ export const ICONS = {
   building: { sf: 'building.2', md: 'apartment' },
   chevronRight: { sf: 'chevron.right', md: 'chevron_right' },
   blocked: { sf: 'nosign', md: 'block' },
+  logout: { sf: 'rectangle.portrait.and.arrow.right', md: 'logout' },
+  palette: { sf: 'paintpalette', md: 'palette' },
 } as const satisfies Record<string, SymbolIcon>;
