@@ -284,6 +284,6 @@ function buildGuardProfile(values: GuardOnboardingValues, metadata: GuardMetadat
 }
 
 /** Saves the guard profile. The server then moves the tenant out of "onboarding". */
-export function saveGuardProfile(values: GuardOnboardingValues, metadata: GuardMetadata) {
-  return api.put<TenantUpdateResponse>(ENDPOINTS.tenant.profile, buildGuardProfile(values, metadata));
+export function saveGuardProfile(values: GuardOnboardingValues, metadata: GuardMetadata, status = 'pending_activation') {
+  return api.put<TenantUpdateResponse>(ENDPOINTS.tenant.profile, { ...buildGuardProfile(values, metadata), status });
 }

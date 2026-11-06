@@ -248,8 +248,9 @@ function buildClientProfile(values: ClientOnboardingValues, metadata: ClientMeta
 }
 
 /** Saves the client profile. The server then moves the tenant out of "onboarding". */
-export function saveClientProfile(values: ClientOnboardingValues, metadata: ClientMetadata) {
-  return api.put<TenantUpdateResponse>(ENDPOINTS.tenant.profile, buildClientProfile(values, metadata));
+export function saveClientProfile(values: ClientOnboardingValues, metadata: ClientMetadata, status?: string) {
+  const profile = buildClientProfile(values, metadata);
+  return api.put<TenantUpdateResponse>(ENDPOINTS.tenant.profile, status ? { ...profile, status } : profile);
 }
 
 /**

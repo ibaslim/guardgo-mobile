@@ -7,12 +7,15 @@ import { FormScrollView } from '@/components/ui/form-scroll-view';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { TextField } from '@/components/ui/text-field';
+import { useIsLoggedIn } from '@/hooks/use-session';
 import { ApiError, DEFAULT_API_URL, getApiUrl } from '@/services/api';
+import { logout } from '@/services/auth';
 import { resetServerUrl, saveServerUrl, testServer } from '@/services/server-config';
 import type { ConnectionStatus } from '@/types/server-config';
 import { normalizeServerUrl } from '@/utils/server-url';
 
 export default function ServerConfigScreen() {
+  const signedIn = useIsLoggedIn();
   const [address, setAddress] = useState(getApiUrl);
   const [inputError, setInputError] = useState<string | undefined>();
   const [status, setStatus] = useState<ConnectionStatus>({ kind: 'idle' });
@@ -44,9 +47,18 @@ export default function ServerConfigScreen() {
     setBusy(null);
   }
 
+  /** A session belongs to one server, so after switching servers a signed-in user signs in again. */
+  async function leaveIfSwitched(previous: string) {
+    if (!signedIn || getApiUrl() === previous) return false;
+    await logout();
+    router.replace('/login');
+    return true;
+  }
+
   async function save(url: string) {
+    const previous = getApiUrl();
     await saveServerUrl(url);
-    router.back();
+    if (!(await leaveIfSwitched(previous))) router.back();
   }
 
   async function onSave() {
@@ -65,8 +77,10 @@ export default function ServerConfigScreen() {
     ]);
   }
 
-  function onReset() {
+  async function onReset() {
+    const previous = getApiUrl();
     resetServerUrl();
+    if (await leaveIfSwitched(previous)) return;
     setAddress(DEFAULT_API_URL);
     setInputError(undefined);
     setStatus({ kind: 'idle' });
@@ -76,6 +90,7 @@ export default function ServerConfigScreen() {
     <Screen edges={['bottom']}>
       <FormScrollView contentContainerStyle={{ gap: 16, padding: 24 }}>
         <Text tone="muted">Enter the API server&apos;s IP address and port. All app traffic will go to this server.</Text>
+        {signedIn ? <Text tone="muted">Switching to another server signs you out.</Text> : null}
 
         <View className="gap-4 rounded-lg border border-border bg-surface p-5 shadow-sm">
           <TextField

@@ -1,5 +1,5 @@
-import type { BottomTabBarProps } from 'expo-router/build/layouts/Tabs';
-import { useEffect, useState } from 'react';
+import { BottomTabBarHeightCallbackContext, type BottomTabBarProps } from 'expo-router/build/layouts/Tabs';
+import { useContext, useEffect, useState } from 'react';
 import { Pressable, View, type LayoutChangeEvent } from 'react-native';
 import Animated, {
   Easing,
@@ -38,11 +38,13 @@ type TabDockProps = BottomTabBarProps & {
  * is the pill, in the same blue (and glow) as the primary button. It slides from the old tab to the
  * new one and resizes to fit the label, so it always travels in the direction of the tap. The pill is
  * one separate element behind the tabs, moved to the frame measured for the selected tab. It sits in
- * the layout instead of over the content, so no screen needs to leave room for it. Colours are theme
- * tokens, so light and dark follow.
+ * the content, with no background of its own, so a screen scrolls behind it; it reports its height
+ * to the navigator (TabScreen reads it to leave room at the bottom). Colours are theme tokens, so
+ * light and dark follow.
  */
 export function TabDock({ state, descriptors, emitter, navigateToTab, insets, tabs }: TabDockProps) {
   const reduceMotion = useReducedMotion();
+  const reportHeight = useContext(BottomTabBarHeightCallbackContext);
   const [shadow, glow, highlight, primary] = useCSSVariable([
     '--color-overlay',
     '--color-btn-primary-glow',
@@ -87,7 +89,12 @@ export function TabDock({ state, descriptors, emitter, navigateToTab, insets, ta
   };
 
   return (
-    <View className="bg-background px-4 pt-2" style={{ paddingBottom: insets.bottom + 8 }}>
+    <View
+      // box-none: touches in the gaps beside the capsule reach the screen underneath.
+      pointerEvents="box-none"
+      onLayout={(event) => reportHeight?.(event.nativeEvent.layout.height)}
+      className="px-4 pt-2"
+      style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingBottom: insets.bottom + 8 }}>
       <View className="rounded-[32px] border border-border bg-surface" style={dockShadow}>
         {/* No border on this view, so the tabs' measured positions are the pill's positions. */}
         <View accessibilityRole="tablist" className="flex-row items-center justify-between p-1.5">
