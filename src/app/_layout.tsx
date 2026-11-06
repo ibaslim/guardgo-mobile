@@ -106,6 +106,10 @@ export default function RootLayout() {
             <Stack.Screen name="register"/>
             <Stack.Screen name="forgot-password" />
           </Stack.Protected>
+          {/* A section of the profile, opened from the Account screen. It has no header bar: its heading carries the back chevron. */}
+          <Stack.Protected guard={isLoggedIn && !needsOnboarding && !awaitingApproval}>
+            <Stack.Screen name="edit-profile/[step]" options={{ headerShown: false }} />
+          </Stack.Protected>
           {/*
             Development-only preview. It is only available once signed in and past onboarding: when the
             current screen goes away, the router falls back to the first allowed route with the shortest

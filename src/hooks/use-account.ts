@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { getAccount, type AccountInfo } from '@/services/account';
 import { fetchTenantLogo, type TenantImage } from '@/services/tenant';
@@ -40,6 +41,20 @@ export function useAccount() {
       setRefreshing(false);
     }
   }, []);
+
+  // Coming back from an edit screen: show the saved changes. The first focus is the first load above.
+  const firstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (firstFocus.current) {
+        firstFocus.current = false;
+        return;
+      }
+      loadAccount()
+        .then(setLoaded)
+        .catch(() => undefined);
+    }, [])
+  );
 
   return { account: loaded?.account ?? null, photo: loaded?.photo ?? null, failed, refreshing, refresh };
 }

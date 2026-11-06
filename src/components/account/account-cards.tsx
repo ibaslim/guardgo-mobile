@@ -3,7 +3,6 @@ import { router } from 'expo-router';
 import { Fragment } from 'react';
 import { Pressable, View } from 'react-native';
 
-import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
@@ -11,7 +10,7 @@ import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 import { ICONS } from '@/constants/icons';
 import { getApiUrl } from '@/services/api';
 import type { TenantImage } from '@/services/tenant';
-import type { ProfileRow } from '@/utils/account-profile';
+import { sentenceCase, type ProfileStepRow } from '@/utils/account-profile';
 
 const AVATAR_SIZE = 72;
 
@@ -27,15 +26,13 @@ const initialsOf = (name: string) =>
 export type AccountHeaderCardProps = {
   name: string;
   role: string;
-  /** Account status, shown as a badge. */
+  /** Account status (for example "active"), shown on the third row. */
   status?: string;
-  /** Shown once the account has loaded. */
-  email?: string;
   photo: TenantImage | null;
 };
 
-/** Who is signed in: photo (or initials), name, role and email. */
-export function AccountHeaderCard({ name, role, status, email, photo }: AccountHeaderCardProps) {
+/** Who is signed in: photo (or initials), then name, role and account status on three rows. */
+export function AccountHeaderCard({ name, role, status, photo }: AccountHeaderCardProps) {
   return (
     <Card>
       <View className="flex-row items-center gap-4 p-4">
@@ -62,19 +59,13 @@ export function AccountHeaderCard({ name, role, status, email, photo }: AccountH
           <Text variant="heading" numberOfLines={1} className="font-sans-semibold">
             {name}
           </Text>
-          <View className="flex-row flex-wrap items-center gap-2">
-            <Text variant="small" tone="secondary">
-              {role}
+          <Text variant="small" tone="secondary">
+            {role}
+          </Text>
+          {status ? (
+            <Text variant="small" tone="muted">
+              Account status: {sentenceCase(status)}
             </Text>
-            {status ? <Badge label={status} /> : null}
-          </View>
-          {email ? (
-            <View className="flex-row items-center gap-1.5">
-              <Icon icon={ICONS.mail} size={14} tone="muted" />
-              <Text variant="small" tone="muted" numberOfLines={1} selectable className="shrink">
-                {email}
-              </Text>
-            </View>
           ) : null}
         </View>
       </View>
@@ -82,23 +73,46 @@ export function AccountHeaderCard({ name, role, status, email, photo }: AccountH
   );
 }
 
-/** The profile rows for this kind of account (see utils/account-profile.ts), under a "Profile" title. */
-export function ProfileCard({ rows }: { rows: ProfileRow[] }) {
+/**
+ * The sections of the profile for this kind of account (see utils/account-profile.ts), under a
+ * "Profile" title. A section with a chevron opens its edit screen, where the user sees and updates it.
+ */
+export function ProfileCard({ rows }: { rows: ProfileStepRow[] }) {
   return (
     <Card title="Profile">
-      {rows.map((row, index) => (
-        <Fragment key={row.label}>
-          {index > 0 ? <View className="ml-4 h-px bg-border" /> : null}
-          <View className="flex-row items-start justify-between gap-4 px-4 py-3">
-            <Text variant="small" tone="muted" className="w-28">
-              {row.label}
+      {rows.map((row, index) => {
+        const content = (
+          <>
+            <Text variant="label" className="shrink-0">
+              {row.title}
             </Text>
-            <Text variant="small" className="flex-1 text-right font-sans-medium">
-              {row.value}
+            <Text variant="small" tone="muted" numberOfLines={1} className="min-w-0 flex-1 text-right">
+              {row.summary || 'Not added yet'}
             </Text>
-          </View>
-        </Fragment>
-      ))}
+            {row.step ? <Icon icon={ICONS.chevronRight} size={16} tone="muted" /> : null}
+          </>
+        );
+        const className = 'min-h-14 flex-row items-center gap-3 px-4 py-3';
+        const step = row.step;
+
+        return (
+          <Fragment key={row.title}>
+            {index > 0 ? <View className="ml-4 h-px bg-border" /> : null}
+            {step ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${row.title}: ${row.summary || 'not added yet'}`}
+                accessibilityHint="Opens this section to view and update it"
+                onPress={() => router.push({ pathname: '/edit-profile/[step]', params: { step } })}
+                className={`${className} active:bg-surface-subtle`}>
+                {content}
+              </Pressable>
+            ) : (
+              <View className={className}>{content}</View>
+            )}
+          </Fragment>
+        );
+      })}
     </Card>
   );
 }

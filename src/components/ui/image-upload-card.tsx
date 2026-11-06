@@ -9,8 +9,9 @@ import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
 import { pickImage, type ImageSource, type PickedImage } from '@/services/image-picker';
 
-const SIZES = { md: 84, lg: 112 } as const;
-const SQUARE_RADIUS = { md: 18, lg: 24 } as const;
+// `lg` leaves room beside the picture for Change and Remove on one row on a 360 dp phone (they need about 163 dp).
+const SIZES = { md: 84, lg: 92 } as const;
+const SQUARE_RADIUS = { md: 18, lg: 20 } as const;
 
 export type ImageUploadCardProps = {
   /** What the picture is, e.g. "Profile photo" or "Company logo". Shown as the card title. */
@@ -169,7 +170,7 @@ export function ImageUploadCard({
                 accessibilityState={{ disabled: busy }}
                 disabled={busy}
                 onPress={remove}
-                className={`min-h-8 flex-row items-center gap-1 rounded-lg border border-field-error px-2.5 active:opacity-70 ${
+                className={`min-h-8 flex-row items-center gap-1 rounded-lg border border-field-error px-2 active:opacity-70 ${
                   busy ? 'opacity-50' : ''
                 }`}>
                 <Icon icon={ICONS.trash} size={13} tone="danger" />

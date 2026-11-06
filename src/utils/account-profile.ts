@@ -1,9 +1,13 @@
+import { CLIENT_PROFILE_STEPS, GUARD_PROFILE_STEPS, PROVIDER_PROFILE_STEPS } from '@/constants/profile-steps';
 import type { AccountInfo, AccountKind } from '@/services/account';
-import { fromIsoDate } from '@/utils/dates';
 import { formatPhone } from '@/utils/phone';
 import { asObject, asText } from '@/utils/profile';
 
-export type ProfileRow = { label: string; value: string };
+/**
+ * One line of the Profile card. With a `step`, it is a section of the profile that opens its edit
+ * screen (`edit-profile/[step]`); without one it is only shown.
+ */
+export type ProfileStepRow = { title: string; summary: string; step?: string };
 
 /** The server saves "N/A" as the name of a tenant that has no profile yet. */
 const clean = (value: unknown) => {
@@ -13,7 +17,7 @@ const clean = (value: unknown) => {
 
 const first = (...values: unknown[]) => values.map(clean).find(Boolean) ?? '';
 
-/** "unarmed" -> "Unarmed", "TORONTO" -> "Toronto", "first_aid" -> "First aid". */
+/** "unarmed" -> "Unarmed", "first_aid" -> "First aid". */
 export function sentenceCase(code: string) {
   const text = code.replace(/_/g, ' ').trim().toLowerCase();
   return text.charAt(0).toUpperCase() + text.slice(1);
@@ -24,9 +28,10 @@ const titleCase = (code: string) => code.toLowerCase().replace(/(^|[\s-])([a-z])
 const list = (value: unknown) => (Array.isArray(value) ? value.map(clean).filter(Boolean) : []);
 const objects = (value: unknown) => (Array.isArray(value) ? value.map((entry) => asObject(entry)) : []);
 const place = (address: Record<string, unknown>) => [clean(address.city), clean(address.province)].filter(Boolean).join(', ');
-const phone = (value: unknown) => formatPhone(value);
+const count = (total: number, one: string, many: string) => (total > 0 ? `${total} ${total === 1 ? one : many}` : '');
+const join = (...parts: string[]) => parts.filter(Boolean).join(' · ');
 
-const NOT_SET_BY_PROVIDER = 'Not set yet. Your service provider sets it.';
+const SET_BY_PROVIDER = 'Set by your service provider';
 
 /** The name shown at the top of the Account screen. */
 export function accountName(kind: AccountKind, account: AccountInfo | null, username: string) {
@@ -38,109 +43,98 @@ export function accountName(kind: AccountKind, account: AccountInfo | null, user
   return first(user?.full_name, username) || username;
 }
 
-function guardRows(account: AccountInfo, managed: boolean): ProfileRow[] {
+function guardSteps(account: AccountInfo, managed: boolean): ProfileStepRow[] {
   const profile = account.tenant.profile;
   const provider = clean(account.tenant.service_provider?.name) || 'Your service provider';
 
-  const birth = fromIsoDate(profile.date_of_birth);
   const operationalCity = clean(profile.operational_city_code);
   const radius = Number(profile.max_travel_radius_km);
   const area = operationalCity
-    ? [titleCase(operationalCity) + (clean(profile.operational_region_code) ? `, ${clean(profile.operational_region_code)}` : ''), Number.isFinite(radius) && radius > 0 ? `${radius} km` : '']
-        .filter(Boolean)
-        .join(' · ')
+    ? join(
+        titleCase(operationalCity) + (clean(profile.operational_region_code) ? `, ${clean(profile.operational_region_code)}` : ''),
+        Number.isFinite(radius) && radius > 0 ? `${radius} km` : ''
+      )
     : '';
-
+  const types = list(profile.preferred_guard_types).map(sentenceCase).join(', ');
   const days = Object.values(asObject(profile.weekly_availability)).filter((ranges) => Array.isArray(ranges) && ranges.length > 0).length;
-  const availability = days > 0 ? `${days} ${days === 1 ? 'day' : 'days'} a week` : '';
 
-  const rows: (ProfileRow | null)[] = [
-    managed ? { label: 'Managed by', value: provider } : null,
-    { label: 'Full name', value: first(profile.full_name, account.user.full_name) },
-    { label: 'Mobile', value: phone(profile.mobile_phone) },
-    { label: 'Landline', value: phone(profile.landline_phone) },
-    { label: 'Date of birth', value: birth ? birth.toLocaleDateString() : '' },
-    { label: 'Home', value: place(asObject(profile.home_address)) },
-    { label: 'Work area', value: area || (managed ? NOT_SET_BY_PROVIDER : '') },
-    { label: 'Availability', value: availability || (managed ? NOT_SET_BY_PROVIDER : '') },
-    { label: 'Guard types', value: list(profile.preferred_guard_types).map(sentenceCase).join(', ') },
-  ];
-  return rows.filter((row): row is ProfileRow => row !== null && row.value !== '');
+  const summaries: Record<string, string> = {
+    you: join(first(profile.full_name, account.user.full_name), formatPhone(profile.mobile_phone)),
+    home: place(asObject(profile.home_address)),
+    // A provider's guard only chooses the types of work; the provider sets the area.
+    work: managed ? types : area,
+    identity: count(objects(asObject(profile.identification).documents).length, 'document', 'documents'),
+    licenses: join(count(objects(profile.security_licenses).length, 'license', 'licenses'), count(objects(profile.police_clearances).length, 'clearance', 'clearances')),
+    training: count(objects(profile.training_certificates).length, 'certificate', 'certificates'),
+    availability: days > 0 ? `${days} ${days === 1 ? 'day' : 'days'} a week` : '',
+  };
+
+  const rows: ProfileStepRow[] = [];
+  if (managed) rows.push({ title: 'Managed by', summary: provider });
+  for (const { key, title } of GUARD_PROFILE_STEPS) {
+    // The provider sets a managed guard's availability, so it is shown but not edited here.
+    if (managed && key === 'availability') {
+      rows.push({ title, summary: summaries.availability || SET_BY_PROVIDER });
+      continue;
+    }
+    rows.push({ title, summary: summaries[key], step: key });
+  }
+  return rows;
 }
 
-function providerRows(account: AccountInfo): ProfileRow[] {
+function providerSteps(account: AccountInfo): ProfileStepRow[] {
   const profile = account.tenant.profile;
-  const representative = asObject(profile.representative);
   const regions = objects(profile.operating_regions);
   const cities = regions.reduce((total, region) => total + Math.max(objects(region.city_entries).length, list(region.city_codes).length, region.city ? 1 : 0), 0);
-  const coverage =
-    regions.length > 0
-      ? `${regions.length} ${regions.length === 1 ? 'province' : 'provinces'}${cities > 0 ? `, ${cities} ${cities === 1 ? 'city' : 'cities'}` : ''}`
-      : '';
 
-  const company = first(profile.legal_company_name, profile.trading_name);
-  const trading = clean(profile.trading_name);
-  const rows: ProfileRow[] = [
-    { label: 'Company', value: company },
-    { label: 'Trading name', value: trading && trading !== company ? trading : '' },
-    { label: 'Representative', value: clean(representative.name) },
-    { label: 'Phone', value: phone(representative.phone) },
-    { label: 'Contact email', value: clean(representative.email) },
-    { label: 'Address', value: place(asObject(profile.address)) },
-    { label: 'Coverage', value: coverage },
-    { label: 'Guard types', value: list(profile.guard_categories_offered).map(sentenceCase).join(', ') },
-  ];
-  return rows.filter((row) => row.value !== '');
+  const summaries: Record<string, string> = {
+    company: first(profile.legal_company_name, profile.trading_name),
+    head: place(asObject(profile.head_office_address)),
+    contacts: first(asObject(profile.primary_representative).name),
+    licenses: count(objects(profile.security_licenses).length || (Object.keys(asObject(profile.security_license)).length > 0 ? 1 : 0), 'license', 'licenses'),
+    coverage: join(count(regions.length, 'province', 'provinces'), count(cities, 'city', 'cities')),
+  };
+  return PROVIDER_PROFILE_STEPS.map(({ key, title }) => ({ title, summary: summaries[key], step: key }));
 }
 
-function clientRows(account: AccountInfo): ProfileRow[] {
+function clientSteps(account: AccountInfo): ProfileStepRow[] {
   const profile = account.tenant.profile;
-  const contact = asObject(profile.primary_contact);
   const businessType = clean(profile.business_type);
-  const sites = objects(profile.sites).length;
 
-  const rows: ProfileRow[] = [
-    { label: 'Client type', value: businessType ? (businessType === 'individual' ? 'Individual' : 'Company') : '' },
-    { label: 'Name', value: clean(profile.legal_entity_name) },
-    { label: 'Industry', value: clean(profile.industry) },
-    { label: 'Contact', value: clean(contact.name) },
-    { label: 'Phone', value: phone(contact.phone) },
-    { label: 'Contact email', value: clean(contact.email) },
-    { label: 'Billing address', value: place(asObject(profile.billing_address)) },
-    { label: 'Sites', value: sites > 0 ? `${sites} ${sites === 1 ? 'site' : 'sites'}` : '' },
-  ];
-  return rows.filter((row) => row.value !== '');
+  const summaries: Record<string, string> = {
+    identity: clean(profile.legal_entity_name),
+    contacts: clean(asObject(profile.primary_contact).name),
+    billing: place(asObject(profile.billing_address)),
+    sites: count(objects(profile.sites).length, 'site', 'sites'),
+  };
+  const rows: ProfileStepRow[] = [];
+  if (businessType) rows.push({ title: 'Client type', summary: businessType === 'individual' ? 'Individual' : 'Company' });
+  for (const { key, title } of CLIENT_PROFILE_STEPS) rows.push({ title, summary: summaries[key], step: key });
+  return rows;
 }
 
 /**
- * The rows of the Profile card. They differ by kind of account, and only the ones that have a value
- * are listed. Before the account is loaded, or for an account without a tenant profile (platform
- * admins), the card shows what the session knows.
+ * The lines of the Profile card. They differ by kind of account: for a guard, a provider's guard, a
+ * service provider and a client they are the sections of the profile (the onboarding steps), each
+ * with a short summary and an edit screen. Before the account loads, and for platform admins who
+ * have no tenant profile, the card shows what the session knows.
  */
-export function profileRows(
+export function profileSteps(
   kind: AccountKind,
   account: AccountInfo | null,
   session: { username: string; status: string; verificationDate: string | null } | null
-): ProfileRow[] {
-  const rows =
-    account === null
-      ? []
-      : kind === 'guard'
-        ? guardRows(account, false)
-        : kind === 'provider-guard'
-          ? guardRows(account, true)
-          : kind === 'provider'
-            ? providerRows(account)
-            : kind === 'client'
-              ? clientRows(account)
-              : [];
-  if (rows.length > 0) return rows;
+): ProfileStepRow[] {
+  if (account !== null) {
+    if (kind === 'guard') return guardSteps(account, false);
+    if (kind === 'provider-guard') return guardSteps(account, true);
+    if (kind === 'provider') return providerSteps(account);
+    if (kind === 'client') return clientSteps(account);
+  }
 
-  // Nothing saved in a profile yet: show the basics.
   const verified = session?.verificationDate ? new Date(session.verificationDate) : null;
   return [
-    { label: 'Username', value: session?.username ?? '' },
-    { label: 'Status', value: session?.status ? sentenceCase(session.status) : '' },
-    { label: 'Verified', value: verified && !Number.isNaN(verified.getTime()) ? verified.toLocaleDateString() : 'Not verified' },
-  ].filter((row) => row.value !== '');
+    { title: 'Username', summary: session?.username ?? '' },
+    { title: 'Status', summary: session?.status ? sentenceCase(session.status) : '' },
+    { title: 'Verified', summary: verified && !Number.isNaN(verified.getTime()) ? verified.toLocaleDateString() : 'Not verified' },
+  ].filter((row) => row.summary !== '');
 }

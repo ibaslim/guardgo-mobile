@@ -8,7 +8,7 @@ import { useAccount } from '@/hooks/use-account';
 import { useLogout } from '@/hooks/use-logout';
 import { useSession } from '@/hooks/use-session';
 import { accountKind } from '@/services/account';
-import { accountName, profileRows } from '@/utils/account-profile';
+import { accountName, profileSteps } from '@/utils/account-profile';
 import { roleLabelFor } from '@/utils/role';
 
 /**
@@ -30,11 +30,10 @@ export function AccountScreen() {
         name={accountName(kind, account, username)}
         role={roleLabelFor(session?.role)}
         status={session?.status}
-        email={account?.user.email}
         photo={photo}
       />
 
-      <ProfileCard rows={profileRows(kind, account, session)} />
+      <ProfileCard rows={profileSteps(kind, account, session)} />
 
       <ConfigurationsCard />
 
