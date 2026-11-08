@@ -26,5 +26,9 @@ export const ICONS = {
   server: { sf: 'server.rack', md: 'dns' },
   building: { sf: 'building.2', md: 'apartment' },
   chevronRight: { sf: 'chevron.right', md: 'chevron_right' },
+  /** The back arrow: a left chevron (the Material one is the bolder, iOS-style shape). */
+  chevronLeft: { sf: 'chevron.left', md: 'arrow_back_ios_new' },
   blocked: { sf: 'nosign', md: 'block' },
+  logout: { sf: 'rectangle.portrait.and.arrow.right', md: 'logout' },
+  palette: { sf: 'paintpalette', md: 'palette' },
 } as const satisfies Record<string, SymbolIcon>;

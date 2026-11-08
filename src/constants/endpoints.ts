@@ -15,6 +15,10 @@ export const ENDPOINTS = {
     resetContext: '/api/reset/context',
     updatePassword: '/api/updatePassword',
   },
+  /** The signed-in user and their tenant, with the email and the full profile. */
+  account: {
+    me: '/api/me',
+  },
   tenant: {
     profile: '/api/tenant',
     image: '/api/tenant/image',

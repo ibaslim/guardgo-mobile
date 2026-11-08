@@ -233,6 +233,7 @@ function buildProviderProfile(values: ProviderOnboardingValues, metadata: GuardM
 }
 
 /** Saves the service provider profile. The server then moves the tenant out of "onboarding". */
-export function saveProviderProfile(values: ProviderOnboardingValues, metadata: GuardMetadata) {
-  return api.put<TenantUpdateResponse>(ENDPOINTS.tenant.profile, buildProviderProfile(values, metadata));
+export function saveProviderProfile(values: ProviderOnboardingValues, metadata: GuardMetadata, status?: string) {
+  const profile = buildProviderProfile(values, metadata);
+  return api.put<TenantUpdateResponse>(ENDPOINTS.tenant.profile, status ? { ...profile, status } : profile);
 }

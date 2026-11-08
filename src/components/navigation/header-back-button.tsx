@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Pressable, View } from 'react-native';
+import { Pressable } from 'react-native';
 
 import { Icon } from '@/components/ui/icon';
 import { ICONS } from '@/constants/icons';
@@ -16,10 +16,8 @@ export function HeaderBackButton() {
       accessibilityLabel="Go back"
       hitSlop={8}
       onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
-      className="size-10 items-center justify-center rounded-full active:bg-surface-muted">
-      <View className="rotate-180">
-        <Icon icon={ICONS.chevronRight} size={20} tone="default" />
-      </View>
+      className="size-11 items-center justify-center rounded-full active:bg-surface-muted">
+      <Icon icon={ICONS.chevronLeft} size={26} tone="default" />
     </Pressable>
   );
 }
