@@ -1,4 +1,5 @@
-import { File } from 'expo-file-system';
+import { File, Paths } from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 import { ENDPOINTS } from '@/constants/endpoints';
 import { api, getAccessToken, getApiUrl } from '@/services/api';
@@ -68,4 +69,19 @@ export function documentSource(file: UploadedFile): { uri: string; headers?: Rec
     uri: `${getApiUrl()}${file.url}`,
     headers: token ? { Cookie: `access_token=${token}` } : undefined,
   };
+}
+
+/**
+ * Downloads a saved document to the app's cache and opens it in the phone's own viewer (the share
+ * sheet), for files the app can't draw itself, such as a PDF. Throws when it can't be fetched or opened.
+ */
+export async function openDocumentExternally(file: UploadedFile): Promise<void> {
+  const { uri, headers } = documentSource(file);
+  const isPdf = file.mimeType === 'application/pdf';
+  const target = new File(Paths.cache, `document-${file.id}${isPdf ? '.pdf' : ''}`);
+  if (target.exists) target.delete();
+
+  const saved = await File.downloadFileAsync(uri, target, { headers });
+  if (!(await Sharing.isAvailableAsync())) throw new Error('Opening files is not available on this device.');
+  await Sharing.shareAsync(saved.uri, { mimeType: file.mimeType || undefined, dialogTitle: file.name });
 }

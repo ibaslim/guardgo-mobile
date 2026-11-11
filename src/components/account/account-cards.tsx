@@ -89,11 +89,12 @@ export function ProfileCard({ rows }: { rows: ProfileStepRow[] }) {
             <Text variant="small" tone="muted" numberOfLines={1} className="min-w-0 flex-1 text-right">
               {row.summary || 'Not added yet'}
             </Text>
-            {row.step ? <Icon icon={ICONS.chevronRight} size={16} tone="muted" /> : null}
+            {row.step || row.section ? <Icon icon={ICONS.chevronRight} size={16} tone="muted" /> : null}
           </>
         );
         const className = 'min-h-14 flex-row items-center gap-3 px-4 py-3';
         const step = row.step;
+        const section = row.section;
 
         return (
           <Fragment key={row.title}>
@@ -104,6 +105,15 @@ export function ProfileCard({ rows }: { rows: ProfileStepRow[] }) {
                 accessibilityLabel={`${row.title}: ${row.summary || 'not added yet'}`}
                 accessibilityHint="Opens this section to view and update it"
                 onPress={() => router.push({ pathname: '/edit-profile/[step]', params: { step } })}
+                className={`${className} active:bg-surface-subtle`}>
+                {content}
+              </Pressable>
+            ) : section ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${row.title}: ${row.summary || 'not set yet'}`}
+                accessibilityHint="Opens this section to view it. Your service provider sets it."
+                onPress={() => router.push({ pathname: '/assigned-schedule', params: { section } })}
                 className={`${className} active:bg-surface-subtle`}>
                 {content}
               </Pressable>

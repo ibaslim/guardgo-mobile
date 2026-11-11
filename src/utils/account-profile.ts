@@ -7,7 +7,7 @@ import { asObject, asText } from '@/utils/profile';
  * One line of the Profile card. With a `step`, it is a section of the profile that opens its edit
  * screen (`edit-profile/[step]`); without one it is only shown.
  */
-export type ProfileStepRow = { title: string; summary: string; step?: string };
+export type ProfileStepRow = { title: string; summary: string; step?: string; /** Opens the read-only screen for what the service provider set (`/assigned-schedule`). */ section?: 'area' | 'availability' };
 
 /** The server saves "N/A" as the name of a tenant that has no profile yet. */
 const clean = (value: unknown) => {
@@ -72,9 +72,10 @@ function guardSteps(account: AccountInfo, managed: boolean): ProfileStepRow[] {
   const rows: ProfileStepRow[] = [];
   if (managed) rows.push({ title: 'Managed by', summary: provider });
   for (const { key, title } of GUARD_PROFILE_STEPS) {
-    // The provider sets a managed guard's availability, so it is shown but not edited here.
+    // The provider sets a managed guard's area and availability: they open a read-only screen.
     if (managed && key === 'availability') {
-      rows.push({ title, summary: summaries.availability || SET_BY_PROVIDER });
+      rows.push({ title: 'Operational area', summary: area || SET_BY_PROVIDER, section: 'area' });
+      rows.push({ title, summary: summaries.availability || SET_BY_PROVIDER, section: 'availability' });
       continue;
     }
     rows.push({ title, summary: summaries[key], step: key });

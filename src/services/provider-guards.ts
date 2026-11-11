@@ -79,6 +79,59 @@ export function deleteExpiredInvite(guardId: string) {
   return api.delete<unknown>(`${ENDPOINTS.providerGuards.pendingInvite}/${guardId}`);
 }
 
+/** A guard of the service provider with the profile they filled in, from `GET /api/sp/guards/<id>`. */
+export type ProviderGuardDetail = {
+  id: string;
+  status: string;
+  profile: Record<string, unknown>;
+  email: string;
+};
+
+type RawDetail = {
+  id?: string;
+  status?: string | null;
+  profile?: Record<string, unknown> | null;
+  tenant_admin_user?: { email?: string | null } | null;
+};
+
+export async function getProviderGuard(guardId: string): Promise<ProviderGuardDetail> {
+  const raw = await api.get<RawDetail>(`${ENDPOINTS.providerGuards.list}/${guardId}`);
+  return {
+    id: String(raw.id ?? guardId),
+    status: String(raw.status ?? '').trim().toLowerCase().replace(/_/g, ' '),
+    profile: raw.profile ?? {},
+    email: String(raw.tenant_admin_user?.email ?? ''),
+  };
+}
+
+export type GuardCoverage = {
+  regionCode: string;
+  cityCode: string;
+  radiusKm: number;
+  /** Weekly availability as the server stores it (see `availabilityPayload`). */
+  weeklyAvailability: Record<string, { start: string; end: string }[]>;
+};
+
+/** Sets the work area and weekly availability of one of the provider's guards. */
+export function saveGuardCoverage(guardId: string, coverage: GuardCoverage) {
+  return api.put<unknown>(`${ENDPOINTS.providerGuards.list}/${guardId}/operational-coverage`, {
+    operational_region_code: coverage.regionCode,
+    operational_city_code: coverage.cityCode,
+    max_travel_radius_km: coverage.radiusKm,
+    weekly_availability: coverage.weeklyAvailability,
+  });
+}
+
+/**
+ * Approves a guard whose profile is waiting for review, so they become active. The server answers 400
+ * until the work area and weekly availability are set.
+ */
+export function approveGuard(guardId: string) {
+  return api.post<{ message?: string }>(`${ENDPOINTS.providerGuards.list}/${guardId}/status-request`, {
+    action: 'activate',
+  });
+}
+
 /** A readable reason for a failed guards request. */
 export function guardsErrorMessage(error: unknown, fallback: string) {
   if (error instanceof ApiError) {

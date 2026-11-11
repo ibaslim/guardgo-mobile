@@ -15,7 +15,8 @@ type DayRowProps = {
   onChange: (next: DayAvailabilityValue) => void;
 };
 
-function DayRow({ name, value, onChange }: DayRowProps) {
+/** One day of the week: a switch, and the time ranges when it is on. Also used by the service provider's guard review. */
+export function DayRow({ name, value, onChange }: DayRowProps) {
   function toggle(enabled: boolean) {
     // Switching a day on starts with one empty range to fill in.
     const ranges = enabled && value.ranges.length === 0 ? [{ start: '', end: '' }] : value.ranges;

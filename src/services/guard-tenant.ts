@@ -55,7 +55,8 @@ function normalizeTime(value: unknown) {
   return parsed ? formatTime12(parsed) : text;
 }
 
-function parseAvailability(value: unknown): WeeklyAvailabilityValues {
+/** The availability the server saved, as one entry per day with its time ranges. */
+export function parseAvailability(value: unknown): WeeklyAvailabilityValues {
   const saved = asObject(value);
   const result: WeeklyAvailabilityValues = JSON.parse(JSON.stringify(EMPTY_AVAILABILITY));
   for (const name of WEEK_DAYS) {
@@ -185,6 +186,17 @@ export function fileFields(file: UploadedFile | null) {
 const optional = (value: string | null | undefined) => (value && value.trim() ? value.trim() : undefined);
 const optionalDate = (value: Date | null) => (value ? toIsoDate(value) : undefined);
 
+/** Weekly availability as the server stores it. All seven days are sent so a day switched off replaces what was saved before. */
+export function availabilityPayload(availability: WeeklyAvailabilityValues) {
+  return Object.fromEntries(
+    WEEK_DAYS.map((name) => {
+      const day = availability[name];
+      const ranges = day.enabled ? day.ranges.filter((range) => range.start && range.end) : [];
+      return [name, ranges.map((range) => ({ start: range.start, end: range.end }))];
+    })
+  );
+}
+
 /** The profile in the shape `PUT /api/tenant` expects (same as the web guard profile form). */
 function buildGuardProfile(values: GuardOnboardingValues, metadata: GuardMetadata) {
   const cities = metadata.canadianCitiesByProvince;
@@ -270,14 +282,7 @@ function buildGuardProfile(values: GuardOnboardingValues, metadata: GuardMetadat
     profile.operational_region_code = values.operational_province;
     profile.operational_city_code = values.operational_city;
     profile.max_travel_radius_km = Number(values.radius_km);
-    // All seven days are sent so a day switched off replaces what was saved before.
-    profile.weekly_availability = Object.fromEntries(
-      WEEK_DAYS.map((name) => {
-        const day = values.weekly_availability[name];
-        const ranges = day.enabled ? day.ranges.filter((range) => range.start && range.end) : [];
-        return [name, ranges.map((range) => ({ start: range.start, end: range.end }))];
-      })
-    );
+    profile.weekly_availability = availabilityPayload(values.weekly_availability);
   }
 
   return { tenant_type: 'guard', profile, status: 'pending_activation' };
