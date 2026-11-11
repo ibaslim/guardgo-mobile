@@ -28,7 +28,7 @@ export function TabScreen({ title, subtitle, header, hideHeader = false, childre
       {/* "automatic" keeps content clear of the iOS tab bar, which floats over the screen. */}
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerClassName="gap-6 px-5 pt-4"
+        contentContainerClassName="gap-4 px-5 pt-0"
         contentContainerStyle={{ paddingBottom: tabBarHeight + 24 }}
         refreshControl={onRefresh ? <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> : undefined}>
         {hideHeader ? null : (header ?? (

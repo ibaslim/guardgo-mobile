@@ -98,6 +98,10 @@
       --color-danger-soft-content: #991b1b;
       --color-field-error: #dc2626; /* invalid field border, error text and icon */
       --color-overlay: rgba(15, 23, 42, 0.45);
+      --color-toast: #ffffff;
+      --color-toast-success: #16a34a;
+      --color-toast-warning: #d97706;
+      --color-toast-failure: #ef4444;
 
       /* Form fields (src/components/ui/field.tsx) */
       --color-field: #ffffff;
@@ -160,6 +164,10 @@
       --color-danger-soft-content: #fca5a5;
       --color-field-error: #f87171; /* red-400: danger (#b91c1c) is too dark to read on dark surfaces */
       --color-overlay: rgba(0, 0, 0, 0.6);
+      --color-toast: #1f2937;
+      --color-toast-success: #4ade80;
+      --color-toast-warning: #fcd34d;
+      --color-toast-failure: #f87171;
 
       --color-field: #182233;
       --color-field-border: #2b3649;

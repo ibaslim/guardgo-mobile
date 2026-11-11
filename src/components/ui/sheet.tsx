@@ -6,6 +6,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
+import { ToastHost } from '@/components/ui/toast-host';
 import { ICONS } from '@/constants/icons';
 import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 
@@ -127,6 +128,8 @@ export function Sheet({ visible, onClose, title, children, footer, size = 'auto'
             {footer ? <View className="gap-2 px-6 pt-3">{footer}</View> : null}
           </View>
         </Animated.View>
+        {/* A modal covers the app-level toast, so the sheet shows its own. */}
+        <ToastHost />
       </View>
     </Modal>
   );

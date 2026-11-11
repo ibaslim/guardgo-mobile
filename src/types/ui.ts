@@ -2,6 +2,8 @@ import type { AndroidSymbol } from 'expo-symbols';
 import type { SFSymbol } from 'sf-symbols-typescript';
 
 /** Status badge colours, same set as the web badge.component.ts. */
+export type ToastVariant = 'success' | 'warning' | 'failure';
+
 export type BadgeKind = 'primary' | 'secondary' | 'success' | 'danger' | 'warning';
 
 /** An icon as an SF Symbol (iOS) and a Material Symbol (Android, web). */

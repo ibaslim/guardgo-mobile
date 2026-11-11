@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { buildMapPickerHtml } from '@/components/ui/map-picker-html';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
+import { ToastHost } from '@/components/ui/toast-host';
 import { getApiUrl } from '@/services/api';
 import { getMapsConfig, type MapsConfig } from '@/services/maps-config';
 
@@ -135,6 +136,7 @@ export function MapPicker({ visible, ...props }: MapPickerProps) {
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={props.onClose}>
       {visible ? <MapPickerContent {...props} /> : null}
+      <ToastHost />
     </Modal>
   );
 }
