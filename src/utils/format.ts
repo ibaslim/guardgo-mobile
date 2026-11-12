@@ -14,3 +14,8 @@ export function formatFileSize(bytes: number) {
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
+
+/** "$1,250.00" in the given currency (CAD by default), following the device's locale. */
+export function formatMoney(value: number, currency = 'CAD') {
+  return value.toLocaleString(undefined, { style: 'currency', currency });
+}

@@ -33,6 +33,14 @@ export const ENDPOINTS = {
       insurance: '/api/tenant/files/insurance',
     },
   },
+  /** Job requests: a client's own, or the ones a guard or service provider can see. */
+  requests: {
+    /**
+     * GET <path>/<request id> is one request; PATCH edits a draft. Under it: /waves (offer rounds),
+     * /schedule (GET, POST, PATCH the repeat pattern), /publish (POST).
+     */
+    list: '/api/requests',
+  },
   /** Guards owned by the signed-in service provider. */
   providerGuards: {
     list: '/api/sp/guards',

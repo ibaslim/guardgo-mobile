@@ -114,6 +114,10 @@ export default function RootLayout() {
             <Stack.Screen name="review-guard/[id]" options={{ headerShown: false }} />
             {/* A service provider's guard seeing the work area and availability the provider set for them, read only. */}
             <Stack.Screen name="assigned-schedule" options={{ headerShown: false }} />
+            {/* One job request, read only. Opened from a request list; it has its own heading with the back chevron. */}
+            <Stack.Screen name="request/[id]" options={{ headerShown: false }} />
+            {/* Creating a job request, or editing a draft. It has its own heading with the back chevron. */}
+            <Stack.Screen name="request-form" options={{ headerShown: false }} />
           </Stack.Protected>
           {/*
             Development-only preview. It is only available once signed in and past onboarding: when the
