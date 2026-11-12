@@ -1,22 +1,15 @@
-import { View } from 'react-native';
+import { useEffect } from 'react';
 
-import { Icon } from '@/components/ui/icon';
-import { Text } from '@/components/ui/text';
-import { ICONS } from '@/constants/icons';
+import { toast } from '@/services/toast';
 
-/** The form-level error from the last submit (`serverError` from useApiForm). Renders nothing without one. */
+/**
+ * The form-level error from the last submit (`serverError` from useApiForm), shown as a failure
+ * toast at the bottom of the screen. Renders nothing itself.
+ */
 export function FormError({ message }: { message?: string }) {
-  if (!message) return null;
+  useEffect(() => {
+    if (message) toast.failure(message);
+  }, [message]);
 
-  return (
-    <View
-      className="flex-row items-start gap-3 rounded-[14px] bg-danger-soft px-4 py-3.5"
-      accessibilityRole="alert"
-      accessibilityLiveRegion="polite">
-      <Icon icon={ICONS.error} size={18} colorVar="--color-danger-soft-content" />
-      <Text variant="small" tone="inherit" className="flex-1 font-sans-medium text-danger-soft-content">
-        {message}
-      </Text>
-    </View>
-  );
+  return null;
 }

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
-import { FormDateField, FormTextField } from '@/components/form/form-fields';
+import { FormWheelDateField, FormTextField } from '@/components/form/form-fields';
 import type { GuardForm } from '@/components/onboarding/guard/guard-form';
 import { StepHeading } from '@/components/onboarding/step-heading';
 import { Text } from '@/components/ui/text';
@@ -29,7 +29,7 @@ export function YouStep({ form, photo }: { form: GuardForm; photo: ReactNode }) 
           submitBehavior="submit"
           onSubmitEditing={() => form.setFocus('mobile_phone')}
         />
-        <FormDateField
+        <FormWheelDateField
           control={form.control}
           name="date_of_birth"
           label="Date of birth"

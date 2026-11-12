@@ -11,14 +11,13 @@ import { useIsLoggedIn } from '@/hooks/use-session';
 import { ApiError, DEFAULT_API_URL, getApiUrl } from '@/services/api';
 import { logout } from '@/services/auth';
 import { resetServerUrl, saveServerUrl, testServer } from '@/services/server-config';
-import type { ConnectionStatus } from '@/types/server-config';
+import { toast } from '@/services/toast';
 import { normalizeServerUrl } from '@/utils/server-url';
 
 export default function ServerConfigScreen() {
   const signedIn = useIsLoggedIn();
   const [address, setAddress] = useState(getApiUrl);
   const [inputError, setInputError] = useState<string | undefined>();
-  const [status, setStatus] = useState<ConnectionStatus>({ kind: 'idle' });
   const [busy, setBusy] = useState<'test' | 'save' | null>(null);
 
   function parseAddress() {
@@ -30,11 +29,11 @@ export default function ServerConfigScreen() {
   async function check(url: string) {
     try {
       await testServer(url);
-      setStatus({ kind: 'ok', message: `Connected to ${url}` });
+      toast.success(`Connected to ${url}`);
       return true;
     } catch (e) {
       const reason = e instanceof ApiError ? e.message : 'Unknown error';
-      setStatus({ kind: 'error', message: `Could not reach ${url}: ${reason}` });
+      toast.failure(`Could not reach ${url}: ${reason}`);
       return false;
     }
   }
@@ -58,7 +57,12 @@ export default function ServerConfigScreen() {
   async function save(url: string) {
     const previous = getApiUrl();
     await saveServerUrl(url);
-    if (!(await leaveIfSwitched(previous))) router.back();
+    if (await leaveIfSwitched(previous)) return;
+    toast.success('Server saved.');
+    // Nothing to go back to when this screen was the first one opened (e.g. after a reload),
+    // so fall back to the app's start instead of dispatching an unhandled GO_BACK.
+    if (router.canGoBack()) router.back();
+    else router.replace('/');
   }
 
   async function onSave() {
@@ -83,7 +87,7 @@ export default function ServerConfigScreen() {
     if (await leaveIfSwitched(previous)) return;
     setAddress(DEFAULT_API_URL);
     setInputError(undefined);
-    setStatus({ kind: 'idle' });
+    toast.success('Server reset to default.');
   }
 
   return (
@@ -96,10 +100,7 @@ export default function ServerConfigScreen() {
           <TextField
             label="Server address"
             value={address}
-            onChangeText={(text) => {
-              setAddress(text);
-              setStatus({ kind: 'idle' });
-            }}
+            onChangeText={setAddress}
             placeholder="192.168.1.236:8080"
             keyboardType="url"
             autoCapitalize="none"
@@ -108,19 +109,6 @@ export default function ServerConfigScreen() {
             onSubmitEditing={onTest}
             error={inputError}
           />
-
-          {status.kind !== 'idle' ? (
-            <View
-              className={`rounded-md p-3 ${status.kind === 'ok' ? 'bg-surface-muted' : 'bg-danger-soft'}`}
-              accessibilityLiveRegion="polite">
-              <Text
-                variant="small"
-                tone={status.kind === 'ok' ? 'success' : 'inherit'}
-                className={status.kind === 'error' ? 'text-danger-soft-content' : ''}>
-                {status.message}
-              </Text>
-            </View>
-          ) : null}
 
           <View className="gap-2">
             <Button

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
-import { FormDateField, FormTextField } from '@/components/form/form-fields';
+import { FormWheelDateField, FormTextField } from '@/components/form/form-fields';
 import type { ProviderForm } from '@/components/onboarding/provider/provider-form';
 import { StepHeading } from '@/components/onboarding/step-heading';
 import { ICONS } from '@/constants/icons';
@@ -46,7 +46,7 @@ export function CompanyStep({ form, logo }: { form: ProviderForm; logo: ReactNod
           submitBehavior="submit"
           onSubmitEditing={() => form.setFocus('tax_number')}
         />
-        <FormDateField
+        <FormWheelDateField
           control={form.control}
           name="established_on"
           label="Date of establishment"

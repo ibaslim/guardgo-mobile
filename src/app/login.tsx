@@ -26,7 +26,7 @@ const schema = z.object({
 
 // Test account, prefilled in development builds only.
 const DEFAULT_VALUES = __DEV__
-  ? { username: 'guard1@gmail.com', password: '1qaz!QAZ' }
+  ? { username: 'serviceprovider1@gmail.com', password: '12345678' }
   : { username: '', password: '' };
 
 export default function LoginScreen() {

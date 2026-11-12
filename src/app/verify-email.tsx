@@ -15,6 +15,7 @@ import {
   resendVerificationEmail,
   setVerificationCredentials,
 } from "@/services/auth";
+import { toast } from "@/services/toast";
 
 /** The server sends one confirmation email per minute per account. */
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -63,7 +64,6 @@ export default function VerifyEmailScreen() {
   );
   const [sending, setSending] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [canResend] = useState(hasVerificationCredentials);
 
   useEffect(() => {
@@ -74,14 +74,14 @@ export default function VerifyEmailScreen() {
 
   const resend = useCallback(async () => {
     setSending(true);
-    setError(null);
     try {
-      setSentTo(
-        (await resendVerificationEmail()) ?? email ?? "your email address",
-      );
+      const address =
+        (await resendVerificationEmail()) ?? email ?? "your email address";
+      setSentTo(address);
       setCooldown(RESEND_COOLDOWN_SECONDS);
+      toast.success(`New email sent to ${address}.`);
     } catch (caught) {
-      setError(resendErrorMessage(caught));
+      toast.failure(resendErrorMessage(caught));
       if (caught instanceof ApiError && caught.status === 429)
         setCooldown(RESEND_COOLDOWN_SECONDS);
     } finally {
@@ -206,19 +206,9 @@ export default function VerifyEmailScreen() {
 
         <View className="gap-3">
           <View accessibilityLiveRegion="polite" className="min-h-5">
-            {error ? (
-              <Text variant="small" tone="danger">
-                {error}
-              </Text>
-            ) : sentTo ? (
-              <Text variant="small" tone="success">
-                New email sent to {sentTo}.
-              </Text>
-            ) : (
-              <Text variant="small" tone="muted">
-                The link expires after 24 hours.
-              </Text>
-            )}
+            <Text variant="small" tone="muted">
+              The link expires after 24 hours.
+            </Text>
           </View>
           {canResend ? (
             <View className="flex-row flex-wrap items-center justify-center">

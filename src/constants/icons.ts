@@ -19,6 +19,8 @@ export const ICONS = {
   close: { sf: 'xmark', md: 'close' },
   clear: { sf: 'xmark.circle.fill', md: 'cancel' },
   error: { sf: 'exclamationmark.circle', md: 'error' },
+  success: { sf: 'checkmark.circle', md: 'check_circle' },
+  warning: { sf: 'exclamationmark.triangle', md: 'warning' },
   camera: { sf: 'camera', md: 'photo_camera' },
   library: { sf: 'photo.on.rectangle', md: 'photo_library' },
   trash: { sf: 'trash', md: 'delete' },

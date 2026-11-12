@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { useFieldArray, useWatch } from 'react-hook-form';
 
-import { FormDateField, FormSelect, FormTextField } from '@/components/form/form-fields';
+import { FormWheelDateField, FormSelect, FormTextField } from '@/components/form/form-fields';
 import { DocumentCard, ListError } from '@/components/onboarding/guard/document-card';
 import { FormDocumentFile } from '@/components/onboarding/guard/document-file-field';
 import type { ProviderStepProps } from '@/components/onboarding/provider/provider-form';
@@ -57,7 +57,7 @@ function LicenseCard({ form, metadata, onUploading, index, onRemove }: LicenseCa
         multiline
         returnKeyType="done"
       />
-      <FormDateField
+      <FormWheelDateField
         control={form.control}
         name={`security_licenses.${index}.issue_date`}
         label="Issue date"
@@ -65,7 +65,7 @@ function LicenseCard({ form, metadata, onUploading, index, onRemove }: LicenseCa
         placeholder="Select date"
         maximumDate={new Date()}
       />
-      <FormDateField
+      <FormWheelDateField
         control={form.control}
         name={`security_licenses.${index}.expiry_date`}
         label="Expiry date"
@@ -136,7 +136,7 @@ export function LicensesInsuranceStep(props: ProviderStepProps) {
           submitBehavior="submit"
           onSubmitEditing={() => form.setFocus('insurance.coverage_details')}
         />
-        <FormDateField
+        <FormWheelDateField
           control={form.control}
           name="insurance.expiry_date"
           label="Policy expiry date"

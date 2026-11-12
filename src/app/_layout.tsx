@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { useUniwind } from 'uniwind';
 
+import { ToastHost } from '@/components/ui/toast-host';
 import { useNavigationTheme } from '@/hooks/use-navigation-theme';
 import { ONBOARDING_AREAS, ONBOARDING_ROUTES, ROLE_AREA_NAMES } from '@/constants/roles';
 import { HeaderBackButton } from '@/components/navigation/header-back-button';
@@ -109,6 +110,10 @@ export default function RootLayout() {
           {/* A section of the profile, opened from the Account screen. It has no header bar: its heading carries the back chevron. */}
           <Stack.Protected guard={isLoggedIn && !needsOnboarding && !awaitingApproval}>
             <Stack.Screen name="edit-profile/[step]" options={{ headerShown: false }} />
+            {/* A service provider reviewing a guard who is waiting for approval. It has its own heading with the back chevron. */}
+            <Stack.Screen name="review-guard/[id]" options={{ headerShown: false }} />
+            {/* A service provider's guard seeing the work area and availability the provider set for them, read only. */}
+            <Stack.Screen name="assigned-schedule" options={{ headerShown: false }} />
           </Stack.Protected>
           {/*
             Development-only preview. It is only available once signed in and past onboarding: when the
@@ -127,6 +132,7 @@ export default function RootLayout() {
             />
           </Stack.Protected>
         </Stack>
+        <ToastHost />
       </ThemeProvider>
     </KeyboardProvider>
   );

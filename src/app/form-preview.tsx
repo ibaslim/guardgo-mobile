@@ -15,6 +15,7 @@ import {
   FormSelect,
   FormTextField,
   FormTimePicker,
+  FormWheelDateField,
   FormWheelTimePicker,
 } from '@/components/form/form-fields';
 import { Button, type ButtonVariant } from '@/components/ui/button';
@@ -43,6 +44,7 @@ const schema = z.object({
   password: z.string().min(8, 'Use at least 8 characters.'),
   date: z.date({ error: 'Choose a date.' }).nullable().refine((value) => value !== null, 'Choose a date.'),
   time: z.string().min(1, 'Choose a start time.'),
+  end_date: z.date().nullable(),
   end_time: z.string().min(1, 'Choose an end time.'),
   site: z.string().nullable().refine((value) => value !== null, 'Choose a site.'),
   guard: z.string().nullable(),
@@ -57,7 +59,7 @@ export default function FormPreviewScreen() {
   const [logo, setLogo] = useState<PickedImage | null>(null);
   const form = useApiForm({
     schema,
-    defaultValues: { title: '', email: '', password: '', date: null, time: '', end_time: '', site: null, guard: null, photo: null, notes: '' },
+    defaultValues: { title: '', email: '', password: '', date: null, time: '', end_date: null, end_time: '', site: null, guard: null, photo: null, notes: '' },
   });
 
   if (!__DEV__) return <Redirect href="/" />;
@@ -125,7 +127,14 @@ export default function FormPreviewScreen() {
               <FormTimePicker control={form.control} name="time" label="Start time" />
             </View>
           </View>
-          <FormWheelTimePicker control={form.control} name="end_time" label="End time" />
+          <View className="flex-row gap-3">
+            <View className="flex-1">
+              <FormWheelDateField control={form.control} name="end_date" label="End date" optional minimumDate={new Date()} />
+            </View>
+            <View className="flex-1">
+              <FormWheelTimePicker control={form.control} name="end_time" label="End time" />
+            </View>
+          </View>
 
           <FormSelect control={form.control} name="site" label="Site" icon={ICONS.location} options={SITES} placeholder="Choose a site" />
           <FormSelect

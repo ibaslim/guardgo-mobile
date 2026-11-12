@@ -12,6 +12,7 @@ import { PasswordField, type PasswordFieldProps } from '@/components/ui/password
 import { Select, type SelectProps, type SelectValue } from '@/components/ui/select';
 import { TimePickerField, type TimePickerFieldProps } from '@/components/ui/time-picker-field';
 import { TextField, type TextFieldProps } from '@/components/ui/text-field';
+import { WheelDateField, type WheelDateFieldProps } from '@/components/ui/wheel-date-field';
 import { WheelTimePickerField, type WheelTimePickerFieldProps } from '@/components/ui/wheel-time-picker-field';
 
 type ControlProps<T extends FieldValues, N extends FieldPath<T>> = {
@@ -62,6 +63,16 @@ export function FormDateField<T extends FieldValues, N extends FieldPath<T>>({
 }: ControlProps<T, N> & Omit<DateFieldProps, Connected>) {
   const { value, onChange, onBlur, error } = useField({ control, name });
   return <DateField {...props} value={value ?? null} onChange={onChange} onBlur={onBlur} error={error} />;
+}
+
+/** Scrolling-wheel date picker, like the iPhone's. Same form value as `FormDateField`. */
+export function FormWheelDateField<T extends FieldValues, N extends FieldPath<T>>({
+  control,
+  name,
+  ...props
+}: ControlProps<T, N> & Omit<WheelDateFieldProps, Connected>) {
+  const { value, onChange, onBlur, error } = useField({ control, name });
+  return <WheelDateField {...props} value={value ?? null} onChange={onChange} onBlur={onBlur} error={error} />;
 }
 
 export function FormTimeField<T extends FieldValues, N extends FieldPath<T>>({

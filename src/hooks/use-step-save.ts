@@ -2,6 +2,8 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import type { FieldValues, UseFormGetFieldState, UseFormTrigger } from 'react-hook-form';
 
+import { toast } from '@/services/toast';
+
 type StepSaveOptions<TInput extends FieldValues, TOutput extends FieldValues> = {
   /** The form from `useApiForm`. */
   form: {
@@ -37,6 +39,7 @@ export function useStepSave<TInput extends FieldValues, TOutput extends FieldVal
 
   const submit = form.submit(async (values) => {
     await save(values);
+    toast.success('Changes saved.');
     router.back();
   });
 

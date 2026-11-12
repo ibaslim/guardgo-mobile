@@ -49,7 +49,8 @@
         {
           "locationWhenInUsePermission": "GuardGo uses your location to fill in the coordinates of a site you add."
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true,
