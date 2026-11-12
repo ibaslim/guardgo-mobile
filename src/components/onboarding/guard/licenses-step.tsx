@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { View } from 'react-native';
 import { useFieldArray, useWatch } from 'react-hook-form';
 
-import { FormDateField, FormSelect, FormTextField } from '@/components/form/form-fields';
+import { FormWheelDateField, FormSelect, FormTextField } from '@/components/form/form-fields';
 import { DocumentCard, ListError } from '@/components/onboarding/guard/document-card';
 import { FormDocumentFile } from '@/components/onboarding/guard/document-file-field';
 import type { GuardStepProps } from '@/components/onboarding/guard/guard-form';
@@ -69,14 +69,14 @@ function SecurityLicenseCard({ form, metadata, onUploading, index, onRemove }: C
         multiline
         returnKeyType="done"
       />
-      <FormDateField
+      <FormWheelDateField
         control={form.control}
         name={`security_licenses.${index}.issue_date`}
         label="Issue date"
         placeholder="Select date"
         maximumDate={new Date()}
       />
-      <FormDateField
+      <FormWheelDateField
         control={form.control}
         name={`security_licenses.${index}.expiry_date`}
         label="Expiry date"
@@ -144,7 +144,7 @@ function PoliceClearanceCard({ form, metadata, onUploading, index, onRemove }: C
         disabled={!province}
         placeholder="Choose a city"
       />
-      <FormDateField
+      <FormWheelDateField
         control={form.control}
         name={`police_clearances.${index}.issue_date`}
         label="Issue date"

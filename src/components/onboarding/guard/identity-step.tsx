@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { useWatch } from 'react-hook-form';
 
-import { FormDateField, FormSelect, FormTextField } from '@/components/form/form-fields';
+import { FormWheelDateField, FormSelect, FormTextField } from '@/components/form/form-fields';
 import { DocumentCard, ListError } from '@/components/onboarding/guard/document-card';
 import { FormDocumentFile } from '@/components/onboarding/guard/document-file-field';
 import type { GuardStepProps } from '@/components/onboarding/guard/guard-form';
@@ -62,7 +62,7 @@ function IdentityCard({ form, metadata, onUploading, index }: GuardStepProps & {
         />
       ) : null}
       {requiresExpiry ? (
-        <FormDateField
+        <FormWheelDateField
           control={form.control}
           name={`identification.${index}.expiry_date`}
           label="Expiry date"
