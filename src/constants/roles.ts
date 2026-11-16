@@ -92,7 +92,7 @@ export const AREA_CONFIGS: Readonly<Record<RoleArea, AreaConfig>> = {
     focus: { title: 'Open requests', empty: 'No open requests. Requests you create show their staffing status here.' },
     tabs: [
       homeTab('Open requests and recent activity.'),
-      { name: 'requests', title: 'Requests', icon: { sf: 'tray.full', md: 'assignment' }, description: 'Create guard requests and track who is assigned.' },
+      { name: 'requests', title: 'Jobs', icon: { sf: 'tray.full', md: 'assignment' }, description: 'Create guard jobs and track who is assigned.' },
       { name: 'notifications', title: 'Alerts', icon: { sf: 'bell', md: 'notifications' }, description: 'Updates about your requests and sites.' },
       accountTab,
     ],
@@ -103,7 +103,7 @@ export const AREA_CONFIGS: Readonly<Record<RoleArea, AreaConfig>> = {
     focus: { title: 'Requests to staff', empty: 'Nothing to staff right now. New requests for your guards appear here.' },
     tabs: [
       homeTab('Requests to staff and guard activity.'),
-      { name: 'requests', title: 'Requests', icon: { sf: 'tray.full', md: 'assignment' }, description: 'Requests sent to your company and their assignments.' },
+      { name: 'requests', title: 'Jobs', icon: { sf: 'tray.full', md: 'assignment' }, description: 'Jobs sent to your company and their assignments.' },
       { name: 'guards', title: 'Guards', icon: { sf: 'person.2', md: 'groups' }, description: 'Guards in your company and their availability.' },
       { name: 'invoices', title: 'Invoices', icon: { sf: 'doc.text', md: 'receipt_long' }, description: 'Payouts for completed work.' },
       { name: 'notifications', title: 'Alerts', icon: { sf: 'bell', md: 'notifications' }, description: 'Updates about your requests, guards and invoices.' },
