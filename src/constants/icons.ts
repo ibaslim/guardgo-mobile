@@ -9,6 +9,7 @@ export const ICONS = {
   user: { sf: 'person', md: 'person' },
   lock: { sf: 'lock', md: 'lock' },
   mail: { sf: 'envelope', md: 'mail' },
+  phone: { sf: 'phone', md: 'call' },
   mailUnread: { sf: 'envelope.badge', md: 'mark_email_unread' },
   location: { sf: 'mappin.and.ellipse', md: 'location_on' },
   note: { sf: 'text.alignleft', md: 'notes' },

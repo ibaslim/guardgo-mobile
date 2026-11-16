@@ -1,5 +1,6 @@
 import { ENDPOINTS } from '@/constants/endpoints';
-import { api, ApiError } from '@/services/api';
+import { api, ApiError, getAccessToken, getApiUrl } from '@/services/api';
+import { formatPhone } from '@/utils/phone';
 
 export const GUARDS_PAGE_SIZE = 20;
 
@@ -14,6 +15,8 @@ export type ProviderGuard = {
   status: string;
   invite: InviteState | null;
   inviteExpiresAt: Date | null;
+  /** Phone number when the server sends one, already formatted. */
+  phone: string;
 };
 
 export type ProviderGuardsPage = {
@@ -30,6 +33,8 @@ type RawGuard = {
   status?: string | null;
   invite_status?: string | null;
   invite_expires_at?: string | null;
+  phone?: string | null;
+  mobile_phone?: string | null;
 };
 
 type RawPage = {
@@ -54,19 +59,38 @@ function parseGuard(raw: RawGuard): ProviderGuard {
     status: String(raw.status ?? '').trim().toLowerCase(),
     invite: INVITE_STATES.includes(String(raw.invite_status)) ? (raw.invite_status as InviteState) : null,
     inviteExpiresAt: expiry && !Number.isNaN(expiry.getTime()) ? expiry : null,
+    phone: formatPhone(raw.phone ?? raw.mobile_phone),
   };
 }
 
-export async function listProviderGuards(page: number): Promise<ProviderGuardsPage> {
-  const response = await api.get<RawPage>(ENDPOINTS.providerGuards.list, {
-    query: { page, rows: GUARDS_PAGE_SIZE },
-  });
+/** Which guards the server returns: those with this one tenant `status`, or all of them when left out. */
+export type GuardsQuery = { status?: GuardStatus; rows?: number };
+
+/** The tenant statuses the server knows. */
+export type GuardStatus = 'onboarding' | 'pending_verification' | 'pending_activation' | 'active' | 'inactive' | 'banned';
+
+function toPage(response: RawPage, page: number): ProviderGuardsPage {
   return {
     items: (response.items ?? []).map(parseGuard).filter((guard) => guard.id),
     page: response.pagination?.page ?? page,
     totalPages: response.pagination?.total_pages ?? 1,
     totalItems: response.pagination?.total_items ?? 0,
   };
+}
+
+export async function listProviderGuards(page: number, filter: GuardsQuery = {}): Promise<ProviderGuardsPage> {
+  const response = await api.get<RawPage>(ENDPOINTS.providerGuards.list, {
+    query: { page, rows: filter.rows ?? GUARDS_PAGE_SIZE, status: filter.status },
+  });
+  return toPage(response, page);
+}
+
+/** Guards whose name or email contains `keyword` (case-insensitive), whatever their status. */
+export async function searchProviderGuards(page: number, keyword: string): Promise<ProviderGuardsPage> {
+  const response = await api.get<RawPage>(ENDPOINTS.providerGuards.search, {
+    query: { keyword: keyword.trim(), page, rows: GUARDS_PAGE_SIZE },
+  });
+  return toPage(response, page);
 }
 
 /** Emails the guard a link to set their password. The server answers 400 when the email is already used. */
@@ -130,6 +154,21 @@ export function approveGuard(guardId: string) {
   return api.post<{ message?: string }>(`${ENDPOINTS.providerGuards.list}/${guardId}/status-request`, {
     action: 'activate',
   });
+}
+
+/** Deactivates a guard. The server requires a reason, which it keeps in the activity log. */
+export function deactivateGuard(guardId: string, reason: string) {
+  return api.post<{ message?: string }>(`${ENDPOINTS.providerGuards.list}/${guardId}/status-request`, {
+    action: 'deactivate',
+    reason: reason.trim(),
+  });
+}
+
+/** A guard's profile photo, with the cookie the image route checks (the app signs in with a bearer token). */
+export function guardPhoto(guardId: string): { uri: string; headers: Record<string, string> } | null {
+  const token = getAccessToken();
+  if (!token) return null;
+  return { uri: `${getApiUrl()}${ENDPOINTS.tenant.imageFile}/${guardId}`, headers: { Cookie: `access_token=${token}` } };
 }
 
 /** A readable reason for a failed guards request. */

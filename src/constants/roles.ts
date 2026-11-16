@@ -104,7 +104,7 @@ export const AREA_CONFIGS: Readonly<Record<RoleArea, AreaConfig>> = {
     tabs: [
       homeTab('Requests to staff and guard activity.'),
       { name: 'requests', title: 'Requests', icon: { sf: 'tray.full', md: 'assignment' }, description: 'Requests sent to your company and their assignments.' },
-      { name: 'guards', title: 'My guards', icon: { sf: 'person.2', md: 'groups' }, description: 'Guards in your company and their availability.' },
+      { name: 'guards', title: 'Guards', icon: { sf: 'person.2', md: 'groups' }, description: 'Guards in your company and their availability.' },
       { name: 'invoices', title: 'Invoices', icon: { sf: 'doc.text', md: 'receipt_long' }, description: 'Payouts for completed work.' },
       accountTab,
     ],

@@ -2,21 +2,26 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 
+import { ActiveGuardCard } from '@/components/provider/active-guard-card';
+import { DeactivateGuardSheet } from '@/components/provider/deactivate-guard-sheet';
 import { GuardReviewCard } from '@/components/provider/guard-review-card';
 import { InviteGuardSheet } from '@/components/provider/invite-guard-sheet';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { FilterPills } from '@/components/ui/filter-pills';
 import { ListGroup, ListRow } from '@/components/ui/list';
+import { SearchBar } from '@/components/ui/search-bar';
 import { TabScreen } from '@/components/ui/tab-screen';
+import { Tabs } from '@/components/ui/tabs';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
+import { useGuardSearch } from '@/hooks/use-guard-search';
 import {
   approveGuard,
   deleteExpiredInvite,
   guardsErrorMessage,
   listProviderGuards,
+  type GuardsQuery,
   type InviteState,
   type ProviderGuard,
   type ProviderGuardsPage,
@@ -30,33 +35,35 @@ const INVITE_LABELS: Record<InviteState, string> = {
   accepted: 'Joined',
 };
 
-type Filter = 'pending' | 'joined' | 'review';
+type Filter = 'active' | 'pending' | 'joined' | 'review' | 'inactive' | 'banned';
 
 const FILTERS: readonly { value: Filter; label: string }[] = [
+  { value: 'active', label: 'Active' },
   { value: 'pending', label: 'Pending' },
   { value: 'joined', label: 'Joined' },
   { value: 'review', label: 'In review' },
+  { value: 'inactive', label: 'Inactive' },
+  { value: 'banned', label: 'Banned' },
 ];
 
 const EMPTY_FILTERED: Record<Filter, string> = {
-  pending: 'No pending invites. Invite a guard with their email address.',
-  joined: 'No guards have joined yet.',
+  active: 'No active guards yet. Approved guards show up here.',
+  pending: 'No guards are waiting to verify. Invite a guard with their email address.',
+  joined: 'No guards are setting up their profile right now.',
   review: 'No guards are waiting for approval.',
+  inactive: 'No inactive guards.',
+  banned: 'No banned guards.',
 };
 
-/** A guard who finished onboarding and waits for an admin to approve their profile. */
-const inReview = (guard: ProviderGuard) => guard.status.replace(/_/g, ' ') === 'pending activation';
-
-/**
- * Pending: invites not accepted yet, including expired ones (so they can be deleted).
- * In review: waiting for approval. Joined: everyone else who accepted, including guards still onboarding.
- */
-function matches(guard: ProviderGuard, filter: Filter) {
-  const invited = guard.invite === 'pending' || guard.invite === 'expired';
-  if (filter === 'pending') return invited;
-  if (invited) return false;
-  return filter === 'review' ? inReview(guard) : !inReview(guard);
-}
+/** The one `status` each tab asks the server for, so a long list is paged by status and never loaded whole. */
+const QUERIES: Record<Filter, GuardsQuery> = {
+  active: { status: 'active' },
+  pending: { status: 'pending_verification' },
+  joined: { status: 'onboarding' },
+  review: { status: 'pending_activation' },
+  inactive: { status: 'inactive' },
+  banned: { status: 'banned' },
+};
 
 // A guard who is still onboarding is shown by email only: their name is not final yet.
 const showsName = (guard: ProviderGuard) => Boolean(guard.name) && guard.status !== 'onboarding';
@@ -77,35 +84,61 @@ function badgeFor(guard: ProviderGuard) {
   return { label: guard.status || 'unknown', kind: undefined };
 }
 
-/** The provider's guards: who was invited, who joined, and invites that ran out. */
+const LOAD_ERROR = "Couldn't load your guards. Pull down to try again.";
+
+/** The provider's guards: who was invited, who joined, who is active, and invites that ran out. */
 export default function ProviderGuardsScreen() {
-  const [data, setData] = useState<ProviderGuardsPage | null>(null);
+  // One page list per tab, each fetched from the server by status when the tab is first opened.
+  const [pages, setPages] = useState<Partial<Record<Filter, ProviderGuardsPage>>>({});
+  const [reviewTotal, setReviewTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<Filter>('pending');
+  const [filter, setFilter] = useState<Filter>('active');
+  const [query, setQuery] = useState('');
+  const search = useGuardSearch(query);
+  // While the search box holds text, one list of matches replaces the tabs.
+  const showTabs = !search.searching;
+  const [deactivating, setDeactivating] = useState<ProviderGuard | null>(null);
+  const [deactivateOpen, setDeactivateOpen] = useState(false);
 
-  const load = useCallback(async () => {
-    try {
-      setData(await listProviderGuards(1));
-      setError(null);
-    } catch (failure) {
-      setError(guardsErrorMessage(failure, "Couldn't load your guards. Pull down to try again."));
-    }
+  const data = pages[filter] ?? null;
+
+  /** Fetches the first page of one tab, and the review count with it. */
+  const fetchFirst = useCallback(async (which: Filter) => {
+    const [page, review] = await Promise.all([
+      listProviderGuards(1, QUERIES[which]),
+      which === 'review' ? null : listProviderGuards(1, { ...QUERIES.review, rows: 1 }),
+    ]);
+    return { which, page, reviewTotal: (review ?? page).totalItems };
   }, []);
 
-  // First load. Later reloads (pull to refresh, after an invite) go through `load`.
+  const apply = useCallback((result: { which: Filter; page: ProviderGuardsPage; reviewTotal: number }) => {
+    setPages((current) => ({ ...current, [result.which]: result.page }));
+    setReviewTotal(result.reviewTotal);
+    setError(null);
+  }, []);
+
+  const load = useCallback(
+    (which: Filter) =>
+      fetchFirst(which).then(apply, (failure) => setError(guardsErrorMessage(failure, LOAD_ERROR))),
+    [fetchFirst, apply]
+  );
+
+  // Opening a tab for the first time fetches it. Tabs already loaded keep their pages.
+  const loaded = Boolean(pages[filter]);
   useEffect(() => {
+    if (loaded) return;
     let active = true;
-    listProviderGuards(1)
-      .then((page) => active && setData(page))
-      .catch((failure) => active && setError(guardsErrorMessage(failure, "Couldn't load your guards. Pull down to try again.")));
+    fetchFirst(filter)
+      .then((result) => active && apply(result))
+      .catch((failure) => active && setError(guardsErrorMessage(failure, LOAD_ERROR)));
     return () => {
       active = false;
     };
-  }, []);
+  }, [filter, loaded, fetchFirst, apply]);
 
   // Coming back from a guard's details: show what changed. The first focus is the first load above.
   const firstFocus = useRef(true);
@@ -115,28 +148,29 @@ export default function ProviderGuardsScreen() {
         firstFocus.current = false;
         return;
       }
-      load();
-    }, [load])
+      setPages({});
+    }, [])
   );
 
   const refresh = async () => {
     setRefreshing(true);
-    await load();
+    setPages({});
+    await load(filter);
     setRefreshing(false);
   };
 
-  const loadMore = async () => {
+  const loadMore = useCallback(async () => {
     if (!data || loadingMore || data.page >= data.totalPages) return;
     setLoadingMore(true);
     try {
-      const next = await listProviderGuards(data.page + 1);
-      setData({ ...next, items: [...data.items, ...next.items] });
+      const next = await listProviderGuards(data.page + 1, QUERIES[filter]);
+      setPages((current) => ({ ...current, [filter]: { ...next, items: [...data.items, ...next.items] } }));
     } catch (failure) {
       toast.failure(guardsErrorMessage(failure, "Couldn't load more guards."));
     } finally {
       setLoadingMore(false);
     }
-  };
+  }, [data, filter, loadingMore]);
 
   /** What the confirmation dialog is asking about. Kept after it closes so the text doesn't blank during the fade. */
   const [ask, setAsk] = useState<{ kind: 'approve' | 'delete'; guard: ProviderGuard } | null>(null);
@@ -146,13 +180,18 @@ export default function ProviderGuardsScreen() {
     setAskOpen(true);
   };
 
+  const reloadAll = async () => {
+    setPages({});
+    await load(filter);
+  };
+
   const approve = async (guard: ProviderGuard) => {
     const who = guard.name || guard.email;
     setBusyId(guard.id);
     try {
       await approveGuard(guard.id);
       toast.success(`${who} approved.`);
-      await load();
+      await reloadAll();
     } catch (failure) {
       // The server refuses until the work area and weekly availability are set; its message says which.
       toast.failure(guardsErrorMessage(failure, "Couldn't approve this guard."));
@@ -166,7 +205,7 @@ export default function ProviderGuardsScreen() {
     try {
       await deleteExpiredInvite(guard.id);
       toast.success('Expired invite deleted.');
-      await load();
+      await reloadAll();
     } catch (failure) {
       toast.failure(guardsErrorMessage(failure, "Couldn't delete the invite."));
     } finally {
@@ -174,35 +213,41 @@ export default function ProviderGuardsScreen() {
     }
   };
 
-  // Only the review pill shows a count: those are the guards waiting on an admin.
-  const reviewCount = (data?.items ?? []).filter((guard) => matches(guard, 'review')).length;
-  const filters = FILTERS.map((item) => (item.value === 'review' ? { ...item, count: reviewCount } : item));
+  // Only the review tab shows a count: those are the guards waiting on an admin.
+  const filters = FILTERS.map((item) => (item.value === 'review' ? { ...item, count: reviewTotal } : item));
 
-  const guards = (data?.items ?? []).filter((guard) => matches(guard, filter));
+  const guards = data?.items ?? [];
 
   return (
     <TabScreen
-      title="My guards"
-      subtitle="Invite guards to your company"
+      title="Guards"
+      hideHeader
       refreshing={refreshing}
-      onRefresh={refresh}>
-      <Button title="Invite a guard" icon={ICONS.mail} onPress={() => setInviteOpen(true)} />
+      onRefresh={refresh}
+      onEndReached={showTabs ? loadMore : search.loadMore}>
+      <View className="h-2" />
+      <View className="flex-row items-center gap-1.5">
+        <View className="min-w-0 flex-1">
+          <SearchBar value={query} onChangeText={setQuery} placeholder="Search guards" />
+        </View>
+        <Button title="Invite" size="md" pill onPress={() => setInviteOpen(true)} />
+      </View>
 
-      <FilterPills options={filters} value={filter} onChange={setFilter} />
+      {showTabs ? <Tabs scrollable bleed={20} options={filters} value={filter} onChange={setFilter} /> : null}
 
-      {error ? (
+      {showTabs && error ? (
         <Text tone="danger" accessibilityRole="alert">
           {error}
         </Text>
       ) : null}
 
-      {data === null && !error ? (
+      {showTabs && data === null && !error ? (
         <View className="items-center py-10" accessibilityLiveRegion="polite">
           <ActivityIndicator colorClassName="accent-primary" />
         </View>
       ) : null}
 
-      {data !== null && guards.length === 0 ? (
+      {showTabs && data !== null && guards.length === 0 ? (
         <View className="rounded-xl border border-dashed border-border bg-surface-muted p-5">
           <Text tone="secondary">
             {EMPTY_FILTERED[filter]}
@@ -210,7 +255,7 @@ export default function ProviderGuardsScreen() {
         </View>
       ) : null}
 
-      {guards.length > 0 && filter === 'review' ? (
+      {showTabs && guards.length > 0 && filter === 'review' ? (
         <View className="gap-3">
           {guards.map((guard) => (
             <GuardReviewCard
@@ -225,7 +270,27 @@ export default function ProviderGuardsScreen() {
         </View>
       ) : null}
 
-      {guards.length > 0 && filter !== 'review' ? (
+      {showTabs && guards.length > 0 && filter === 'active' ? (
+        <View className="gap-3">
+          {guards.map((guard) => (
+            <ActiveGuardCard
+              key={guard.id}
+              id={guard.id}
+              title={showsName(guard) ? guard.name : guard.email}
+              email={showsName(guard) ? guard.email : undefined}
+              phone={guard.phone}
+              busy={busyId === guard.id}
+              onDetails={() => router.push({ pathname: '/review-guard/[id]', params: { id: guard.id } })}
+              onDeactivate={() => {
+                setDeactivating(guard);
+                setDeactivateOpen(true);
+              }}
+            />
+          ))}
+        </View>
+      ) : null}
+
+      {showTabs && guards.length > 0 && filter !== 'review' && filter !== 'active' ? (
         <ListGroup>
           {guards.map((guard) => (
             <ListRow
@@ -252,8 +317,42 @@ export default function ProviderGuardsScreen() {
         </ListGroup>
       ) : null}
 
-      {data && data.page < data.totalPages ? (
-        <Button title="Load more" variant="secondary" loading={loadingMore} onPress={loadMore} />
+      {!showTabs && search.error ? (
+        <Text tone="danger" accessibilityRole="alert">
+          {search.error}
+        </Text>
+      ) : null}
+
+      {!showTabs && search.data === null && !search.error ? (
+        <View className="items-center py-10" accessibilityLiveRegion="polite">
+          <ActivityIndicator colorClassName="accent-primary" />
+        </View>
+      ) : null}
+
+      {!showTabs && search.data !== null && search.data.items.length === 0 ? (
+        <View className="rounded-xl border border-dashed border-border bg-surface-muted p-5">
+          <Text tone="secondary">{`No guards match "${query.trim()}". Search by name or email.`}</Text>
+        </View>
+      ) : null}
+
+      {!showTabs && search.data !== null && search.data.items.length > 0 ? (
+        <ListGroup>
+          {search.data.items.map((guard) => (
+            <ListRow
+              key={guard.id}
+              title={showsName(guard) ? guard.name : guard.email}
+              description={describe(guard)}
+              value={<Badge {...badgeFor(guard)} />}
+              onPress={() => router.push({ pathname: '/review-guard/[id]', params: { id: guard.id } })}
+            />
+          ))}
+        </ListGroup>
+      ) : null}
+
+      {(showTabs ? loadingMore : search.loadingMore) ? (
+        <View className="items-center py-4" accessibilityLiveRegion="polite">
+          <ActivityIndicator colorClassName="accent-primary" />
+        </View>
       ) : null}
 
       <ConfirmDialog
@@ -272,12 +371,24 @@ export default function ProviderGuardsScreen() {
         onConfirm={() => (ask ? (ask.kind === 'delete' ? removeInvite(ask.guard) : approve(ask.guard)) : undefined)}
       />
 
+      <DeactivateGuardSheet
+        visible={deactivateOpen}
+        onClose={() => setDeactivateOpen(false)}
+        guardId={deactivating?.id ?? ''}
+        guardName={deactivating ? deactivating.name || deactivating.email : ''}
+        onDeactivated={async () => {
+          setDeactivateOpen(false);
+          toast.success(`${deactivating?.name || deactivating?.email || 'Guard'} deactivated.`);
+          await reloadAll();
+        }}
+      />
+
       <InviteGuardSheet
         visible={inviteOpen}
         onClose={() => setInviteOpen(false)}
         onInvited={async (email) => {
           setInviteOpen(false);
-          // Switch to Pending so a filter can't hide the new invite, then fetch the list from the server.
+          // Switch to Pending so a tab can't hide the new invite, then fetch the list from the server.
           setFilter('pending');
           toast.success(`Invite sent to ${email}.`);
           await refresh();

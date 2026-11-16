@@ -16,10 +16,12 @@ export type TabScreenProps = {
   /** With `onRefresh`, pulling the list down reloads it. */
   refreshing?: boolean;
   onRefresh?: () => void;
+  /** Called when the user scrolls near the bottom, e.g. to load the next page of a list. */
+  onEndReached?: () => void;
 };
 
 /** Scrollable screen inside a tab bar, with a title block at the top. */
-export function TabScreen({ title, subtitle, header, hideHeader = false, children, refreshing = false, onRefresh }: TabScreenProps) {
+export function TabScreen({ title, subtitle, header, hideHeader = false, children, refreshing = false, onRefresh, onEndReached }: TabScreenProps) {
   // The tab bar floats over the screen, so the content keeps clear of it at the bottom.
   const tabBarHeight = useContext(BottomTabBarHeightContext) ?? 0;
 
@@ -27,6 +29,14 @@ export function TabScreen({ title, subtitle, header, hideHeader = false, childre
     <Screen edges={['top']}>
       {/* "automatic" keeps content clear of the iOS tab bar, which floats over the screen. */}
       <ScrollView
+        scrollEventThrottle={100}
+        onScroll={
+          onEndReached
+            ? ({ nativeEvent: { contentOffset, contentSize, layoutMeasurement } }) => {
+                if (contentOffset.y + layoutMeasurement.height >= contentSize.height - 400) onEndReached();
+              }
+            : undefined
+        }
         contentInsetAdjustmentBehavior="automatic"
         contentContainerClassName="gap-4 px-5 pt-0"
         contentContainerStyle={{ paddingBottom: tabBarHeight + 24 }}
