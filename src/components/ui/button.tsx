@@ -68,6 +68,8 @@ export type ButtonProps = Omit<PressableProps, 'children' | 'className'> & {
   /** Shown before the title. */
   icon?: SymbolIcon;
   loading?: boolean;
+  /** Fully rounded ends, instead of the size's usual corner radius. */
+  pill?: boolean;
   /** Positions the button (margins, flex, alignment). */
   className?: string;
 };
@@ -78,6 +80,7 @@ export function Button({
   size = 'md',
   icon,
   loading = false,
+  pill = false,
   disabled,
   className,
   style,
@@ -105,7 +108,7 @@ export function Button({
       scaleTo={variant === 'link' ? 1 : 0.97}
       style={[depth, typeof style === 'function' ? undefined : style]}
       contentClassName={`flex-row items-center justify-center ${
-        variant === 'link' ? 'min-h-10 gap-1.5 rounded-[10px] px-2' : sizing.container
+        variant === 'link' ? 'min-h-10 gap-1.5 rounded-[10px] px-2' : pill ? sizing.container.replace(/rounded-\S+/, 'rounded-full') : sizing.container
       } ${look.container} ${looksDisabled && variant === 'link' ? 'opacity-50' : ''}`}
       {...rest}>
       {loading ? (
