@@ -1,5 +1,5 @@
-import { AreaHomeScreen } from '@/components/screens/area-home-screen';
+import { GuardDashboardScreen } from '@/components/dashboard/guard-dashboard';
 
 export default function GuardHomeScreen() {
-  return <AreaHomeScreen area="guard" />;
+  return <GuardDashboardScreen />;
 }

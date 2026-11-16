@@ -1,5 +1,5 @@
-import { AreaHomeScreen } from '@/components/screens/area-home-screen';
+import { ClientDashboardScreen } from '@/components/dashboard/client-dashboard';
 
 export default function ClientHomeScreen() {
-  return <AreaHomeScreen area="client" />;
+  return <ClientDashboardScreen />;
 }
