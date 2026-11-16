@@ -24,7 +24,8 @@ const MAKE_ROOM = LinearTransition.duration(MOVE_MS).easing(EASE);
 
 /** Space between the capsule edge and the tabs (p-1.5). The pill's top edge sits here. */
 const DOCK_PADDING = 6;
-const TAB_HEIGHT = 48;
+/** h-9: keep in step with the tabs' height class below. */
+const TAB_HEIGHT = 36;
 /** The selected icon turns white once the pill has mostly arrived under it, not before. */
 const RECOLOR_DELAY_MS = 100;
 
@@ -93,7 +94,7 @@ export function TabDock({ state, descriptors, emitter, navigateToTab, insets, ta
       // box-none: touches in the gaps beside the capsule reach the screen underneath.
       pointerEvents="box-none"
       onLayout={(event) => reportHeight?.(event.nativeEvent.layout.height)}
-      className="px-4 pt-2"
+      className="px-2 pt-2"
       style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingBottom: insets.bottom + 8 }}>
       <View className="rounded-[32px] border border-border bg-surface" style={dockShadow}>
         {/* No border on this view, so the tabs' measured positions are the pill's positions. */}
@@ -128,8 +129,8 @@ export function TabDock({ state, descriptors, emitter, navigateToTab, insets, ta
                   hitSlop={4}
                   onPress={onPress}
                   onLongPress={() => emitter.emit({ type: 'tabLongPress', target: route.key })}
-                  className={`h-12 flex-row items-center justify-center gap-2 rounded-full active:opacity-80 ${
-                    focused ? 'px-4' : 'w-12'
+                  className={`h-9 flex-row items-center justify-center gap-1 rounded-full active:opacity-80 ${
+                    focused ? 'pl-1.5 pr-2' : 'w-10'
                   }`}>
                   <Icon
                     icon={tab.icon}
@@ -140,7 +141,7 @@ export function TabDock({ state, descriptors, emitter, navigateToTab, insets, ta
                     <Animated.View
                       entering={reduceMotion ? undefined : FadeIn.duration(160).delay(60)}
                       exiting={reduceMotion ? undefined : FadeOut.duration(70)}>
-                      <Text variant="label" tone="inherit" numberOfLines={1} className="font-sans-semibold text-[14px] text-on-primary">
+                      <Text variant="small" tone="inherit" numberOfLines={1} className="text-[14px] text-on-primary">
                         {title}
                       </Text>
                     </Animated.View>
