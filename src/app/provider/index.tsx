@@ -1,5 +1,5 @@
-import { AreaHomeScreen } from '@/components/screens/area-home-screen';
+import { ProviderDashboardScreen } from '@/components/dashboard/provider-dashboard';
 
 export default function ProviderHomeScreen() {
-  return <AreaHomeScreen area="provider" />;
+  return <ProviderDashboardScreen />;
 }

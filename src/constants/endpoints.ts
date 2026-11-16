@@ -41,6 +41,12 @@ export const ENDPOINTS = {
      */
     list: '/api/requests',
   },
+  /** Lists the provider dashboard summarises: assignments, shifts and payout invoices. */
+  dashboard: {
+    jobs: '/api/jobs',
+    shifts: '/api/shifts',
+    invoices: '/api/my-invoices',
+  },
   /** Guards owned by the signed-in service provider. */
   providerGuards: {
     list: '/api/sp/guards',
