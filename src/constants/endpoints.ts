@@ -41,6 +41,16 @@ export const ENDPOINTS = {
      */
     list: '/api/requests',
   },
+  /** In-app notifications for the signed-in user. Under it: /latest, /unread-count, PATCH /read-all, PATCH /<id>/read. */
+  notifications: {
+    list: '/api/notifications',
+    unreadCount: '/api/notifications/unread-count',
+    readAll: '/api/notifications/read-all',
+  },
+  /** Jobs offered to, or taken by, the signed-in guard or provider. GET <path>/<id> is one job; PATCH <path>/<id>/status answers or moves it on. */
+  jobs: {
+    list: '/api/jobs',
+  },
   /** Lists the provider dashboard summarises: assignments, shifts and payout invoices. */
   dashboard: {
     jobs: '/api/jobs',
