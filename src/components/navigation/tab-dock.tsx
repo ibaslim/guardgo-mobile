@@ -1,7 +1,8 @@
 import { BottomTabBarHeightCallbackContext, type BottomTabBarProps } from 'expo-router/build/layouts/Tabs';
 import { useContext, useEffect, useState } from 'react';
-import { Pressable, View, type LayoutChangeEvent } from 'react-native';
+import { AppState, Pressable, View, type LayoutChangeEvent } from 'react-native';
 import Animated, {
+  cancelAnimation,
   Easing,
   FadeIn,
   FadeOut,
@@ -9,12 +10,16 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
+  withRepeat,
+  withSequence,
   withTiming,
 } from 'react-native-reanimated';
 import { useCSSVariable } from 'uniwind';
 
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
+import { useUnreadCount } from '@/hooks/use-unread-count';
+import { fetchUnreadCount } from '@/services/notifications';
 import type { AreaTab } from '@/types/roles';
 
 const EASE = Easing.out(Easing.cubic);
@@ -28,6 +33,34 @@ const DOCK_PADDING = 6;
 const TAB_HEIGHT = 36;
 /** The selected icon turns white once the pill has mostly arrived under it, not before. */
 const RECOLOR_DELAY_MS = 100;
+
+/** A small red dot that fades in and out. It stays solid when the person has reduced motion on. */
+function UnreadDot() {
+  const reduceMotion = useReducedMotion();
+  const opacity = useSharedValue(1);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      opacity.set(1);
+      return;
+    }
+    opacity.set(
+      withRepeat(withSequence(withTiming(0.2, { duration: 600 }), withTiming(1, { duration: 600 })), -1, false)
+    );
+    return () => cancelAnimation(opacity);
+  }, [reduceMotion, opacity]);
+
+  const blink = useAnimatedStyle(() => ({ opacity: opacity.get() }));
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      accessible={false}
+      className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full border border-surface bg-badge-danger"
+      style={blink}
+    />
+  );
+}
 
 type TabDockProps = BottomTabBarProps & {
   /** The area's tabs (constants/roles.ts), matched to the routes by name. */
@@ -45,6 +78,22 @@ type TabDockProps = BottomTabBarProps & {
  */
 export function TabDock({ state, descriptors, emitter, navigateToTab, insets, tabs }: TabDockProps) {
   const reduceMotion = useReducedMotion();
+  const unread = useUnreadCount();
+  const hasAlerts = tabs.some((tab) => tab.name === 'notifications');
+
+  // Keep the Alerts badge current: on arrival, on every tab change, and when the app returns to the foreground.
+  useEffect(() => {
+    if (!hasAlerts) return;
+    const refresh = () => {
+      fetchUnreadCount().catch(() => undefined);
+    };
+    refresh();
+    const subscription = AppState.addEventListener('change', (next) => {
+      if (next === 'active') refresh();
+    });
+    return () => subscription.remove();
+  }, [hasAlerts, state.index]);
+
   const reportHeight = useContext(BottomTabBarHeightCallbackContext);
   const [shadow, glow, highlight, primary] = useCSSVariable([
     '--color-overlay',
@@ -132,11 +181,15 @@ export function TabDock({ state, descriptors, emitter, navigateToTab, insets, ta
                   className={`h-9 flex-row items-center justify-center gap-1 rounded-full active:opacity-80 ${
                     focused ? 'pl-1.5 pr-2' : 'w-10'
                   }`}>
-                  <Icon
-                    icon={tab.icon}
-                    size={22}
-                    colorVar={looksSelected === index ? '--color-on-primary' : '--color-content-muted'}
-                  />
+                  <View>
+                    <Icon
+                      icon={tab.icon}
+                      size={22}
+                      colorVar={looksSelected === index ? '--color-on-primary' : '--color-content-muted'}
+                    />
+                    {/* Unread alerts: a blinking dot on the Alerts icon while that tab is not the open one. */}
+                    {tab.name === 'notifications' && unread > 0 && !focused ? <UnreadDot /> : null}
+                  </View>
                   {focused ? (
                     <Animated.View
                       entering={reduceMotion ? undefined : FadeIn.duration(160).delay(60)}

@@ -1,5 +1,5 @@
-import { PlaceholderScreen } from '@/components/screens/placeholder-screen';
+import { NotificationsScreen } from '@/components/notifications/notifications-screen';
 
-export default function ProviderNotificationsScreen() {
-  return <PlaceholderScreen area="provider" tab="notifications" />;
+export default function NotificationsTab() {
+  return <NotificationsScreen />;
 }

@@ -84,6 +84,7 @@ export const AREA_CONFIGS: Readonly<Record<RoleArea, AreaConfig>> = {
       { name: 'jobs', title: 'Jobs', icon: { sf: 'briefcase', md: 'work' }, description: 'Jobs offered and assigned to you.' },
       { name: 'leaves', title: 'Leaves', icon: { sf: 'calendar', md: 'event_busy' }, description: 'Request time off and see its status.' },
       { name: 'invoices', title: 'Invoices', icon: { sf: 'doc.text', md: 'receipt_long' }, description: 'Payouts for completed shifts.' },
+      { name: 'notifications', title: 'Alerts', icon: { sf: 'bell', md: 'notifications' }, description: 'New job offers and updates about your jobs.' },
       accountTab,
     ],
   },
