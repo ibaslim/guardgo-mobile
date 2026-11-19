@@ -10,6 +10,7 @@ import {
   type NotificationsPage,
 } from '@/services/notifications';
 import { getUnreadCount, setUnreadCount } from '@/services/unread-count';
+import { useRealtimeRefresh, useScreenFocused } from '@/hooks/use-realtime';
 import { toast } from '@/services/toast';
 
 const LOAD_ERROR = "Couldn't load your alerts. Pull down to try again.";
@@ -46,6 +47,9 @@ export function useNotifications(filter: NotificationFilter) {
 
   const reload = useCallback(() => setReloads((count) => count + 1), []);
 
+  // A new or changed alert (here or on another device) refreshes the list.
+  const focused = useScreenFocused();
+  useRealtimeRefresh(reload, { active: focused });
 
   // Coming back to the screen: show what arrived meanwhile. The first focus is the first load above.
   const firstFocus = useRef(true);

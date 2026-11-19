@@ -1,6 +1,7 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 
+import { useRealtimeRefresh, useScreenFocused } from '@/hooks/use-realtime';
 import { dashboardErrorMessage } from '@/services/dashboard-data';
 
 /**
@@ -31,6 +32,12 @@ export function useDashboard<T>(load: () => Promise<T>) {
       run();
     }, [run])
   );
+
+  // Offers and requests changing on the server (or, without Pusher, a 30-second poll: a load is six calls) refresh the figures.
+  const focused = useScreenFocused();
+  useRealtimeRefresh(() => {
+    run();
+  }, { sources: ['requests'], active: focused, pollMs: 30_000 });
 
   const refresh = useCallback(async () => {
     setRefreshing(true);

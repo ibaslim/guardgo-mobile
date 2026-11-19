@@ -41,6 +41,11 @@ export const ENDPOINTS = {
      */
     list: '/api/requests',
   },
+  /** Pusher Channels: GET returns the user's private channel name; POST <auth> signs a subscription to it (form-encoded socket_id and channel_name). */
+  pusher: {
+    channel: '/api/pusher/channel',
+    auth: '/api/pusher/auth',
+  },
   /** In-app notifications for the signed-in user. Under it: /latest, /unread-count, PATCH /read-all, PATCH /<id>/read. */
   notifications: {
     list: '/api/notifications',

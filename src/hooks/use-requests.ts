@@ -2,6 +2,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { listRequests, requestsErrorMessage, type RequestsPage } from '@/services/requests';
+import { useRealtimeRefresh, useScreenFocused } from '@/hooks/use-realtime';
 import { toast } from '@/services/toast';
 
 const SEARCH_DELAY_MS = 350;
@@ -53,6 +54,12 @@ export function useRequests(keyword: string) {
       load();
     }, [load])
   );
+
+  // A request or offer changed on the server (or, without Pusher, a 30-second poll) refreshes the list.
+  const focused = useScreenFocused();
+  useRealtimeRefresh(() => {
+    load();
+  }, { sources: ['requests'], active: focused, pollMs: 30_000 });
 
   const refresh = useCallback(async () => {
     setRefreshing(true);

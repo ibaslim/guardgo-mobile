@@ -4,10 +4,13 @@ import Animated, { FadeInDown, FadeOutDown, ReduceMotion } from 'react-native-re
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Toast } from '@/components/ui/toast';
+import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 import { getToast, hideToast, subscribeToast } from '@/services/toast';
 import type { ToastVariant } from '@/types/ui';
 
 const BOTTOM_GAP = 54;
+/** Space between the toast and the top of the keyboard. */
+const KEYBOARD_GAP = 32;
 const DURATION_MS: Record<ToastVariant, number> = { success: 1500, warning: 2000, failure: 2500 };
 
 /**
@@ -16,6 +19,7 @@ const DURATION_MS: Record<ToastVariant, number> = { success: 1500, warning: 2000
  */
 export function ToastHost() {
   const insets = useSafeAreaInsets();
+  const keyboardHeight = useKeyboardHeight();
   const current = useSyncExternalStore(subscribeToast, getToast, getToast);
   const id = current?.id;
   const variant = current?.variant;
@@ -33,7 +37,7 @@ export function ToastHost() {
       key={current.id}
       entering={FadeInDown.duration(220).reduceMotion(ReduceMotion.System)}
       exiting={FadeOutDown.duration(180).reduceMotion(ReduceMotion.System)}
-      style={{ position: 'absolute', left: 0, right: 0, bottom: insets.bottom + BOTTOM_GAP, alignItems: 'center', zIndex: 9999, elevation: 9999 }}
+      style={{ position: 'absolute', left: 0, right: 0, bottom: keyboardHeight > 0 ? keyboardHeight + KEYBOARD_GAP : insets.bottom + BOTTOM_GAP, alignItems: 'center', zIndex: 9999, elevation: 9999 }}
       pointerEvents="box-none">
       <Pressable accessibilityRole="button" accessibilityLabel="Dismiss message" onPress={() => hideToast(current.id)}>
         <Toast message={current.message} variant={current.variant} />

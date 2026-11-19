@@ -6,4 +6,7 @@
 export const env = {
   /** Server from .env, used until the user picks another one on the IP Config screen. */
   apiUrl: (process.env.EXPO_PUBLIC_API_URL ?? '').replace(/\/+$/, ''),
+  /** Public key and cluster of the Pusher Channels app (see the backend's docs/pusher-setup.md). Empty: polling only. */
+  pusherKey: (process.env.EXPO_PUBLIC_PUSHER_KEY ?? '').trim(),
+  pusherCluster: (process.env.EXPO_PUBLIC_PUSHER_CLUSTER ?? '').trim(),
 } as const;

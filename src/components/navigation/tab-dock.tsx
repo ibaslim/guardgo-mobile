@@ -18,6 +18,7 @@ import { useCSSVariable } from 'uniwind';
 
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
+import { useRealtimeRefresh } from '@/hooks/use-realtime';
 import { useUnreadCount } from '@/hooks/use-unread-count';
 import { fetchUnreadCount } from '@/services/notifications';
 import type { AreaTab } from '@/types/roles';
@@ -80,6 +81,15 @@ export function TabDock({ state, descriptors, emitter, navigateToTab, insets, ta
   const reduceMotion = useReducedMotion();
   const unread = useUnreadCount();
   const hasAlerts = tabs.some((tab) => tab.name === 'notifications');
+
+  // While not connected to Pusher, ask for the count every 10 seconds. With Pusher up, the root bridge
+  // (hooks/use-realtime-bridge.ts) updates it on each event, so only the polling is used here.
+  useRealtimeRefresh(
+    () => {
+      fetchUnreadCount().catch(() => undefined);
+    },
+    { active: hasAlerts, events: false }
+  );
 
   // Keep the Alerts badge current: on arrival, on every tab change, and when the app returns to the foreground.
   useEffect(() => {
