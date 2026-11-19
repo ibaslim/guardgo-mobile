@@ -4,7 +4,7 @@
  */
 import { Redirect } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Platform, ToastAndroid, View } from 'react-native';
 import { z } from 'zod';
 
 import { FormError } from '@/components/form/form-error';
@@ -26,6 +26,7 @@ import { ICONS } from '@/constants/icons';
 import { useApiForm } from '@/hooks/use-api-form';
 import { ApiError } from '@/services/api';
 import type { PickedImage } from '@/services/image-picker';
+import { toast } from '@/services/toast';
 
 const SITES = [
   { value: 'north-gate', label: 'North Gate', description: 'Main entrance, 24/7' },
@@ -53,6 +54,16 @@ const schema = z.object({
 });
 
 const VARIANTS: ButtonVariant[] = ['primary', 'secondary', 'info', 'outline', 'success', 'warning', 'danger', 'link'];
+
+/**
+ * Android's system toast is drawn by the OS, so it shows above the keyboard. iOS has no equivalent,
+ * so there it falls back to the in-app toast.
+ */
+function showSystemToast() {
+  const message = 'New job offer';
+  if (Platform.OS === 'android') ToastAndroid.showWithGravity(message, ToastAndroid.LONG, ToastAndroid.BOTTOM);
+  else toast.success(message);
+}
 
 export default function FormPreviewScreen() {
   const [avatar, setAvatar] = useState<PickedImage | null>(null);
@@ -87,6 +98,7 @@ export default function FormPreviewScreen() {
             <Button title="Disabled" disabled className="flex-1" />
             <Button title="Loading" loading className="flex-1" />
           </View>
+          <Button title="Show system toast" variant="info" onPress={showSystemToast} />
         </View>
 
         <View className="gap-4">

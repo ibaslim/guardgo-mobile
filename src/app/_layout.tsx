@@ -16,6 +16,7 @@ import { useUniwind } from 'uniwind';
 
 import { ToastHost } from '@/components/ui/toast-host';
 import { useNavigationTheme } from '@/hooks/use-navigation-theme';
+import { useRealtimeBridge } from '@/hooks/use-realtime-bridge';
 import { ONBOARDING_AREAS, ONBOARDING_ROUTES, ROLE_AREA_NAMES } from '@/constants/roles';
 import { HeaderBackButton } from '@/components/navigation/header-back-button';
 import { useAwaitingApproval, useIsLoggedIn, useNeedsOnboarding, useOnboardingArea, useRoleArea } from '@/hooks/use-session';
@@ -50,6 +51,9 @@ export default function RootLayout() {
 
   // Keep the session token fresh when the app returns from the background.
   useEffect(() => startSessionMonitor(), []);
+
+  // Live updates from Pusher for the signed-in session: connect after sign-in, disconnect at sign-out.
+  useRealtimeBridge(isLoggedIn);
 
   const ready = settingsLoaded && (fontsLoaded || fontError !== null);
 
