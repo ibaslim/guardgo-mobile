@@ -2,6 +2,8 @@ import { router, type Href } from 'expo-router';
 import { useMemo } from 'react';
 
 import { DashboardScreen, toneOf, type DashboardView } from '@/components/dashboard/dashboard-screen';
+import { ArrivalsBanner } from '@/components/requests/arrivals-banner';
+import { usePendingArrivals } from '@/hooks/use-pending-arrivals';
 import { useDashboard } from '@/hooks/use-dashboard';
 import { loadClientDashboard, type ClientDashboard, type DashboardRequest } from '@/services/client-dashboard';
 import { attentionOf, shiftStaffing, token, when } from '@/utils/dashboard';
@@ -96,5 +98,6 @@ function viewOf(data: ClientDashboard): DashboardView {
 export function ClientDashboardScreen() {
   const { data, error, refreshing, refresh } = useDashboard(loadClientDashboard);
   const view = useMemo(() => (data ? viewOf(data) : null), [data]);
-  return <DashboardScreen view={view} error={error} refreshing={refreshing} onRefresh={refresh} />;
+  const arrivals = usePendingArrivals();
+  return <DashboardScreen top={<ArrivalsBanner arrivals={arrivals} />} view={view} error={error} refreshing={refreshing} onRefresh={refresh} />;
 }

@@ -1,5 +1,6 @@
 import { ENDPOINTS } from '@/constants/endpoints';
 import { api, ApiError } from '@/services/api';
+import { parseServerTimestamp } from '@/utils/dates';
 
 export const REQUESTS_PAGE_SIZE = 20;
 
@@ -92,6 +93,7 @@ const MODES: readonly string[] = ['individual_only', 'service_provider_only', 'h
  * zone) and the server returns them as they were saved. Reading them without a zone shows the same
  * wall-clock time the client chose; a time that does carry a zone is honoured.
  */
+/** A time a person typed on the request (its start and end): wall-clock time, read as the phone's local time. */
 function parseDate(value: string | null | undefined) {
   if (!value) return null;
   const date = new Date(value);
@@ -120,8 +122,8 @@ function parseRequest(raw: RawRequest): RequestSummary {
     filled: Math.min(Math.max(filled, 0), required),
     start: parseDate(raw.requested_start_at),
     end: parseDate(raw.requested_end_at),
-    expiresAt: parseDate(raw.request_expires_at),
-    createdAt: parseDate(raw.created_at),
+    expiresAt: parseServerTimestamp(raw.request_expires_at),
+    createdAt: parseServerTimestamp(raw.created_at),
   };
 }
 
@@ -262,7 +264,7 @@ export async function listRequestWaves(requestId: string): Promise<RequestWave[]
       status: String(wave.wave_status ?? ''),
       offers: wave.offer_count ?? 0,
       accepted: wave.accepted_slots_at_close ?? 0,
-      expiresAt: parseDate(wave.wave_expires_at),
+      expiresAt: parseServerTimestamp(wave.wave_expires_at),
     }))
     .filter((wave) => wave.id)
     .sort((a, b) => b.number - a.number);

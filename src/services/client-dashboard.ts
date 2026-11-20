@@ -1,5 +1,6 @@
 import { ENDPOINTS } from '@/constants/endpoints';
 import { api } from '@/services/api';
+import { parseServerTimestamp } from '@/utils/dates';
 import {
   DASHBOARD_ROWS,
   jobStats,
@@ -89,13 +90,13 @@ function parseRequest(raw: Raw, committedSlots: number): DashboardRequest {
     siteName: raw.site_snapshot?.site_name || 'Site unavailable',
     accepted: toNumber(raw.accepted_slots),
     open: toNumber(raw.open_slots),
-    expiresAt: toDate(raw.request_expires_at),
-    updatedAt: toDate(raw.updated_at),
+    expiresAt: parseServerTimestamp(raw.request_expires_at),
+    updatedAt: parseServerTimestamp(raw.updated_at),
     charge: chargeOf(raw, committedSlots),
     invoiceNumber: raw.invoicing_snapshot?.latest_invoice_number || '',
     invoiceStatus: lower(raw.invoicing_snapshot?.invoice_status || raw.invoicing_snapshot?.billing_cycle),
     billingCycle: lower(raw.invoicing_snapshot?.billing_cycle),
-    invoicedAt: toDate(raw.invoicing_snapshot?.last_invoice_issued_at),
+    invoicedAt: parseServerTimestamp(raw.invoicing_snapshot?.last_invoice_issued_at),
   };
 }
 
