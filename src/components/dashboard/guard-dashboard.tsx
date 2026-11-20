@@ -10,6 +10,7 @@ import { badgeKindFor } from '@/utils/badge';
 import { formatMoney } from '@/utils/format';
 
 const go = (tab: string) => () => router.navigate(`/guard/${tab}` as Href);
+const openJob = (id: string) => () => router.push(`/job/${id}` as Href);
 
 function viewOf(data: GuardDashboard): DashboardView {
   const managed = data.managedBy !== null;
@@ -81,7 +82,7 @@ function viewOf(data: GuardDashboard): DashboardView {
           subtitle: `${job.siteName}${job.status === 'reconfirmation_required' ? ' · Reconfirm' : ''}`,
           meta: offerMeta(job, managed ? 'Payout managed by provider' : undefined),
           tone: within24Hours(job.dueAt) ? 'warning' : 'neutral',
-          onPress: go('jobs'),
+          onPress: openJob(job.id),
         })),
       },
       {
@@ -110,7 +111,7 @@ function viewOf(data: GuardDashboard): DashboardView {
           meta: `Updated ${when(job.updatedAt)}`,
           tone: toneOf(badgeKindFor(job.status)),
           badge: token(job.status),
-          onPress: go('jobs'),
+          onPress: openJob(job.id),
         })),
       },
       closing,

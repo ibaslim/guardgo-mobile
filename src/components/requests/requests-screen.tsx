@@ -25,6 +25,8 @@ export type RequestsScreenProps = {
   onOpen: (request: RequestSummary) => void;
   /** Above the filters, e.g. a "New request" button for a client. */
   action?: ReactNode;
+  /** Shown above the action and the list, e.g. a banner that needs the user right now. */
+  banner?: ReactNode;
   /** What to say when a group has nothing in it, per group. */
   empty?: Partial<Record<RequestGroup, string>>;
 };
@@ -39,7 +41,7 @@ const DEFAULT_EMPTY: Record<RequestGroup, string> = {
  * The list of requests with a search box and Live, Drafts and Done filters. A client, a guard and a
  * service provider all use it; each passes its own title, what a tap opens and an optional action.
  */
-export function RequestsScreen({ title, subtitle, onOpen, action, empty }: RequestsScreenProps) {
+export function RequestsScreen({ title, subtitle, onOpen, action, banner, empty }: RequestsScreenProps) {
   const [keyword, setKeyword] = useState('');
   const [group, setGroup] = useState<RequestGroup>('live');
   const { items, loading, hasMore, error, refreshing, loadingMore, refresh, loadMore } = useRequests(keyword);
@@ -49,6 +51,7 @@ export function RequestsScreen({ title, subtitle, onOpen, action, empty }: Reque
 
   return (
     <TabScreen title={title} subtitle={subtitle} refreshing={refreshing} onRefresh={refresh}>
+      {banner}
       {action}
 
       <TextField

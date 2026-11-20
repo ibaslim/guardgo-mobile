@@ -1,5 +1,6 @@
 import { ENDPOINTS } from '@/constants/endpoints';
 import { api, ApiError } from '@/services/api';
+import { parseServerTimestamp, parseWallClock } from '@/utils/dates';
 
 /**
  * Lists and figures shared by the home dashboards (provider, guard, client). They read the same
@@ -76,8 +77,8 @@ export function parseJob(raw: Raw): DashboardJob {
     status: lower(raw.assignment_status),
     assignee,
     hourlyPay: Number.isFinite(pay) ? pay : null,
-    dueAt: toDate(raw.response_due_at) ?? toDate(raw.reconfirmation_due_at),
-    updatedAt: toDate(raw.updated_at),
+    dueAt: parseServerTimestamp(raw.response_due_at) ?? parseServerTimestamp(raw.reconfirmation_due_at),
+    updatedAt: parseServerTimestamp(raw.updated_at),
   };
 }
 
@@ -88,11 +89,11 @@ function parseShift(raw: Raw): DashboardShift {
     siteName: raw.site_name || 'Site unavailable',
     status: lower(raw.instance_status),
     dateLocal: String(raw.shift_date_local ?? ''),
-    start: toDate(raw.shift_start_at_utc),
+    start: parseWallClock(raw.shift_start_at_utc),
     staffed: toNumber(raw.slots_staffed),
     required: toNumber(raw.slots_required),
     clientActionRequired: !!raw.client_action_required,
-    rosterDueAt: toDate(raw.roster_due_at),
+    rosterDueAt: parseServerTimestamp(raw.roster_due_at),
   };
 }
 
@@ -106,8 +107,8 @@ function parseInvoice(raw: Raw): DashboardInvoice {
     currency: raw.currency || 'CAD',
     amount: toNumber(raw.estimated_amount),
     hours: toNumber(raw.estimated_total_hours),
-    createdAt: toDate(raw.created_at),
-    periodStart: toDate(raw.billing_period_start_local) ?? toDate(raw.created_at),
+    createdAt: parseServerTimestamp(raw.created_at),
+    periodStart: toDate(raw.billing_period_start_local) ?? parseServerTimestamp(raw.created_at),
   };
 }
 

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { MetricLedger, type DashboardMetricProps } from '@/components/dashboard/dashboard-metric';
@@ -30,7 +31,8 @@ export type DashboardSectionView = {
   title: string;
   /** Shown instead of the rows when there are none. */
   empty: string;
-  action: { label: string; onPress: () => void };
+  /** The link at the right of the title. Left out when the section has nowhere else to go. */
+  action?: { label: string; onPress: () => void };
   rows: DashboardRowView[];
 };
 
@@ -44,6 +46,8 @@ export type DashboardView = {
 };
 
 export type DashboardScreenProps = {
+  /** Shown above everything else, e.g. a banner that needs the user right now. */
+  top?: ReactNode;
   view: DashboardView | null;
   error: string | null;
   refreshing: boolean;
@@ -147,9 +151,11 @@ function Section({ title, empty, action, rows }: Omit<DashboardSectionView, 'key
           </View>
         ) : null}
         <View className="flex-1" />
-        <Text variant="label" tone="link" accessibilityRole="link" numberOfLines={1} className="shrink-0" onPress={action.onPress}>
-          {action.label}
-        </Text>
+        {action ? (
+          <Text variant="label" tone="link" accessibilityRole="link" numberOfLines={1} className="shrink-0" onPress={action.onPress}>
+            {action.label}
+          </Text>
+        ) : null}
       </View>
       {rows.length ? (
         <View className="overflow-hidden rounded-2xl border border-border bg-surface">
@@ -171,10 +177,11 @@ function Section({ title, empty, action, rows }: Omit<DashboardSectionView, 'key
  * open next. It has no title block, so the attention panel is the first thing on screen. Each role
  * builds its `view` from its own dashboard data.
  */
-export function DashboardScreen({ view, error, refreshing, onRefresh }: DashboardScreenProps) {
+export function DashboardScreen({ top, view, error, refreshing, onRefresh }: DashboardScreenProps) {
   return (
     <TabScreen title="Home" hideHeader refreshing={refreshing} onRefresh={onRefresh}>
       <View className="h-2" />
+      {top}
       {error ? (
         <View className="rounded-2xl border border-danger-soft-content bg-danger-soft p-4" accessibilityRole="alert">
           <Text tone="inherit" className="text-danger-soft-content">
