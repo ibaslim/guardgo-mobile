@@ -43,6 +43,12 @@ export type GuardJob = {
   completedAt: Date | null;
   /** A note the sender attached to the offer. */
   note: string;
+  /** True when the job is offered to a service provider (which commits a number of guard positions) rather than a guard. */
+  forProvider: boolean;
+  /** Guard positions this assignee has committed to. */
+  committed: number;
+  /** Positions of the request nobody has taken yet. */
+  openSlots: number;
 };
 
 export type GuardJobsPage = {
@@ -56,7 +62,8 @@ type RawPage = { items?: Raw[]; pagination?: { page?: number; total_pages?: numb
 
 export function parseGuardJob(raw: Raw): GuardJob {
   const request = raw.request ?? {};
-  const pay = Number(request.pricing_snapshot?.guard_hourly_pay);
+  const forProvider = raw.assignee_tenant_type === 'service_provider';
+  const pay = Number(request.pricing_snapshot?.[forProvider ? 'provider_hourly_pay' : 'guard_hourly_pay']);
   return {
     id: String(raw.id ?? ''),
     requestId: String(raw.request_id ?? request.id ?? ''),
@@ -77,6 +84,9 @@ export function parseGuardJob(raw: Raw): GuardJob {
     startedAt: parseServerTimestamp(raw.started_at),
     completedAt: parseServerTimestamp(raw.completed_at),
     note: String(raw.note ?? ''),
+    forProvider,
+    committed: Math.max(1, Math.floor(toNumber(raw.slots_committed ?? 1))),
+    openSlots: Math.max(0, Math.floor(toNumber(request.open_slots))),
   };
 }
 
@@ -110,11 +120,11 @@ export async function getGuardJob(jobId: string): Promise<GuardJob> {
 }
 
 /** Answers or moves a job on. The server says what is allowed; its message is returned for the toast. */
-export async function respondToJob(jobId: string, status: JobStatus, reason?: string): Promise<string> {
+export async function respondToJob(jobId: string, status: JobStatus, reason?: string, slots?: number): Promise<string> {
   const response = await api.patch<{ message?: string }>(`${ENDPOINTS.jobs.list}/${jobId}/status`, {
     assignment_status: status,
     reason: reason?.trim() || null,
-    slots_committed: null,
+    slots_committed: slots ?? null,
   });
   return response.message || 'Job updated';
 }
@@ -126,6 +136,8 @@ export type JobAction = {
   kind: 'primary' | 'secondary' | 'danger';
   /** True when the server wants a reason, so the app asks for one first. */
   needsReason: boolean;
+  /** Set for a service provider's acceptance: how many guard positions it can cover. The app asks first. */
+  slots?: { min: number; max: number };
 };
 
 const action = (label: string, status: JobStatus, kind: JobAction['kind']): JobAction => ({
@@ -140,6 +152,22 @@ const action = (label: string, status: JobStatus, kind: JobAction['kind']): JobA
  * replaces a missed shift, is run through its shifts, so it has no buttons of its own once accepted.
  */
 export function jobActions(job: GuardJob): JobAction[] {
+  // A service provider answers with how many guard positions it can cover, as on the web.
+  if (job.forProvider && job.scope === 'request') {
+    const positions = Math.max(job.guardsRequired, job.committed);
+    if (job.status === 'offered') {
+      return [{ ...action('Accept', 'accepted', 'primary'), slots: { min: 1, max: positions } }, action('Decline', 'declined', 'danger')];
+    }
+    if (job.status === 'reconfirmation_required') {
+      return [
+        { ...action('Reconfirm', 'accepted', 'primary'), slots: { min: job.committed, max: positions } },
+        action('Decline', 'declined', 'danger'),
+      ];
+    }
+    if (job.status === 'accepted' && job.openSlots > 0) {
+      return [{ ...action('Add coverage', 'accepted', 'secondary'), slots: { min: job.committed + 1, max: job.committed + job.openSlots } }];
+    }
+  }
   const throughShifts = job.scope === 'shift_replacement' || (job.scope === 'request' && job.hasSchedule);
   if (throughShifts && ['accepted', 'in_progress', 'completed', 'cancelled'].includes(job.status)) return [];
 

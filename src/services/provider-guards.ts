@@ -1,5 +1,6 @@
 import { ENDPOINTS } from '@/constants/endpoints';
 import { api, ApiError, getAccessToken, getApiUrl } from '@/services/api';
+import { parseServerTimestamp } from '@/utils/dates';
 import { formatPhone } from '@/utils/phone';
 
 export const GUARDS_PAGE_SIZE = 20;
@@ -51,14 +52,14 @@ const cleanName = (name: string | null | undefined) => {
 };
 
 function parseGuard(raw: RawGuard): ProviderGuard {
-  const expiry = raw.invite_expires_at ? new Date(raw.invite_expires_at) : null;
+  const expiry = parseServerTimestamp(raw.invite_expires_at);
   return {
     id: String(raw.id ?? ''),
     name: cleanName(raw.name),
     email: String(raw.email ?? ''),
     status: String(raw.status ?? '').trim().toLowerCase(),
     invite: INVITE_STATES.includes(String(raw.invite_status)) ? (raw.invite_status as InviteState) : null,
-    inviteExpiresAt: expiry && !Number.isNaN(expiry.getTime()) ? expiry : null,
+    inviteExpiresAt: expiry,
     phone: formatPhone(raw.phone ?? raw.mobile_phone),
   };
 }

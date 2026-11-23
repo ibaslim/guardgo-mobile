@@ -1,5 +1,6 @@
-import { PlaceholderScreen } from '@/components/screens/placeholder-screen';
+import { WorkScreen } from '@/components/jobs/work-screen';
 
+/** The service provider's work: offers (with the positions its team covers), jobs, and shifts to roster guards on. */
 export default function ProviderRequestsScreen() {
-  return <PlaceholderScreen area="provider" tab="requests" />;
+  return <WorkScreen />;
 }

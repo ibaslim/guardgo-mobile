@@ -120,6 +120,10 @@ export default function RootLayout() {
             <Stack.Screen name="assigned-schedule" options={{ headerShown: false }} />
             {/* One job request, read only. Opened from a request list; it has its own heading with the back chevron. */}
             <Stack.Screen name="request/[id]" options={{ headerShown: false }} />
+            {/* One job offered to a guard, with its answers. It has its own heading with the back chevron. */}
+            <Stack.Screen name="job/[id]" options={{ headerShown: false }} />
+            {/* One shift of a guard's schedule, opened from the Shifts calendar. It has its own heading with the back chevron. */}
+            <Stack.Screen name="shift/[id]" options={{ headerShown: false }} />
             {/* Creating a job request, or editing a draft. It has its own heading with the back chevron. */}
             <Stack.Screen name="request-form" options={{ headerShown: false }} />
           </Stack.Protected>

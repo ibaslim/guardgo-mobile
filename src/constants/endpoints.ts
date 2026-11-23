@@ -56,6 +56,11 @@ export const ENDPOINTS = {
   jobs: {
     list: '/api/jobs',
   },
+  /** A shift's positions. GET <path>/pending-arrivals lists the guards waiting for the client to confirm; POST <path>/<id>/client-confirm confirms one. */
+  shiftSlots: {
+    list: '/api/shift-slots',
+    pendingArrivals: '/api/shift-slots/pending-arrivals',
+  },
   /** Lists the provider dashboard summarises: assignments, shifts and payout invoices. */
   dashboard: {
     jobs: '/api/jobs',
