@@ -1,5 +1,5 @@
-import { PlaceholderScreen } from '@/components/screens/placeholder-screen';
+import { InvoicesScreen } from '@/components/invoices/invoices-screen';
 
 export default function GuardInvoicesScreen() {
-  return <PlaceholderScreen area="guard" tab="invoices" />;
+  return <InvoicesScreen />;
 }

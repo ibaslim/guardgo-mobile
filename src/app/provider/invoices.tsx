@@ -1,5 +1,5 @@
-import { PlaceholderScreen } from '@/components/screens/placeholder-screen';
+import { InvoicesScreen } from '@/components/invoices/invoices-screen';
 
 export default function ProviderInvoicesScreen() {
-  return <PlaceholderScreen area="provider" tab="invoices" />;
+  return <InvoicesScreen />;
 }
