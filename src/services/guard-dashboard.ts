@@ -1,39 +1,6 @@
 import { getAccount } from '@/services/account';
-import {
-  jobStats,
-  listInvoices,
-  listJobs,
-  listShifts,
-  payoutStats,
-  SECTION_SIZE,
-  settled,
-  shiftStats,
-  throwIfAllFailed,
-  weekAhead,
-  type DashboardInvoice,
-  type DashboardJob,
-  type DashboardShift,
-} from '@/services/dashboard-data';
-
-export type GuardDashboard = {
-  /** The service provider's name when one manages this guard's coverage, availability and payout. */
-  managedBy: string | null;
-  actionableOffers: DashboardJob[];
-  dueSoonOffers: number;
-  reconfirmations: number;
-  accepted: number;
-  committed: number;
-  inProgress: number;
-  upcomingShifts: DashboardShift[];
-  shiftsToday: number;
-  liveShifts: number;
-  atRiskShifts: number;
-  recentJobs: DashboardJob[];
-  payout: ReturnType<typeof payoutStats>['payout'];
-  averageRate: number | null;
-  invoiceCount: number;
-  recentInvoices: DashboardInvoice[];
-};
+import { jobStats, listInvoices, listJobs, listShifts, payoutStats, SECTION_SIZE, settled, shiftStats, throwIfAllFailed, weekAhead } from '@/services/dashboard-data';
+import type { DashboardInvoice, GuardDashboard } from '@/types/dashboard';
 
 /** Loads a guard's home screen. A guard owned by a service provider has no payout figures of their own. */
 export async function loadGuardDashboard(): Promise<GuardDashboard> {

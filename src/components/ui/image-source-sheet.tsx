@@ -5,7 +5,7 @@ import { Icon } from '@/components/ui/icon';
 import { Sheet } from '@/components/ui/sheet';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
-import type { ImageSource } from '@/services/image-picker';
+import type { ImageSource } from '@/types/image';
 import type { SymbolIcon } from '@/types/ui';
 
 export type ImageSourceSheetProps = {

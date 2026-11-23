@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { fieldBoxClassName, FieldFrame } from '@/components/ui/field';
 import { Sheet } from '@/components/ui/sheet';
 import { Text } from '@/components/ui/text';
+import type { TimeDraft } from '@/types/time';
 import type { FieldMeta } from '@/types/ui';
-import { DEFAULT_TIME_DRAFT, draftToLabel, draftToText, textToDraft, type TimeDraft } from '@/utils/time-draft';
+import { DEFAULT_TIME_DRAFT, draftToLabel, draftToText, textToDraft } from '@/utils/time-draft';
 
 export type TimeFieldProps = FieldMeta & {
   /** "09:30 AM", or an empty string when no time is chosen. */

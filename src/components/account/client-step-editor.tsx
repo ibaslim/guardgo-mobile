@@ -13,8 +13,9 @@ import { useClientMetadata } from '@/hooks/use-client-metadata';
 import { useStepSave } from '@/hooks/use-step-save';
 import { useTenantPrefill } from '@/hooks/use-tenant-prefill';
 import { CLIENT_ONBOARDING_DEFAULTS, CLIENT_STEP_FIELDS, clientOnboardingSchema } from '@/schemas/client-onboarding';
-import { parseClientProfile, saveClientProfile, type TenantSnapshot } from '@/services/tenant';
+import { parseClientProfile, saveClientProfile } from '@/services/tenant';
 import type { ClientKind, ClientMetadata } from '@/types/onboarding';
+import type { TenantSnapshot } from '@/types/tenant';
 
 const fieldsOf = (key: string): readonly string[] => CLIENT_STEP_FIELDS[key as ClientProfileStep];
 

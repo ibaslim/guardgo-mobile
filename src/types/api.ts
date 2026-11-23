@@ -45,3 +45,5 @@ export type ServerValidationError = {
   message: string;
   type?: string;
 };
+
+export type Raw = Record<string, any>;

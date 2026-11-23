@@ -2,8 +2,8 @@ import { Pressable, View } from 'react-native';
 
 import { Badge } from '@/components/ui/badge';
 import { Text } from '@/components/ui/text';
-import type { AppNotification, NotificationCategory } from '@/services/notifications';
-import { countLabel, type NotificationGroup, type StateChip } from '@/utils/notification-view';
+import type { AppNotification, NotificationCategory, NotificationGroup, StateChip } from '@/types/notification';
+import { countLabel } from '@/utils/notification-view';
 import { timeAgo } from '@/utils/time-ago';
 
 /** The rail on the row's left edge: what kind of news it is. */

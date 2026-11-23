@@ -1,6 +1,6 @@
 import { ENDPOINTS } from '@/constants/endpoints';
 import { api, ApiError, clearSession, setAccessToken } from '@/services/api';
-import type { RegisterPayload, TokenResponse } from '@/types/auth';
+import type { InviteContext, RegisterPayload, TokenResponse, VerificationCredentials } from '@/types/auth';
 
 /** A login problem that isn't an HTTP error, with a message that can be shown to the user. */
 export class AuthError extends Error {
@@ -35,8 +35,6 @@ export function startSession(result: LoginResult) {
 export function register(payload: RegisterPayload) {
   return api.post<unknown>(ENDPOINTS.auth.register, payload);
 }
-
-export type InviteContext = { invite_pending: boolean; email: string; username: string; full_name: string };
 
 /** Checks an invite link. Rejects with a 404 (unknown link) or 400 (expired, or already used). */
 export function getInviteContext(token: string) {
@@ -75,8 +73,6 @@ export function isEmailVerificationPending(error: unknown) {
 export function isAccountBlocked(error: unknown) {
   return error instanceof ApiError && error.status === 401 && /account blocked/i.test(error.message);
 }
-
-export type VerificationCredentials = { username: string; email?: string; password: string };
 
 // Resending asks the server to check the password again, so the credentials the user just typed are
 // kept in memory (never saved, never put in a route) until the verify-email screen is left.

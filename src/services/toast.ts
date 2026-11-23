@@ -1,6 +1,4 @@
-import type { ToastVariant } from '@/types/ui';
-
-export type ToastMessage = { id: number; variant: ToastVariant; message: string };
+import type { ToastMessage, ToastVariant } from '@/types/ui';
 
 let current: ToastMessage | null = null;
 let nextId = 1;

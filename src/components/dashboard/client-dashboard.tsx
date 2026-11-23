@@ -5,7 +5,8 @@ import { DashboardScreen, toneOf, type DashboardView } from '@/components/dashbo
 import { ArrivalsBanner } from '@/components/requests/arrivals-banner';
 import { usePendingArrivals } from '@/hooks/use-pending-arrivals';
 import { useDashboard } from '@/hooks/use-dashboard';
-import { loadClientDashboard, type ClientDashboard, type DashboardRequest } from '@/services/client-dashboard';
+import { loadClientDashboard } from '@/services/client-dashboard';
+import type { ClientDashboard, DashboardRequest } from '@/types/dashboard';
 import { attentionOf, shiftStaffing, token, when } from '@/utils/dashboard';
 import { badgeKindFor } from '@/utils/badge';
 import { formatMoney } from '@/utils/format';

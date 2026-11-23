@@ -2,15 +2,10 @@ import { useState } from 'react';
 
 import { ImageUploadCard } from '@/components/ui/image-upload-card';
 import { ApiError } from '@/services/api';
-import type { PickedImage } from '@/services/image-picker';
-import {
-  checkTenantImage,
-  deleteTenantImage,
-  TENANT_IMAGE_MAX_KB,
-  uploadTenantImage,
-  type TenantImage,
-} from '@/services/tenant';
+import { checkTenantImage, deleteTenantImage, TENANT_IMAGE_MAX_KB, uploadTenantImage } from '@/services/tenant';
+import type { PickedImage } from '@/types/image';
 import type { ClientKind } from '@/types/onboarding';
+import type { TenantImage } from '@/types/tenant';
 
 export type LogoFieldProps = {
   kind: ClientKind;

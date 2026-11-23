@@ -3,11 +3,9 @@ import * as Sharing from 'expo-sharing';
 
 import { ENDPOINTS } from '@/constants/endpoints';
 import { api, getAccessToken, getApiUrl } from '@/services/api';
-import type { PickedImage } from '@/services/image-picker';
+import type { DocumentKind } from '@/types/document';
 import type { UploadedFile } from '@/types/guard-onboarding';
-
-/** The kinds of document, each with its own upload folder on the server. The first four are a guard's, insurance is a service provider's. */
-export type DocumentKind = 'identity' | 'securityLicense' | 'policeClearance' | 'trainingCertificate' | 'insurance';
+import type { PickedImage } from '@/types/image';
 
 // Same limit as the server (`upload_tenant_*_document`): 10 MB, images or PDF.
 export const DOCUMENT_MAX_MB = 10;

@@ -3,8 +3,10 @@ import { Pressable, View } from 'react-native';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
-import { shiftTone, type GuardShift, type ShiftTone } from '@/services/guard-shifts';
-import { dateFromKey, monthGrid, WEEKDAYS, type MonthCursor } from '@/utils/calendar';
+import { shiftTone } from '@/services/guard-shifts';
+import type { GuardShift, ShiftTone } from '@/types/shift';
+import type { MonthCursor } from '@/types/time';
+import { dateFromKey, monthGrid, WEEKDAYS } from '@/utils/calendar';
 
 /** The colour of a shift's bar in a day cell. */
 export const TONE_BAR: Record<ShiftTone, string> = {

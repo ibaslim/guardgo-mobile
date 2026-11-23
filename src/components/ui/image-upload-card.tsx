@@ -7,7 +7,8 @@ import { Icon } from '@/components/ui/icon';
 import { ImageSourceSheet } from '@/components/ui/image-source-sheet';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
-import { pickImage, type ImageSource, type PickedImage } from '@/services/image-picker';
+import { pickImage } from '@/services/image-picker';
+import type { ImageSource, PickedImage } from '@/types/image';
 
 // `lg` leaves room beside the picture for Change and Remove on one row on a 360 dp phone (they need about 163 dp).
 const SIZES = { md: 84, lg: 92 } as const;

@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import type { PendingArrivalsState } from '@/hooks/use-pending-arrivals';
-import type { PendingArrival } from '@/services/pending-arrivals';
+import type { PendingArrival } from '@/types/arrival';
 import { distanceText } from '@/utils/distance';
 import { formatTime } from '@/utils/format';
 

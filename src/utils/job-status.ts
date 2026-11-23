@@ -1,5 +1,5 @@
 import { within24Hours } from '@/services/dashboard-data';
-import type { GuardJob } from '@/services/guard-jobs';
+import type { GuardJob, JobRail } from '@/types/job';
 import type { BadgeKind } from '@/types/ui';
 import { formatDate, formatTime } from '@/utils/format';
 
@@ -20,8 +20,6 @@ export function jobBadgeKind(status: string): BadgeKind {
       return 'secondary';
   }
 }
-
-export type JobRail = 'primary' | 'success' | 'warning' | 'danger' | 'neutral';
 
 /** How urgent a job is, for the rail on its card: an offer that expires soon, or one to reconfirm, stands out. */
 export function jobRail(job: GuardJob): JobRail {

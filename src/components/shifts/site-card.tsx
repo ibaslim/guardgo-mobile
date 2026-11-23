@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { InfoCard } from '@/components/ui/info-card';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
-import type { RequestDetail } from '@/services/requests';
 import { toast } from '@/services/toast';
+import type { RequestDetail } from '@/types/request';
 import { distanceMeters, distanceText } from '@/utils/distance';
 
 /**

@@ -4,7 +4,7 @@ import { RequestCard } from '@/components/requests/request-card';
 import { Card } from '@/components/ui/card';
 import { InfoCard } from '@/components/ui/info-card';
 import { Text } from '@/components/ui/text';
-import type { RequestDetail, RequestWave } from '@/services/requests';
+import type { RequestDetail, RequestWave } from '@/types/request';
 import { formatDate, formatMoney, formatTime } from '@/utils/format';
 import { FULFILLMENT_LABELS, WAVE_LABELS } from '@/utils/request-status';
 

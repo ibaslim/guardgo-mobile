@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { jobsErrorMessage } from '@/services/guard-jobs';
-import { isRosterable, rosterShift, type ShiftSlot } from '@/services/guard-shifts';
-import { listProviderGuards, type ProviderGuard } from '@/services/provider-guards';
+import { isRosterable, rosterShift } from '@/services/guard-shifts';
+import { listProviderGuards } from '@/services/provider-guards';
 import { toast } from '@/services/toast';
+import type { ProviderGuard } from '@/types/provider-guard';
+import type { ShiftSlot } from '@/types/shift';
 
 const guardLabel = (guard: ProviderGuard) => guard.name || guard.email;
 

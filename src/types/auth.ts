@@ -36,3 +36,7 @@ export type RegisterPayload = {
   password: string;
   tenant_type: TenantType;
 };
+
+export type InviteContext = { invite_pending: boolean; email: string; username: string; full_name: string };
+
+export type VerificationCredentials = { username: string; email?: string; password: string };

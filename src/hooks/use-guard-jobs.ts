@@ -1,15 +1,10 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import {
-  countGuardJobs,
-  jobsErrorMessage,
-  listGuardJobs,
-  type GuardJobsPage,
-  type JobStatus,
-} from '@/services/guard-jobs';
+import { countGuardJobs, jobsErrorMessage, listGuardJobs } from '@/services/guard-jobs';
 import { useRealtimeRefresh, useScreenFocused } from '@/hooks/use-realtime';
 import { toast } from '@/services/toast';
+import type { GuardJobsPage, JobStatus } from '@/types/job';
 
 const SEARCH_DELAY_MS = 350;
 const LOAD_ERROR = "Couldn't load your jobs. Pull down to try again.";

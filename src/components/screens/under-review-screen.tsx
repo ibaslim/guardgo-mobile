@@ -26,7 +26,7 @@ import { useLogout } from '@/hooks/use-logout';
 import { useSession } from '@/hooks/use-session';
 import { fetchTenantLogo } from '@/services/tenant';
 import { syncTenantReview } from '@/services/tenant-review';
-import type { TenantImage } from '@/services/tenant';
+import type { TenantImage } from '@/types/tenant';
 import { roleAreaFor } from '@/utils/role';
 
 const WINDOW_WIDTH = 84;

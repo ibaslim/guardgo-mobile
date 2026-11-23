@@ -8,9 +8,11 @@ import { ImageSourceSheet } from '@/components/ui/image-source-sheet';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
 import { ApiError } from '@/services/api';
-import { checkDocument, deleteDocument, DOCUMENT_MAX_MB, documentSource, uploadDocument, type DocumentKind } from '@/services/documents';
-import { pickImage, type ImageSource } from '@/services/image-picker';
+import { checkDocument, deleteDocument, DOCUMENT_MAX_MB, documentSource, uploadDocument } from '@/services/documents';
+import { pickImage } from '@/services/image-picker';
+import type { DocumentKind } from '@/types/document';
 import type { UploadedFile } from '@/types/guard-onboarding';
+import type { ImageSource } from '@/types/image';
 import { formatFileSize } from '@/utils/format';
 
 type DocumentFileFieldProps = {

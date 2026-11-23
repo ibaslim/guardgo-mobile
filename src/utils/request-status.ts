@@ -1,4 +1,4 @@
-import type { FulfillmentMode, RequestStatus, RequestSummary, StaffingStatus } from '@/services/requests';
+import type { FulfillmentMode, RequestGroup, RequestStatus, RequestSummary, StaffingStatus } from '@/types/request';
 import type { BadgeKind } from '@/types/ui';
 import { formatDate, formatTime } from '@/utils/format';
 
@@ -34,9 +34,6 @@ export const FULFILLMENT_LABELS: Record<FulfillmentMode, string> = {
   service_provider_only: 'Service providers',
   hybrid: 'Guards or providers',
 };
-
-/** The groups a list can be filtered into: what still needs attention, and what is over. */
-export type RequestGroup = 'draft' | 'live' | 'done';
 
 const GROUPS: Record<RequestGroup, readonly RequestStatus[]> = {
   draft: ['draft'],

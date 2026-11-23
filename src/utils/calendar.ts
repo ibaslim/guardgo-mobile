@@ -1,8 +1,7 @@
+import type { MonthCursor } from '@/types/time';
 import { toIsoDate } from '@/utils/dates';
 
 export const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
-
-export type MonthCursor = { year: number; month: number };
 
 export const monthOf = (date: Date): MonthCursor => ({ year: date.getFullYear(), month: date.getMonth() });
 

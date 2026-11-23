@@ -1,9 +1,10 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { listRequests, requestsErrorMessage, type RequestsPage } from '@/services/requests';
+import { listRequests, requestsErrorMessage } from '@/services/requests';
 import { useRealtimeRefresh, useScreenFocused } from '@/hooks/use-realtime';
 import { toast } from '@/services/toast';
+import type { RequestsPage } from '@/types/request';
 
 const SEARCH_DELAY_MS = 350;
 

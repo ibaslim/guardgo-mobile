@@ -21,8 +21,9 @@ import {
   PROVIDER_STEP_FIELDS,
 } from '@/schemas/provider-onboarding';
 import { parseProviderProfile, saveProviderProfile } from '@/services/provider-tenant';
-import { finishOnboarding, type TenantSnapshot } from '@/services/tenant';
+import { finishOnboarding } from '@/services/tenant';
 import type { GuardMetadata } from '@/types/guard-onboarding';
+import type { TenantSnapshot } from '@/types/tenant';
 
 type StepKey = keyof typeof PROVIDER_STEP_FIELDS;
 

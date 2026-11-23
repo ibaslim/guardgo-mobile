@@ -1,9 +1,5 @@
+import type { TimeDraft } from '@/types/time';
 import { parseTime } from '@/utils/availability';
-
-export type Period = 'AM' | 'PM';
-
-/** A time being picked, in 12-hour parts. */
-export type TimeDraft = { hour: number; minute: number; period: Period };
 
 export const DEFAULT_TIME_DRAFT: TimeDraft = { hour: 9, minute: 0, period: 'AM' };
 

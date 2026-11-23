@@ -2,8 +2,9 @@ import { useState, type ReactNode } from 'react';
 
 import { JobReasonSheet } from '@/components/jobs/job-reason-sheet';
 import { JobSlotsSheet } from '@/components/jobs/job-slots-sheet';
-import { jobsErrorMessage, respondToJob, type GuardJob, type JobAction } from '@/services/guard-jobs';
+import { jobsErrorMessage, respondToJob } from '@/services/guard-jobs';
 import { toast } from '@/services/toast';
+import type { GuardJob, JobAction } from '@/types/job';
 
 type Ask = { job: GuardJob; action: JobAction };
 

@@ -4,9 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
-import { JOB_STATUS_LABELS, jobActions, type GuardJob, type JobAction } from '@/services/guard-jobs';
+import { JOB_STATUS_LABELS, jobActions } from '@/services/guard-jobs';
+import type { GuardJob, JobAction, JobRail } from '@/types/job';
 import { formatMoney } from '@/utils/format';
-import { jobBadgeKind, jobRail, stamp, type JobRail } from '@/utils/job-status';
+import { jobBadgeKind, jobRail, stamp } from '@/utils/job-status';
 
 const RAILS: Record<JobRail, string> = {
   primary: 'bg-primary',

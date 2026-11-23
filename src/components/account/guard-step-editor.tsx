@@ -17,8 +17,9 @@ import { useStepSave } from '@/hooks/use-step-save';
 import { useTenantPrefill } from '@/hooks/use-tenant-prefill';
 import { createGuardOnboardingSchema, GUARD_ONBOARDING_DEFAULTS, GUARD_STEP_FIELDS } from '@/schemas/guard-onboarding';
 import { parseGuardProfile, saveGuardProfile } from '@/services/guard-tenant';
-import { isProviderOwned, type TenantSnapshot } from '@/services/tenant';
+import { isProviderOwned } from '@/services/tenant';
 import type { GuardMetadata } from '@/types/guard-onboarding';
+import type { TenantSnapshot } from '@/types/tenant';
 
 const parseSaved = (tenant: TenantSnapshot, metadata: GuardMetadata) => ({
   ...parseGuardProfile(tenant.profile, metadata),

@@ -1,38 +1,7 @@
-import {
-  DASHBOARD_ROWS,
-  jobStats,
-  listInvoices,
-  listJobs,
-  listShifts,
-  payoutStats,
-  SECTION_SIZE,
-  settled,
-  shiftStats,
-  throwIfAllFailed,
-  weekAhead,
-  type DashboardInvoice,
-  type DashboardJob,
-  type DashboardShift,
-} from '@/services/dashboard-data';
-import { listProviderGuards, type ProviderGuard } from '@/services/provider-guards';
-
-export type ProviderDashboard = {
-  actionableOffers: DashboardJob[];
-  dueSoonOffers: number;
-  reconfirmations: number;
-  accepted: number;
-  committed: number;
-  inProgress: number;
-  atRiskShifts: DashboardShift[];
-  clientActionShifts: number;
-  activeGuards: number;
-  pendingGuards: number;
-  recentGuards: ProviderGuard[];
-  payout: ReturnType<typeof payoutStats>['payout'];
-  averageRate: number | null;
-  invoiceCount: number;
-  recentInvoices: DashboardInvoice[];
-};
+import { DASHBOARD_ROWS, jobStats, listInvoices, listJobs, listShifts, payoutStats, SECTION_SIZE, settled, shiftStats, throwIfAllFailed, weekAhead } from '@/services/dashboard-data';
+import { listProviderGuards } from '@/services/provider-guards';
+import type { DashboardInvoice, DashboardJob, DashboardShift, ProviderDashboard } from '@/types/dashboard';
+import type { ProviderGuard } from '@/types/provider-guard';
 
 /** Builds the provider's dashboard from the raw lists the same way the web dashboard does. */
 export function buildProviderDashboard(input: {

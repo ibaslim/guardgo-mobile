@@ -1,35 +1,11 @@
 import { ENDPOINTS } from '@/constants/endpoints';
 import { api } from '@/services/api';
+import type { AccountInfo, AccountKind } from '@/types/account';
 import { roleAreaFor } from '@/utils/role';
-
-/** The signed-in user and their tenant, from `GET /api/me`. */
-export type AccountInfo = {
-  user: {
-    email: string;
-    username: string;
-    full_name: string;
-    role: string;
-    status: string;
-    verificationDate: string | null;
-  };
-  tenant: {
-    id: string;
-    name: string;
-    tenant_type: string | null;
-    status: string | null;
-    /** 'service_provider' when a service provider owns this guard. */
-    ownership_type: string | null;
-    service_provider: { id: string; name: string } | null;
-    profile: Record<string, unknown>;
-  };
-};
 
 export function getAccount() {
   return api.get<AccountInfo>(ENDPOINTS.account.me);
 }
-
-/** Which Account screen content a user gets. */
-export type AccountKind = 'guard' | 'provider-guard' | 'provider' | 'client' | 'platform';
 
 /**
  * The kind of account. The role decides it right away; once the account is loaded, a guard owned

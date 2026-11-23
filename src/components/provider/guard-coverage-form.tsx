@@ -6,8 +6,8 @@ import { Select } from '@/components/ui/select';
 import { Text } from '@/components/ui/text';
 import { TextField } from '@/components/ui/text-field';
 import { WEEK_DAYS, type GuardMetadata, type WeeklyAvailabilityValues } from '@/types/guard-onboarding';
+import type { CoverageRegion } from '@/types/provider-onboarding';
 import { cityLabelFor } from '@/utils/profile';
-import type { CoverageRegion } from '@/utils/provider-coverage';
 
 /** What the service provider sets for its guard. */
 export type CoverageValues = {

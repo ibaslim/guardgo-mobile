@@ -7,7 +7,8 @@ import { Icon } from '@/components/ui/icon';
 import { ImageSourceSheet } from '@/components/ui/image-source-sheet';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
-import { pickImage, type ImageSource, type PickedImage } from '@/services/image-picker';
+import { pickImage } from '@/services/image-picker';
+import type { ImageSource, PickedImage } from '@/types/image';
 import type { FieldMeta } from '@/types/ui';
 import { formatFileSize } from '@/utils/format';
 

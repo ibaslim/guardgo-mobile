@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { guardsErrorMessage, searchProviderGuards, type ProviderGuardsPage } from '@/services/provider-guards';
+import { guardsErrorMessage, searchProviderGuards } from '@/services/provider-guards';
 import { toast } from '@/services/toast';
+import type { ProviderGuardsPage } from '@/types/provider-guard';
 
 const SEARCH_DELAY_MS = 350;
 

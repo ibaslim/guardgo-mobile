@@ -4,6 +4,7 @@ import { env } from '@/config/env';
 import { ENDPOINTS } from '@/constants/endpoints';
 import { api, getAccessToken, getApiUrl } from '@/services/api';
 import { ensureFreshToken } from '@/services/api/session';
+import type { RealtimeEvent } from '@/types/realtime';
 
 /**
  * Live updates from Pusher Channels. The server publishes a tiny event to the user's private channel
@@ -14,14 +15,6 @@ import { ensureFreshToken } from '@/services/api/session';
  * Nothing here is required for the app to work: when Pusher is not configured, not installed in the
  * running build, or not connected, screens poll instead (see hooks/use-realtime.ts).
  */
-
-export type RealtimeEvent = {
-  /** "created" and "updated" are one notification; "read-all" is every one; "restored" is a (re)connect. */
-  type: 'created' | 'updated' | 'read-all' | 'restored';
-  id: string;
-  /** Where it came from, e.g. "requests" or "leaves". Empty for "read-all" and "restored". */
-  sourceModule: string;
-};
 
 type Channel = { name: string; bind: (event: string, callback: (data: unknown) => void) => void; unbind_all: () => void };
 type PusherClient = {

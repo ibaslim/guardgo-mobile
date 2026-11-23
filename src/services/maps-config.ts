@@ -1,13 +1,6 @@
 import { ENDPOINTS } from '@/constants/endpoints';
 import { api } from '@/services/api';
-
-/** Google Maps settings the server hands to every client, from `GET /api/public` (same as the web). */
-export type MapsConfig = {
-  apiKey: string;
-  mapId?: string;
-  /** Two-letter country the address search is limited to, like "ca". */
-  countryRestriction?: string;
-};
+import type { MapsConfig } from '@/types/maps';
 
 type PublicConfig = { settings?: Record<string, string | undefined> };
 

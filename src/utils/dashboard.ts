@@ -1,4 +1,4 @@
-import type { DashboardInvoice, DashboardJob, DashboardShift } from '@/services/dashboard-data';
+import type { DashboardInvoice, DashboardJob, DashboardShift } from '@/types/dashboard';
 import { formatDate, formatMoney, formatTime } from '@/utils/format';
 
 /** "reconfirmation_required" -> "Reconfirmation required" */

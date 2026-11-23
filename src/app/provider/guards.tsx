@@ -16,17 +16,9 @@ import { Tabs } from '@/components/ui/tabs';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
 import { useGuardSearch } from '@/hooks/use-guard-search';
-import {
-  approveGuard,
-  deleteExpiredInvite,
-  guardsErrorMessage,
-  listProviderGuards,
-  type GuardsQuery,
-  type InviteState,
-  type ProviderGuard,
-  type ProviderGuardsPage,
-} from '@/services/provider-guards';
+import { approveGuard, deleteExpiredInvite, guardsErrorMessage, listProviderGuards } from '@/services/provider-guards';
 import { toast } from '@/services/toast';
+import type { GuardsQuery, InviteState, ProviderGuard, ProviderGuardsPage } from '@/types/provider-guard';
 import { formatDate } from '@/utils/format';
 
 const INVITE_LABELS: Record<InviteState, string> = {

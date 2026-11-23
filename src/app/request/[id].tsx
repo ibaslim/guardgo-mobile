@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { useRoleArea } from '@/hooks/use-session';
-import { getRequest, listRequestWaves, type RequestDetail, type RequestWave } from '@/services/requests';
+import { getRequest, listRequestWaves } from '@/services/requests';
+import type { RequestDetail, RequestWave } from '@/types/request';
 
 type Loaded = { request: RequestDetail; waves: RequestWave[] };
 

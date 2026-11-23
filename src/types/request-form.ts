@@ -1,4 +1,4 @@
-import type { FulfillmentMode } from '@/services/requests';
+import type { FulfillmentMode } from '@/types/request';
 
 /** How a request repeats. `none` is a single job; the others create a shift on each matching day. */
 export type RepeatKind = 'none' | 'date_range' | 'recurring_weekly';

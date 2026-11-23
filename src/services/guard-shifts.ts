@@ -1,42 +1,15 @@
 import { ENDPOINTS } from '@/constants/endpoints';
-import { lower, toNumber, type Raw } from '@/services/dashboard-data';
+import { lower, toNumber } from '@/services/dashboard-data';
 import { api } from '@/services/api';
-import { monthRange, type MonthCursor } from '@/utils/calendar';
+import type { Raw } from '@/types/api';
+import type { GuardShift, GuardShiftDetail, ShiftSlot, ShiftTone, SlotStep } from '@/types/shift';
+import type { MonthCursor } from '@/types/time';
+import { monthRange } from '@/utils/calendar';
 import { parseServerTimestamp, parseWallClock } from '@/utils/dates';
 import { deviceTimezone } from '@/utils/request-form';
 
 /** More than a guard will ever work in a month, so one page holds the whole month. */
 const MONTH_ROWS = 300;
-
-export type ShiftStatus =
-  | 'scheduled'
-  | 'partially_staffed'
-  | 'staffed'
-  | 'in_progress'
-  | 'completed'
-  | 'cancelled'
-  | 'expired';
-
-export type GuardShift = {
-  id: string;
-  requestId: string;
-  title: string;
-  siteName: string;
-  status: ShiftStatus | string;
-  /** The shift's date at the site, "2026-03-12". */
-  dateLocal: string;
-  start: Date | null;
-  end: Date | null;
-  staffed: number;
-  required: number;
-  clientActionRequired: boolean;
-  /**
-   * The site's position, when the shift response carries it. A guard rostered by a service provider can't
-   * read the request (it is assigned to the provider), so this is the only place they can get it from.
-   */
-  siteLatitude: string;
-  siteLongitude: string;
-};
 
 type RawPage = { items?: Raw[] };
 
@@ -72,9 +45,6 @@ export async function listGuardShifts(cursor: MonthCursor): Promise<GuardShift[]
     .sort((a, b) => (a.start?.getTime() ?? 0) - (b.start?.getTime() ?? 0));
 }
 
-/** How a shift reads on the calendar: its colour. */
-export type ShiftTone = 'primary' | 'success' | 'warning' | 'danger' | 'neutral';
-
 export function shiftTone(shift: GuardShift): ShiftTone {
   switch (shift.status) {
     case 'in_progress':
@@ -106,25 +76,6 @@ export function shiftHours(shift: GuardShift) {
 }
 
 export const isOpenShift = (shift: GuardShift) => !['completed', 'cancelled', 'expired'].includes(shift.status);
-
-/** One position on a shift, and how far its guard has got: arrived, confirmed by the client, started, done. */
-export type ShiftSlot = {
-  id: string;
-  number: number;
-  status: string;
-  guardName: string;
-  /** The guard tenant on the position, or empty. */
-  guardId: string;
-  /** Who covers the position: "service_provider" or a direct guard. */
-  coverageType: string;
-  rosterDueAt: Date | null;
-  arrivedAt: Date | null;
-  confirmedAt: Date | null;
-  startedAt: Date | null;
-  completedAt: Date | null;
-};
-
-export type GuardShiftDetail = { shift: GuardShift; slots: ShiftSlot[] };
 
 export const SLOT_STATUS_LABELS: Record<string, string> = {
   open: 'Open',
@@ -163,9 +114,6 @@ export async function getGuardShift(shiftId: string): Promise<GuardShiftDetail> 
   const response = await api.get<{ shift?: Raw; slots?: Raw[] }>(`${ENDPOINTS.dashboard.shifts}/${shiftId}`);
   return { shift: parseShift(response.shift ?? {}), slots: (response.slots ?? []).filter((slot) => slot.id).map(parseSlot) };
 }
-
-/** What a guard can do next on one position of a shift. `wait` has no button: the client has to act. */
-export type SlotStep = 'check_in' | 'wait_for_client' | 'start' | 'check_out' | 'none';
 
 const BEFORE_START = ['reserved', 'rostered', 'client_confirmation_pending'];
 

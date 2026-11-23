@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FieldValues, UseFormReset } from 'react-hook-form';
 
-import { fetchTenantLogo, getTenant, type TenantImage, type TenantSnapshot } from '@/services/tenant';
+import { fetchTenantLogo, getTenant } from '@/services/tenant';
+import type { TenantImage, TenantSnapshot } from '@/types/tenant';
 
 export type TenantPrefillOptions<TInput extends FieldValues, TMetadata> = {
   reset: UseFormReset<TInput>;

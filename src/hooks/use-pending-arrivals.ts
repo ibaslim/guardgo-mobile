@@ -3,8 +3,9 @@ import { useCallback, useRef, useState } from 'react';
 
 import { useRealtimeRefresh, useScreenFocused } from '@/hooks/use-realtime';
 import { jobsErrorMessage } from '@/services/guard-jobs';
-import { confirmArrival, listPendingArrivals, type PendingArrival, type PendingArrivals } from '@/services/pending-arrivals';
+import { confirmArrival, listPendingArrivals } from '@/services/pending-arrivals';
 import { toast } from '@/services/toast';
+import type { PendingArrival, PendingArrivals } from '@/types/arrival';
 
 const NONE: PendingArrivals = { items: [], total: 0 };
 
