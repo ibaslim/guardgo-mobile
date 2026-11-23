@@ -1,10 +1,11 @@
 import { useState, type ReactNode } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
-import { fieldBoxClassName, FieldFrame } from '@/components/ui/field';
+import { PickerTrigger } from '@/components/ui/picker-trigger';
 import { Sheet } from '@/components/ui/sheet';
 import { Text } from '@/components/ui/text';
+import { ICONS } from '@/constants/icons';
 import type { TimeDraft } from '@/types/time';
 import type { FieldMeta } from '@/types/ui';
 import { DEFAULT_TIME_DRAFT, draftToLabel, draftToText, textToDraft } from '@/utils/time-draft';
@@ -22,8 +23,7 @@ type TimeFieldShellProps = TimeFieldProps & {
 };
 
 /**
- * What every time picker shares: the field showing the chosen time ("9:30 PM", big enough to read in
- * a half-width box), and a sheet with a live readout and Done / Clear buttons. A picker supplies the
+ * What every time picker shares: the field showing the chosen time ("9:30 PM"), and a sheet with a live readout and Done / Clear buttons. A picker supplies the
  * controls that change the draft.
  */
 export function TimeFieldShell({ value, onChange, placeholder = 'Select', children, ...meta }: TimeFieldShellProps) {
@@ -38,19 +38,14 @@ export function TimeFieldShell({ value, onChange, placeholder = 'Select', childr
 
   return (
     <View>
-      <FieldFrame label={meta.label} hint={meta.hint} error={meta.error} optional={meta.optional}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={meta.label}
-          accessibilityValue={{ text: current ? draftToLabel(current) : placeholder }}
-          accessibilityState={{ expanded: open }}
-          onPress={openPicker}
-          className={`${fieldBoxClassName({ focused: open, error: meta.error })} justify-center active:opacity-80`}>
-          <Text variant="heading" tone={current ? 'default' : 'muted'} numberOfLines={1} adjustsFontSizeToFit>
-            {current ? draftToLabel(current) : placeholder}
-          </Text>
-        </Pressable>
-      </FieldFrame>
+      <PickerTrigger
+        {...meta}
+        valueLabel={current ? draftToLabel(current) : null}
+        placeholder={placeholder}
+        icon={ICONS.clock}
+        open={open}
+        onPress={openPicker}
+      />
 
       <Sheet
         visible={open}

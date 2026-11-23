@@ -22,6 +22,9 @@ export function PickerTrigger({
   label,
   hint,
   error,
+  hideErrorText,
+  hideLabel,
+  compact,
   optional,
   disabled,
   valueLabel,
@@ -33,7 +36,7 @@ export function PickerTrigger({
   const state = { focused: open, error, disabled };
 
   return (
-    <FieldFrame label={label} hint={hint} error={error} optional={optional}>
+    <FieldFrame label={label} hideLabel={hideLabel} hint={hint} error={hideErrorText ? undefined : error} optional={optional}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
@@ -52,7 +55,7 @@ export function PickerTrigger({
         <Text tone={valueLabel ? 'default' : 'muted'} numberOfLines={1} className="flex-1">
           {valueLabel ?? placeholder}
         </Text>
-        <Icon icon={ICONS.chevronUpDown} size={16} tone={open ? 'primary' : 'field'} />
+        {compact ? null : <Icon icon={ICONS.chevronUpDown} size={16} tone={open ? 'primary' : 'field'} />}
       </Pressable>
     </FieldFrame>
   );

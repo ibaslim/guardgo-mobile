@@ -20,32 +20,41 @@ export function FieldIcon({ icon, focused, error }: FieldBoxState & { icon: Symb
   return <Icon icon={icon} size={20} tone={error ? 'danger' : focused ? 'primary' : 'field'} />;
 }
 
-export type FieldFrameProps = Omit<FieldMeta, 'disabled'> & { children: ReactNode };
+/** The error line under a field: the icon and the message, in the danger colour. */
+export function FieldError({ message }: { message: string }) {
+  return (
+    <View className="flex-row gap-1.5 px-0.5" accessibilityLiveRegion="polite">
+      <View className="pt-px">
+        <Icon icon={ICONS.error} size={15} tone="danger" />
+      </View>
+      <Text variant="small" tone="inherit" className="flex-1 text-[13px] text-field-error">
+        {message}
+      </Text>
+    </View>
+  );
+}
+
+export type FieldFrameProps = Omit<FieldMeta, 'disabled' | 'hideErrorText' | 'compact'> & { children: ReactNode };
 
 /** Label above the field, hint or error below it. */
-export function FieldFrame({ label, hint, error, optional, children }: FieldFrameProps) {
+export function FieldFrame({ label, hideLabel, hint, error, optional, children }: FieldFrameProps) {
   return (
     <View className="gap-1.5">
-      <View className="flex-row items-baseline justify-between gap-2 px-0.5">
-        <Text variant="label" tone="inherit" className="font-sans-bold text-[13px] uppercase tracking-wide text-field-label">
-          {label}
-        </Text>
-        {optional ? (
-          <Text variant="caption" tone="muted">
-            Optional
+      {hideLabel ? null : (
+        <View className="flex-row items-baseline justify-between gap-2 px-0.5">
+          <Text variant="label" tone="inherit" className="font-sans-bold text-[13px] uppercase tracking-wide text-field-label">
+            {label}
           </Text>
-        ) : null}
-      </View>
+          {optional ? (
+            <Text variant="caption" tone="muted">
+              Optional
+            </Text>
+          ) : null}
+        </View>
+      )}
       {children}
       {error ? (
-        <View className="flex-row gap-1.5 px-0.5" accessibilityLiveRegion="polite">
-          <View className="pt-px">
-            <Icon icon={ICONS.error} size={15} tone="danger" />
-          </View>
-          <Text variant="small" tone="inherit" className="flex-1 text-[13px] text-field-error">
-            {error}
-          </Text>
-        </View>
+        <FieldError message={error} />
       ) : hint ? (
         <Text variant="small" tone="muted" className="px-0.5 text-[13px]">
           {hint}

@@ -15,6 +15,12 @@ export type FieldMeta = {
   /** Help text under the field. Hidden while there is an error. */
   hint?: string;
   error?: string;
+  /** Marks the field invalid (red box) without the message under it, when the form shows the message elsewhere. */
+  hideErrorText?: boolean;
+  /** Leaves the label off the field, for fields grouped under one label. It is still read aloud. */
+  hideLabel?: boolean;
+  /** A tighter box for half-width fields: no up/down arrows, so the value has the room. */
+  compact?: boolean;
   /** Adds "(optional)" to the label. Fields are required by default. */
   optional?: boolean;
   disabled?: boolean;
