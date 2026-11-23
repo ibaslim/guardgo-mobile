@@ -46,6 +46,7 @@
     "@types/react": "~19.3.0",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~58.0.4",
+    "sharp": "^0.35.5",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -55,6 +56,7 @@
     "web": "expo start --web",
     "test-build": "node scripts/build-android.js test",
     "release-build": "node scripts/build-android.js production",
+    "brand-assets": "node scripts/generate-brand-assets.js --force",
     "lint": "expo lint"
   },
   "private": true
