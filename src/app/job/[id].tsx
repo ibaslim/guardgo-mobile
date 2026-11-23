@@ -12,7 +12,8 @@ import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { useJobResponder } from '@/hooks/use-job-responder';
 import { useRequestSite } from '@/hooks/use-request-site';
-import { getGuardJob, JOB_STATUS_LABELS, jobActions, type GuardJob } from '@/services/guard-jobs';
+import { getGuardJob, JOB_STATUS_LABELS, jobActions } from '@/services/guard-jobs';
+import type { GuardJob } from '@/types/job';
 import { formatMoney } from '@/utils/format';
 import { jobBadgeKind, sentenceCase, stamp } from '@/utils/job-status';
 

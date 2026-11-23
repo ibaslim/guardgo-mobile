@@ -8,7 +8,8 @@ import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { ToastHost } from '@/components/ui/toast-host';
 import { getApiUrl } from '@/services/api';
-import { getMapsConfig, type MapsConfig } from '@/services/maps-config';
+import { getMapsConfig } from '@/services/maps-config';
+import type { MapsConfig } from '@/types/maps';
 
 type Pin = { latitude: number; longitude: number };
 

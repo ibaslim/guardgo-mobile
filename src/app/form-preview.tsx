@@ -25,8 +25,8 @@ import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
 import { useApiForm } from '@/hooks/use-api-form';
 import { ApiError } from '@/services/api';
-import type { PickedImage } from '@/services/image-picker';
 import { toast } from '@/services/toast';
+import type { PickedImage } from '@/types/image';
 
 const SITES = [
   { value: 'north-gate', label: 'North Gate', description: 'Main entrance, 24/7' },

@@ -9,8 +9,8 @@ import { Text } from '@/components/ui/text';
 import { TextField } from '@/components/ui/text-field';
 import { ICONS } from '@/constants/icons';
 import { useRequests } from '@/hooks/use-requests';
-import type { RequestSummary } from '@/services/requests';
-import { inGroup, type RequestGroup } from '@/utils/request-status';
+import type { RequestGroup, RequestSummary } from '@/types/request';
+import { inGroup } from '@/utils/request-status';
 
 const GROUPS: readonly { value: RequestGroup; label: string }[] = [
   { value: 'live', label: 'Live' },

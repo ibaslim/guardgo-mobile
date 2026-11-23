@@ -7,7 +7,7 @@ import { TabScreen } from '@/components/ui/tab-screen';
 import { Text } from '@/components/ui/text';
 import { useInvoices } from '@/hooks/use-invoices';
 import { useRoleArea } from '@/hooks/use-session';
-import type { Invoice } from '@/services/invoices';
+import type { Invoice } from '@/types/invoice';
 import { formatMoney } from '@/utils/format';
 import { formatHours, groupByMonth, invoiceTotals } from '@/utils/invoice-view';
 

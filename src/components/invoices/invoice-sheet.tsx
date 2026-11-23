@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Sheet } from '@/components/ui/sheet';
 import { Text } from '@/components/ui/text';
 import { useRoleArea } from '@/hooks/use-session';
-import { getInvoice, invoicesErrorMessage, type Invoice } from '@/services/invoices';
+import { getInvoice, invoicesErrorMessage } from '@/services/invoices';
+import type { Invoice } from '@/types/invoice';
 import { formatDate, formatMoney } from '@/utils/format';
 import { formatHours, invoicePeriod, invoiceStatusLabel, lineWhen, tokenLabel } from '@/utils/invoice-view';
 

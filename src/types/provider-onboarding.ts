@@ -66,3 +66,16 @@ export type ProviderOnboardingValues = {
   operating_regions: OperatingRegionValues[];
   guard_categories: string[];
 };
+
+export type CoverageCity = {
+  /** City code, like "TORONTO". */
+  code: string;
+  /** The most a guard may travel from this city, or null when the provider set no limit. */
+  radiusKm: number | null;
+};
+
+export type CoverageRegion = {
+  /** Province code, like "ON". */
+  code: string;
+  cities: CoverageCity[];
+};

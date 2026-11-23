@@ -1,17 +1,11 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import {
-  listNotifications,
-  markAllNotificationsRead,
-  markNotificationRead,
-  notificationsErrorMessage,
-  type NotificationFilter,
-  type NotificationsPage,
-} from '@/services/notifications';
+import { listNotifications, markAllNotificationsRead, markNotificationRead, notificationsErrorMessage } from '@/services/notifications';
 import { getUnreadCount, setUnreadCount } from '@/services/unread-count';
 import { useRealtimeRefresh, useScreenFocused } from '@/hooks/use-realtime';
 import { toast } from '@/services/toast';
+import type { NotificationFilter, NotificationsPage } from '@/types/notification';
 
 const LOAD_ERROR = "Couldn't load your alerts. Pull down to try again.";
 

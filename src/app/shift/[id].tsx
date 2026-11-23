@@ -17,20 +17,8 @@ import { TextField } from '@/components/ui/text-field';
 import { useRealtimeRefresh, useScreenFocused } from '@/hooks/use-realtime';
 import { useRequestSite } from '@/hooks/use-request-site';
 import { useRoleArea } from '@/hooks/use-session';
-import {
-  checkInToSlot,
-  checkOutOfSlot,
-  getGuardShift,
-  SHIFT_STATUS_LABELS,
-  shiftHours,
-  shiftTone,
-  slotStep,
-  startSlot,
-  SLOT_STATUS_LABELS,
-  type GuardShiftDetail,
-  type ShiftSlot,
-  type ShiftTone,
-} from '@/services/guard-shifts';
+import { checkInToSlot, checkOutOfSlot, getGuardShift, SHIFT_STATUS_LABELS, shiftHours, shiftTone, slotStep, startSlot, SLOT_STATUS_LABELS } from '@/services/guard-shifts';
+import type { GuardShiftDetail, ShiftSlot, ShiftTone } from '@/types/shift';
 import type { BadgeKind } from '@/types/ui';
 import { dateFromKey } from '@/utils/calendar';
 import { formatTime } from '@/utils/format';

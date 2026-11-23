@@ -1,21 +1,10 @@
 import { REQUEST_FORM_DEFAULTS } from '@/schemas/request-form';
-import type { RequestDetail, RequestPayload, RequestSchedule, RequestUpdatePayload, SchedulePayload } from '@/services/requests';
 import type { ClientMetadata } from '@/types/onboarding';
+import type { RequestDetail, RequestPayload, RequestSchedule, RequestUpdatePayload, SavedSite, SchedulePayload } from '@/types/request';
 import type { RequestFormValues } from '@/types/request-form';
 import { formatTime12 } from '@/utils/availability';
 import { cityCodeFor, cityLabelFor, asObject, asText } from '@/utils/profile';
 import { combineDateTime, dateKey, deviceTimezone, localStamp, repeats, to24Hour } from '@/utils/request-form';
-
-/** One of the client's saved sites, as the request form can pick it. */
-export type SavedSite = {
-  /** Its place in the client's profile: the number a request names it by. */
-  index: number;
-  name: string;
-  /** Street, city and province on one line. */
-  address: string;
-  /** A site without a location can't be used: guards are matched by distance. */
-  hasCoordinates: boolean;
-};
 
 const hasNumber = (value: unknown) => value !== null && value !== '' && value !== undefined && Number.isFinite(Number(value));
 

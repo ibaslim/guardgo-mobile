@@ -1,5 +1,6 @@
 import { getAccessToken, subscribeSession } from '@/services/api';
-import { getGuardJob, type GuardJob } from '@/services/guard-jobs';
+import { getGuardJob } from '@/services/guard-jobs';
+import type { GuardJob } from '@/types/job';
 
 /**
  * Where a job is now, for the alerts that talk about it. An alert is a snapshot of an event ("a new offer

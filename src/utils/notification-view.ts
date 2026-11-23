@@ -1,12 +1,8 @@
-import type { GuardJob } from '@/services/guard-jobs';
 import { JOB_STATUS_LABELS } from '@/services/guard-jobs';
-import type { AppNotification } from '@/services/notifications';
-import type { BadgeKind } from '@/types/ui';
+import type { GuardJob } from '@/types/job';
+import type { AppNotification, NotificationGroup, NotificationKind, StateChip } from '@/types/notification';
 import { formatMoney } from '@/utils/format';
 import { jobBadgeKind, stamp } from '@/utils/job-status';
-
-/** What an alert is about, read from its title. Offers, reconfirmations and status updates concern a job. */
-export type NotificationKind = 'offer' | 'reconfirm' | 'status' | 'other';
 
 const OFFER_TITLES: readonly string[] = ['New request offer', 'Shift replacement offer', 'New job offer'];
 
@@ -16,22 +12,6 @@ export function kindOf(notification: AppNotification): NotificationKind {
   if (notification.title === 'Job status updated') return 'status';
   return 'other';
 }
-
-/**
- * One row in the list: the latest alert of a kind for one request, with the earlier ones folded under
- * it. A request that was re-sent six times is one row with "6 offers", not six rows.
- */
-export type NotificationGroup = {
-  key: string;
-  kind: NotificationKind;
-  latest: AppNotification;
-  /** The earlier alerts of the same kind for the same request, newest first. */
-  older: AppNotification[];
-  /** Every alert in the group, the latest included. */
-  count: number;
-  /** The ids still unread, so reading the row can mark them all. */
-  unreadIds: string[];
-};
 
 /** Groups a newest-first list. A group sits where its latest alert is, so the order stays by time. */
 export function groupNotifications(items: readonly AppNotification[]): NotificationGroup[] {
@@ -69,8 +49,6 @@ export function countLabel(group: NotificationGroup) {
       return `${group.count} updates`;
   }
 }
-
-export type StateChip = { label: string; kind: BadgeKind };
 
 /** The chip showing where the job is now, or null when it isn't known. */
 export function chipFor(job: GuardJob | null | undefined): StateChip | null {

@@ -1,4 +1,4 @@
-import type { Invoice } from '@/services/invoices';
+import type { Invoice, InvoiceMonth } from '@/types/invoice';
 import { formatDate, formatTime } from '@/utils/format';
 
 /** "Long Term" from "long_term". */
@@ -39,8 +39,6 @@ export function isThisMonth(date: Date | null) {
 
 /** The date an invoice is filed under: the start of its billing period. */
 export const invoiceDate = (invoice: Invoice) => invoice.periodStart ?? invoice.createdAt;
-
-export type InvoiceMonth = { key: string; label: string; total: number; currency: string; invoices: Invoice[] };
 
 /** The invoices grouped by the month of their period, in the order given (newest first). */
 export function groupByMonth(invoices: Invoice[]): InvoiceMonth[] {

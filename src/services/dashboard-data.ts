@@ -1,5 +1,7 @@
 import { ENDPOINTS } from '@/constants/endpoints';
 import { api, ApiError } from '@/services/api';
+import type { Raw } from '@/types/api';
+import type { DashboardInvoice, DashboardJob, DashboardShift } from '@/types/dashboard';
 import { parseServerTimestamp, parseWallClock } from '@/utils/dates';
 
 /**
@@ -11,49 +13,6 @@ export const DASHBOARD_ROWS = 200;
 export const SECTION_SIZE = 5;
 const SOON_MS = 24 * 60 * 60 * 1000;
 
-/** A job offered to, or taken by, the signed-in tenant (or, for a client, by whoever covers their request). */
-export type DashboardJob = {
-  id: string;
-  title: string;
-  siteName: string;
-  status: string;
-  /** Who covers the job. */
-  assignee: 'service_provider' | 'guard';
-  /** Hourly pay on offer to this assignee, when the request carries one. */
-  hourlyPay: number | null;
-  /** When the offer must be answered by. */
-  dueAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type DashboardShift = {
-  id: string;
-  title: string;
-  siteName: string;
-  status: string;
-  /** The shift's date at the site, "2026-03-12". */
-  dateLocal: string;
-  start: Date | null;
-  staffed: number;
-  required: number;
-  clientActionRequired: boolean;
-  rosterDueAt: Date | null;
-};
-
-export type DashboardInvoice = {
-  id: string;
-  number: string;
-  title: string;
-  period: string;
-  status: string;
-  currency: string;
-  amount: number;
-  hours: number;
-  createdAt: Date | null;
-  periodStart: Date | null;
-};
-
-export type Raw = Record<string, any>;
 type RawPage = { items?: Raw[] };
 
 export const toDate = (value: unknown) => {

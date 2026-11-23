@@ -33,6 +33,7 @@ import {
 } from "@/services/requests";
 import { toast } from "@/services/toast";
 import type { ClientMetadata, MetadataOption } from "@/types/onboarding";
+import type { SavedSite } from "@/types/request";
 import type { RequestFormValues } from "@/types/request-form";
 import { repeats } from "@/utils/request-form";
 import {
@@ -41,7 +42,6 @@ import {
   buildUpdatePayload,
   formFromRequest,
   savedSitesFrom,
-  type SavedSite,
 } from "@/utils/request-payload";
 
 type Loaded = {

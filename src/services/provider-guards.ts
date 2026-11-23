@@ -1,31 +1,10 @@
 import { ENDPOINTS } from '@/constants/endpoints';
 import { api, ApiError, getAccessToken, getApiUrl } from '@/services/api';
+import type { GuardCoverage, GuardsQuery, InviteState, ProviderGuard, ProviderGuardDetail, ProviderGuardsPage } from '@/types/provider-guard';
 import { parseServerTimestamp } from '@/utils/dates';
 import { formatPhone } from '@/utils/phone';
 
 export const GUARDS_PAGE_SIZE = 20;
-
-export type InviteState = 'pending' | 'expired' | 'accepted';
-
-/** One guard of the service provider, as the list shows it. */
-export type ProviderGuard = {
-  id: string;
-  /** The guard's name, empty until they fill in their profile. */
-  name: string;
-  email: string;
-  status: string;
-  invite: InviteState | null;
-  inviteExpiresAt: Date | null;
-  /** Phone number when the server sends one, already formatted. */
-  phone: string;
-};
-
-export type ProviderGuardsPage = {
-  items: ProviderGuard[];
-  page: number;
-  totalPages: number;
-  totalItems: number;
-};
 
 type RawGuard = {
   id?: string;
@@ -64,12 +43,6 @@ function parseGuard(raw: RawGuard): ProviderGuard {
   };
 }
 
-/** Which guards the server returns: those with this one tenant `status`, or all of them when left out. */
-export type GuardsQuery = { status?: GuardStatus; rows?: number };
-
-/** The tenant statuses the server knows. */
-export type GuardStatus = 'onboarding' | 'pending_verification' | 'pending_activation' | 'active' | 'inactive' | 'banned';
-
 function toPage(response: RawPage, page: number): ProviderGuardsPage {
   return {
     items: (response.items ?? []).map(parseGuard).filter((guard) => guard.id),
@@ -104,14 +77,6 @@ export function deleteExpiredInvite(guardId: string) {
   return api.delete<unknown>(`${ENDPOINTS.providerGuards.pendingInvite}/${guardId}`);
 }
 
-/** A guard of the service provider with the profile they filled in, from `GET /api/sp/guards/<id>`. */
-export type ProviderGuardDetail = {
-  id: string;
-  status: string;
-  profile: Record<string, unknown>;
-  email: string;
-};
-
 type RawDetail = {
   id?: string;
   status?: string | null;
@@ -128,14 +93,6 @@ export async function getProviderGuard(guardId: string): Promise<ProviderGuardDe
     email: String(raw.tenant_admin_user?.email ?? ''),
   };
 }
-
-export type GuardCoverage = {
-  regionCode: string;
-  cityCode: string;
-  radiusKm: number;
-  /** Weekly availability as the server stores it (see `availabilityPayload`). */
-  weeklyAvailability: Record<string, { start: string; end: string }[]>;
-};
 
 /** Sets the work area and weekly availability of one of the provider's guards. */
 export function saveGuardCoverage(guardId: string, coverage: GuardCoverage) {

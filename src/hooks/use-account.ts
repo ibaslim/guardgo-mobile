@@ -1,8 +1,10 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { getAccount, type AccountInfo } from '@/services/account';
-import { fetchTenantLogo, type TenantImage } from '@/services/tenant';
+import { getAccount } from '@/services/account';
+import { fetchTenantLogo } from '@/services/tenant';
+import type { AccountInfo } from '@/types/account';
+import type { TenantImage } from '@/types/tenant';
 
 type Loaded = { account: AccountInfo; photo: TenantImage | null };
 

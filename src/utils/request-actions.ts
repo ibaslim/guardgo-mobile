@@ -1,16 +1,4 @@
-import type { RequestSummary } from '@/services/requests';
-
-/** What a client can do with a request, from where it is in its life. */
-export type RequestPermissions = {
-  /** Change a draft, then publish it. */
-  editDraft: boolean;
-  /** Send changes to a request that is already out to guards. */
-  updateLive: boolean;
-  /** Ask for more guards on a live request. */
-  addCoverage: boolean;
-  /** Stop the request, or mark it finished. */
-  endRequest: boolean;
-};
+import type { RequestPermissions, RequestSummary } from '@/types/request';
 
 const LIVE = ['submitted', 'assigned'];
 

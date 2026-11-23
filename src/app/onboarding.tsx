@@ -13,8 +13,9 @@ import { useClientMetadata } from '@/hooks/use-client-metadata';
 import { useOnboardingWizard } from '@/hooks/use-onboarding-wizard';
 import { useTenantPrefill } from '@/hooks/use-tenant-prefill';
 import { CLIENT_ONBOARDING_DEFAULTS, CLIENT_STEP_FIELDS, clientOnboardingSchema } from '@/schemas/client-onboarding';
-import { finishOnboarding, parseClientProfile, saveClientProfile, type TenantSnapshot } from '@/services/tenant';
+import { finishOnboarding, parseClientProfile, saveClientProfile } from '@/services/tenant';
 import type { ClientKind, ClientMetadata } from '@/types/onboarding';
+import type { TenantSnapshot } from '@/types/tenant';
 
 // Steps in order. The first is a full-screen choice; the others share a progress header. The logo
 // is part of the details step, at the top, like the web client profile.

@@ -5,8 +5,9 @@ import { View } from 'react-native';
 import { AddCoverageSheet } from '@/components/requests/add-coverage-sheet';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { requestMoreCoverage, requestsErrorMessage, setRequestStatus, type EndStatus, type RequestDetail } from '@/services/requests';
+import { requestMoreCoverage, requestsErrorMessage, setRequestStatus } from '@/services/requests';
 import { toast } from '@/services/toast';
+import type { EndStatus, RequestDetail } from '@/types/request';
 import { clientPermissions } from '@/utils/request-actions';
 
 const ENDING: Record<EndStatus, { title: string; message: string; confirm: string; done: string; failed: string }> = {

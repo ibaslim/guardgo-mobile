@@ -8,14 +8,8 @@ import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
 import type { useGuardShifts } from '@/hooks/use-guard-shifts';
-import {
-  isOpenShift,
-  SHIFT_STATUS_LABELS,
-  shiftHours,
-  shiftTone,
-  type GuardShift,
-  type ShiftTone,
-} from '@/services/guard-shifts';
+import { isOpenShift, SHIFT_STATUS_LABELS, shiftHours, shiftTone } from '@/services/guard-shifts';
+import type { GuardShift, ShiftTone } from '@/types/shift';
 import type { BadgeKind } from '@/types/ui';
 import { dateFromKey } from '@/utils/calendar';
 import { formatTime } from '@/utils/format';

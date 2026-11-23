@@ -1,13 +1,7 @@
 import { CLIENT_PROFILE_STEPS, GUARD_PROFILE_STEPS, PROVIDER_PROFILE_STEPS } from '@/constants/profile-steps';
-import type { AccountInfo, AccountKind } from '@/services/account';
+import type { AccountInfo, AccountKind, ProfileStepRow } from '@/types/account';
 import { formatPhone } from '@/utils/phone';
 import { asObject, asText } from '@/utils/profile';
-
-/**
- * One line of the Profile card. With a `step`, it is a section of the profile that opens its edit
- * screen (`edit-profile/[step]`); without one it is only shown.
- */
-export type ProfileStepRow = { title: string; summary: string; step?: string; /** Opens the read-only screen for what the service provider set (`/assigned-schedule`). */ section?: 'area' | 'availability' };
 
 /** The server saves "N/A" as the name of a tenant that has no profile yet. */
 const clean = (value: unknown) => {

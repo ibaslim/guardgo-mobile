@@ -18,18 +18,15 @@ import { Text } from '@/components/ui/text';
 import { useGuardMetadata } from '@/hooks/use-guard-metadata';
 import { getAccount } from '@/services/account';
 import { availabilityPayload, parseGuardProfile } from '@/services/guard-tenant';
-import {
-  approveGuard,
-  getProviderGuard,
-  guardsErrorMessage,
-  saveGuardCoverage,
-  type ProviderGuardDetail,
-} from '@/services/provider-guards';
+import { approveGuard, getProviderGuard, guardsErrorMessage, saveGuardCoverage } from '@/services/provider-guards';
 import { EMPTY_AVAILABILITY } from '@/schemas/guard-onboarding';
-import { fetchTenantLogo, type TenantImage } from '@/services/tenant';
+import { fetchTenantLogo } from '@/services/tenant';
 import { toast } from '@/services/toast';
 import { WEEK_DAYS, type GuardMetadata } from '@/types/guard-onboarding';
-import { providerCoverage, type CoverageRegion } from '@/utils/provider-coverage';
+import type { ProviderGuardDetail } from '@/types/provider-guard';
+import type { CoverageRegion } from '@/types/provider-onboarding';
+import type { TenantImage } from '@/types/tenant';
+import { providerCoverage } from '@/utils/provider-coverage';
 
 const IN_REVIEW = 'pending activation';
 

@@ -6,9 +6,9 @@ import { DocumentPreview } from '@/components/provider/document-preview';
 
 import { Card } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
-import type { TenantImage } from '@/services/tenant';
 import type { GuardMetadata, GuardOnboardingValues, UploadedFile } from '@/types/guard-onboarding';
 import type { MetadataOption } from '@/types/onboarding';
+import type { TenantImage } from '@/types/tenant';
 import { formatDate } from '@/utils/format';
 import { cityLabelFor } from '@/utils/profile';
 

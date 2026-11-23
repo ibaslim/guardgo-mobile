@@ -1,7 +1,7 @@
 import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
-import type { Invoice } from '@/services/invoices';
+import type { Invoice } from '@/types/invoice';
 import { formatMoney } from '@/utils/format';
 import { formatHours, invoicePeriod, invoiceStatusLabel, tokenLabel } from '@/utils/invoice-view';
 

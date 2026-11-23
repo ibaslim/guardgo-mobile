@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { getRequest, type RequestDetail } from '@/services/requests';
+import { getRequest } from '@/services/requests';
+import type { RequestDetail } from '@/types/request';
 
 /**
  * The request behind a job or a shift. It holds the site's address and position, which the job and the

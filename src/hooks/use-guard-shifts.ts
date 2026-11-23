@@ -3,8 +3,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useRealtimeRefresh, useScreenFocused } from '@/hooks/use-realtime';
 import { jobsErrorMessage } from '@/services/guard-jobs';
-import { listGuardShifts, type GuardShift } from '@/services/guard-shifts';
-import { monthKey, monthOf, sameMonth, shiftMonth, type MonthCursor } from '@/utils/calendar';
+import { listGuardShifts } from '@/services/guard-shifts';
+import type { GuardShift } from '@/types/shift';
+import type { MonthCursor } from '@/types/time';
+import { monthKey, monthOf, sameMonth, shiftMonth } from '@/utils/calendar';
 import { toIsoDate } from '@/utils/dates';
 
 const LOAD_ERROR = "Couldn't load your shifts. Pull down to try again.";

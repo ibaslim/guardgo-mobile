@@ -2,8 +2,9 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useRealtimeRefresh, useScreenFocused } from '@/hooks/use-realtime';
-import { invoicesErrorMessage, listInvoicesPage, type InvoicesPage } from '@/services/invoices';
+import { invoicesErrorMessage, listInvoicesPage } from '@/services/invoices';
 import { toast } from '@/services/toast';
+import type { InvoicesPage } from '@/types/invoice';
 
 const LOAD_ERROR = "Couldn't load your invoices. Pull down to try again.";
 

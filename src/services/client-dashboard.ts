@@ -1,61 +1,9 @@
 import { ENDPOINTS } from '@/constants/endpoints';
 import { api } from '@/services/api';
+import type { Raw } from '@/types/api';
+import type { ClientDashboard, DashboardRequest } from '@/types/dashboard';
 import { parseServerTimestamp } from '@/utils/dates';
-import {
-  DASHBOARD_ROWS,
-  jobStats,
-  listShifts,
-  lower,
-  newestFirst,
-  parseJob,
-  SECTION_SIZE,
-  settled,
-  shiftStats,
-  throwIfAllFailed,
-  toDate,
-  toNumber,
-  weekAhead,
-  type DashboardJob,
-  type DashboardShift,
-  type Raw,
-} from '@/services/dashboard-data';
-
-/** One of the client's requests, with the pricing and invoice signals the dashboard counts. */
-export type DashboardRequest = {
-  id: string;
-  title: string;
-  status: string;
-  staffing: string;
-  siteName: string;
-  accepted: number;
-  open: number;
-  expiresAt: Date | null;
-  updatedAt: Date | null;
-  /** The charge saved with the request, or an estimate from the client's hourly quote. */
-  charge: number;
-  invoiceNumber: string;
-  invoiceStatus: string;
-  billingCycle: string;
-  invoicedAt: Date | null;
-};
-
-export type ClientDashboard = {
-  drafts: number;
-  submitted: number;
-  inMotion: number;
-  seekingCoverage: number;
-  liveAssignments: number;
-  inProgress: number;
-  upcomingShifts: number;
-  shiftsToday: number;
-  coverageRisk: number;
-  clientActionShifts: number;
-  spend: { label: string; amount: number; hint: string };
-  needsAttention: DashboardRequest[];
-  atRiskShifts: DashboardShift[];
-  recentJobs: DashboardJob[];
-  billing: DashboardRequest[];
-};
+import { DASHBOARD_ROWS, jobStats, listShifts, lower, newestFirst, parseJob, SECTION_SIZE, settled, shiftStats, throwIfAllFailed, toDate, toNumber, weekAhead } from '@/services/dashboard-data';
 
 const HOUR_MS = 60 * 60 * 1000;
 const round = (value: number) => Math.round(value * 100) / 100;

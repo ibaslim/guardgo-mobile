@@ -1,37 +1,13 @@
 import { ENDPOINTS } from '@/constants/endpoints';
 import { api, ApiError } from '@/services/api';
-import { lower, type Raw } from '@/services/dashboard-data';
+import { lower } from '@/services/dashboard-data';
 import { setUnreadCount } from '@/services/unread-count';
-import { parseServerTimestamp } from '@/utils/dates';
+import type { Raw } from '@/types/api';
+import type { AppNotification, NotificationCategory, NotificationFilter, NotificationsPage } from '@/types/notification';
 import type { RoleArea } from '@/types/roles';
+import { parseServerTimestamp } from '@/utils/dates';
 
 export const NOTIFICATIONS_PAGE_SIZE = 20;
-
-export type NotificationCategory = 'info' | 'success' | 'warning' | 'error';
-
-export type AppNotification = {
-  id: string;
-  title: string;
-  message: string;
-  category: NotificationCategory;
-  /** Which part of the product it came from, e.g. "requests" or "leaves". */
-  sourceModule: string;
-  /** The web page the server links to. The app maps it to its own screens, see `notificationTarget`. */
-  actionUrl: string;
-  actionLabel: string;
-  /** The request and job (assignment) it is about, when it names them. */
-  requestId: string;
-  assignmentId: string;
-  read: boolean;
-  createdAt: Date | null;
-};
-
-export type NotificationsPage = {
-  items: AppNotification[];
-  page: number;
-  totalPages: number;
-  totalItems: number;
-};
 
 type RawPage = {
   items?: Raw[];
@@ -57,8 +33,6 @@ export function parseNotification(raw: Raw): AppNotification {
     createdAt: parseServerTimestamp(raw.created_at),
   };
 }
-
-export type NotificationFilter = 'all' | 'unread';
 
 /** One page of the user's notifications, newest first. Also refreshes the unread count the tab shows. */
 export async function listNotifications(page: number, filter: NotificationFilter = 'all'): Promise<NotificationsPage> {

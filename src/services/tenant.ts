@@ -1,27 +1,18 @@
 import { File } from 'expo-file-system';
 
 import { ENDPOINTS } from '@/constants/endpoints';
+import type { PickedImage } from '@/types/image';
+import type { ClientMetadata, ClientOnboardingValues, OnboardingSite } from '@/types/onboarding';
+import type { TenantImage, TenantSnapshot } from '@/types/tenant';
 import { formatPhone, toE164 } from '@/utils/phone';
 import { asObject, asText, cityCodeFor } from '@/utils/profile';
 import { api, getAccessToken, getApiUrl, refreshSession, updateSession } from '@/services/api';
-import type { PickedImage } from '@/services/image-picker';
-import type { ClientMetadata, ClientOnboardingValues, OnboardingSite } from '@/types/onboarding';
 
 // Same limits as the web profile picture upload.
 export const TENANT_IMAGE_MAX_KB = 500;
 const TENANT_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
 
 type TenantUpdateResponse = { message?: string; id?: string; status?: string };
-
-/** The signed-in user's tenant, from `GET /api/tenant`. */
-export type TenantSnapshot = {
-  id?: string;
-  status?: string;
-  profile?: Record<string, unknown>;
-  /** 'service_provider' when a service provider owns this guard. */
-  ownership_type?: string | null;
-  service_provider_tenant_id?: string | null;
-};
 
 /** True for a guard that belongs to a service provider, which sets the guard's work area and availability. */
 export function isProviderOwned(tenant: TenantSnapshot | null) {
@@ -60,9 +51,6 @@ export function uploadTenantImage(image: PickedImage) {
   body.append('file', new File(image.uri) as unknown as Blob);
   return api.put<unknown>(ENDPOINTS.tenant.image, body);
 }
-
-/** A logo to show: its address and the headers the server needs to serve it. */
-export type TenantImage = { uri: string; headers?: Record<string, string> };
 
 // What identifies a served file. Two responses with the same signature are the same file.
 const fileSignature = (response: Response) =>

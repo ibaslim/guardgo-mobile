@@ -8,8 +8,9 @@ import { Card } from "@/components/ui/card";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useGuardMetadata } from "@/hooks/use-guard-metadata";
-import { getAccount, type AccountInfo } from "@/services/account";
+import { getAccount } from "@/services/account";
 import { parseAvailability, parseGuardProfile } from "@/services/guard-tenant";
+import type { AccountInfo } from "@/types/account";
 import { WEEK_DAYS, type GuardMetadata } from "@/types/guard-onboarding";
 import { cityLabelFor } from "@/utils/profile";
 

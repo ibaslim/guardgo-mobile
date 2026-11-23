@@ -18,8 +18,8 @@ import {
   PROVIDER_STEP_FIELDS,
 } from '@/schemas/provider-onboarding';
 import { parseProviderProfile, saveProviderProfile } from '@/services/provider-tenant';
-import type { TenantSnapshot } from '@/services/tenant';
 import type { GuardMetadata } from '@/types/guard-onboarding';
+import type { TenantSnapshot } from '@/types/tenant';
 
 const fieldsOf = (key: string): readonly string[] => PROVIDER_STEP_FIELDS[key as ProviderProfileStep];
 

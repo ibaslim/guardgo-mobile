@@ -12,7 +12,7 @@ import { Text } from '@/components/ui/text';
 import { useGuardJobs } from '@/hooks/use-guard-jobs';
 import { useGuardShifts } from '@/hooks/use-guard-shifts';
 import { useJobResponder } from '@/hooks/use-job-responder';
-import type { JobStatus } from '@/services/guard-jobs';
+import type { JobStatus } from '@/types/job';
 
 type Section = 'offers' | 'jobs' | 'shifts';
 

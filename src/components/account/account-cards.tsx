@@ -9,8 +9,9 @@ import { Text } from '@/components/ui/text';
 import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 import { ICONS } from '@/constants/icons';
 import { getApiUrl } from '@/services/api';
-import type { TenantImage } from '@/services/tenant';
-import { sentenceCase, type ProfileStepRow } from '@/utils/account-profile';
+import type { ProfileStepRow } from '@/types/account';
+import type { TenantImage } from '@/types/tenant';
+import { sentenceCase } from '@/utils/account-profile';
 
 const AVATAR_SIZE = 72;
 

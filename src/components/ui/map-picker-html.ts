@@ -1,4 +1,4 @@
-import type { MapsConfig } from '@/services/maps-config';
+import type { MapsConfig } from '@/types/maps';
 
 type Pin = { latitude: number; longitude: number };
 

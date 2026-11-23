@@ -20,8 +20,9 @@ import { useOnboardingWizard } from '@/hooks/use-onboarding-wizard';
 import { useTenantPrefill } from '@/hooks/use-tenant-prefill';
 import { createGuardOnboardingSchema, GUARD_ONBOARDING_DEFAULTS, GUARD_STEP_FIELDS } from '@/schemas/guard-onboarding';
 import { parseGuardProfile, saveGuardProfile } from '@/services/guard-tenant';
-import { finishOnboarding, isProviderOwned, type TenantSnapshot } from '@/services/tenant';
+import { finishOnboarding, isProviderOwned } from '@/services/tenant';
 import type { GuardMetadata } from '@/types/guard-onboarding';
+import type { TenantSnapshot } from '@/types/tenant';
 
 type StepKey = keyof typeof GUARD_STEP_FIELDS;
 

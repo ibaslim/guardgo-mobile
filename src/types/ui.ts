@@ -19,3 +19,5 @@ export type FieldMeta = {
   optional?: boolean;
   disabled?: boolean;
 };
+
+export type ToastMessage = { id: number; variant: ToastVariant; message: string };

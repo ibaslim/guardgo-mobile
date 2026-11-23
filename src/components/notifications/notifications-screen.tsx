@@ -10,8 +10,9 @@ import { useJobStates } from '@/hooks/use-job-states';
 import { useNotifications } from '@/hooks/use-notifications';
 import { useRoleArea } from '@/hooks/use-session';
 import { useUnreadCount } from '@/hooks/use-unread-count';
-import { notificationTarget, type AppNotification, type NotificationFilter } from '@/services/notifications';
-import { chipFor, detailLine, groupNotifications, isDead, kindOf, type NotificationGroup, type StateChip } from '@/utils/notification-view';
+import { notificationTarget } from '@/services/notifications';
+import type { AppNotification, NotificationFilter, NotificationGroup, StateChip } from '@/types/notification';
+import { chipFor, detailLine, groupNotifications, isDead, kindOf } from '@/utils/notification-view';
 
 const EMPTY: Record<NotificationFilter, string> = {
   all: 'No alerts yet. Updates about your jobs and account show up here.',

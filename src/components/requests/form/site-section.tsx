@@ -10,8 +10,8 @@ import { FormSection } from '@/components/ui/form-section';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
 import type { ClientMetadata } from '@/types/onboarding';
+import type { SavedSite } from '@/types/request';
 import type { SiteSource } from '@/types/request-form';
-import type { SavedSite } from '@/utils/request-payload';
 
 const SOURCES: readonly { value: SiteSource; label: string }[] = [
   { value: 'saved', label: 'Saved site' },

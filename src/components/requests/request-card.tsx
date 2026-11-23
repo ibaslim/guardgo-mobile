@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
-import type { RequestSummary } from '@/services/requests';
+import type { RequestSummary } from '@/types/request';
 import { coverageText, formatWindow, STAFFING_LABELS, STATUS_KINDS, STATUS_LABELS } from '@/utils/request-status';
 
 export type RequestCardProps = {
