@@ -22,7 +22,13 @@ export type JobCardProps = {
   /** True while this job's answer is being sent: the buttons wait. */
   busy?: boolean;
   onOpen: () => void;
-  onAct: (action: JobAction) => void;
+  /** Answers the job. Not needed for a read-only card. */
+  onAct?: (action: JobAction) => void;
+  /**
+   * For a client looking at who was offered its work: no answer buttons and no pay (that is what the guard
+   * earns), and the line under the site names who the job went to.
+   */
+  readOnly?: boolean;
 };
 
 /** The line under the site: when the job runs, or when the offer must be answered. */
@@ -30,6 +36,7 @@ function whenLine(job: GuardJob) {
   if (job.status === 'offered' || job.status === 'reconfirmation_required') {
     return job.dueAt ? `Reply by ${stamp(job.dueAt)}` : 'No reply deadline';
   }
+  if (job.status === 'expired') return job.dueAt ? `No reply by ${stamp(job.dueAt)}` : 'Not answered in time';
   return job.start ? `Starts ${stamp(job.start)}` : '';
 }
 
@@ -37,9 +44,14 @@ function whenLine(job: GuardJob) {
  * A job offered to, or taken by, the guard. Tapping it opens the details. An offer, or a job to
  * reconfirm, also has its two answers in a footer, so it can be dealt with without opening it.
  */
-export function JobCard({ job, busy = false, onOpen, onAct }: JobCardProps) {
-  const quick = job.status === 'offered' || job.status === 'reconfirmation_required' ? jobActions(job) : [];
-  const meta = [job.hourlyPay === null ? null : `${formatMoney(job.hourlyPay)} / hr`, whenLine(job)].filter(Boolean).join(' · ');
+export function JobCard({ job, busy = false, onOpen, onAct, readOnly = false }: JobCardProps) {
+  const quick = !readOnly && (job.status === 'offered' || job.status === 'reconfirmation_required') ? jobActions(job) : [];
+  const first = readOnly
+    ? job.assignee || (job.forProvider ? 'Service provider' : 'Guard')
+    : job.hourlyPay === null
+      ? null
+      : `${formatMoney(job.hourlyPay)} / hr`;
+  const meta = [first, whenLine(job)].filter(Boolean).join(' · ');
 
   return (
     <View className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
@@ -77,7 +89,7 @@ export function JobCard({ job, busy = false, onOpen, onAct }: JobCardProps) {
                 accessibilityLabel={`${action.label} ${job.title}`}
                 accessibilityState={{ busy }}
                 disabled={busy}
-                onPress={() => onAct(action)}
+                onPress={() => onAct?.(action)}
                 className="h-10 flex-1 items-center justify-center active:bg-surface-muted">
                 {busy && action.kind === 'primary' ? (
                   <ActivityIndicator colorClassName="accent-primary" />

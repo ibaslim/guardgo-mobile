@@ -12,6 +12,7 @@ export const ICONS = {
   phone: { sf: 'phone', md: 'call' },
   mailUnread: { sf: 'envelope.badge', md: 'mark_email_unread' },
   location: { sf: 'mappin.and.ellipse', md: 'location_on' },
+  plus: { sf: 'plus', md: 'add' },
   note: { sf: 'text.alignleft', md: 'notes' },
   eye: { sf: 'eye', md: 'visibility' },
   eyeOff: { sf: 'eye.slash', md: 'visibility_off' },

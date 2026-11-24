@@ -36,6 +36,8 @@ export type GuardJob = {
   completedAt: Date | null;
   /** A note the sender attached to the offer. */
   note: string;
+  /** Who the job was offered to, by name, as the client sees it. Empty when the server sent none. */
+  assignee: string;
   /** True when the job is offered to a service provider (which commits a number of guard positions) rather than a guard. */
   forProvider: boolean;
   /** Guard positions this assignee has committed to. */

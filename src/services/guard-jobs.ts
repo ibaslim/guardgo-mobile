@@ -33,6 +33,7 @@ export function parseGuardJob(raw: Raw): GuardJob {
     startedAt: parseServerTimestamp(raw.started_at),
     completedAt: parseServerTimestamp(raw.completed_at),
     note: String(raw.note ?? ''),
+    assignee: String(raw.candidate_snapshot?.candidate_name ?? '').trim(),
     forProvider,
     committed: Math.max(1, Math.floor(toNumber(raw.slots_committed ?? 1))),
     openSlots: Math.max(0, Math.floor(toNumber(request.open_slots))),
