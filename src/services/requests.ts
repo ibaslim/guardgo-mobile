@@ -37,8 +37,21 @@ type RawRequest = {
     client_hourly_quote?: number | null;
     estimated_total_hours?: number | null;
     estimated_client_charge?: number | null;
+    requested_hours_per_position?: number | null;
+    rate_field?: string | null;
   } | null;
-  invoicing_snapshot?: { billing_cycle?: string | null; invoice_recipient_email?: string | null } | null;
+  invoicing_snapshot?: {
+    billing_cycle?: string | null;
+    invoice_recipient_email?: string | null;
+    invoice_note?: string | null;
+    invoice_status?: string | null;
+  } | null;
+  lock_reason?: string | null;
+  published_at?: string | null;
+  cancelled_at?: string | null;
+  closed_at?: string | null;
+  expired_at?: string | null;
+  match_summary?: { eligible_count?: number | null; total_candidates?: number | null } | null;
   requested_start_at?: string | null;
   requested_end_at?: string | null;
   request_expires_at?: string | null;
@@ -146,10 +159,19 @@ function parseDetail(raw: RawRequest): RequestDetail {
           hourlyRate: amount(price?.client_hourly_quote),
           estimatedHours: amount(price?.estimated_total_hours),
           estimatedTotal: amount(price?.estimated_client_charge),
+          hoursEach: amount(price?.requested_hours_per_position),
+          weekend: price?.rate_field === 'weekend_rate',
         }
       : null,
     billingCycle: text(raw.invoicing_snapshot?.billing_cycle),
     invoiceEmail: text(raw.invoicing_snapshot?.invoice_recipient_email),
+    lockReason: text(raw.lock_reason),
+    publishedAt: parseServerTimestamp(raw.published_at),
+    endedAt: parseServerTimestamp(raw.cancelled_at ?? raw.closed_at ?? raw.expired_at),
+    eligibleGuards: amount(raw.match_summary?.eligible_count),
+    candidateTotal: amount(raw.match_summary?.total_candidates),
+    invoiceNote: text(raw.invoicing_snapshot?.invoice_note),
+    invoiceStatus: text(raw.invoicing_snapshot?.invoice_status),
   };
 }
 
@@ -164,6 +186,8 @@ type RawWave = {
   offer_count?: number;
   accepted_slots_at_close?: number;
   wave_expires_at?: string | null;
+  activated_at?: string | null;
+  review_note?: string | null;
 };
 
 export async function listRequestWaves(requestId: string): Promise<RequestWave[]> {
@@ -178,6 +202,8 @@ export async function listRequestWaves(requestId: string): Promise<RequestWave[]
       offers: wave.offer_count ?? 0,
       accepted: wave.accepted_slots_at_close ?? 0,
       expiresAt: parseServerTimestamp(wave.wave_expires_at),
+      activatedAt: parseServerTimestamp(wave.activated_at),
+      reviewNote: text(wave.review_note),
     }))
     .filter((wave) => wave.id)
     .sort((a, b) => b.number - a.number);

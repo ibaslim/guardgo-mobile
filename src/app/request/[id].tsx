@@ -57,7 +57,7 @@ export default function RequestScreen() {
         </View>
       ) : loaded ? (
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
-          <RequestDetails request={loaded.request} waves={loaded.waves} />
+          <RequestDetails request={loaded.request} waves={loaded.waves} showPrice={area === 'client'} />
           {area === 'client' ? <ClientRequestActions request={loaded.request} onChanged={() => setAttempt((count) => count + 1)} /> : null}
         </ScrollView>
       ) : (

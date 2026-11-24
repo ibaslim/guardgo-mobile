@@ -45,6 +45,10 @@ export type RequestPricing = {
   hourlyRate: number | null;
   estimatedHours: number | null;
   estimatedTotal: number | null;
+  /** Hours one guard works on this job. */
+  hoursEach: number | null;
+  /** Weekend jobs are quoted at the weekend rate. */
+  weekend: boolean;
 };
 
 /** One request with everything its details screen shows. */
@@ -71,6 +75,18 @@ export type RequestDetail = RequestSummary & {
   pricing: RequestPricing | null;
   billingCycle: string;
   invoiceEmail: string;
+  /** Why the request is locked: review_pending, filled, request_expired, request_cancelled or request_closed. */
+  lockReason: string;
+  /** When it was published to guards. */
+  publishedAt: Date | null;
+  /** When it was cancelled, closed or ran out of time. */
+  endedAt: Date | null;
+  /** How many of the guards considered fit the job. Only a client is sent the match results. */
+  eligibleGuards: number | null;
+  candidateTotal: number | null;
+  /** The server's own plain-language note on how this request is invoiced. */
+  invoiceNote: string;
+  invoiceStatus: string;
 };
 
 /** Where an offer round is: waiting for approval, sent out, or finished one way or another. */
@@ -84,6 +100,10 @@ export type RequestWave = {
   offers: number;
   accepted: number;
   expiresAt: Date | null;
+  /** When the offers went out. */
+  activatedAt: Date | null;
+  /** Why the round was sent back, written by the reviewer. Only a client is sent it. */
+  reviewNote: string;
 };
 
 /** A site typed in for one request (not one of the client's saved sites). */

@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { AddCoverageSheet } from '@/components/requests/add-coverage-sheet';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { Text } from '@/components/ui/text';
 import { requestMoreCoverage, requestsErrorMessage, setRequestStatus } from '@/services/requests';
 import { toast } from '@/services/toast';
 import type { EndStatus, RequestDetail } from '@/types/request';
@@ -78,10 +79,21 @@ export function ClientRequestActions({ request, onChanged }: ClientRequestAction
 
   return (
     <View className="gap-3 pt-4">
-      {can.editDraft ? <Button title="Edit draft" variant="secondary" size="lg" onPress={() => edit()} /> : null}
+      {/* One main action per state; the rest sit quietly beneath it. */}
+      {can.editDraft ? <Button title="Edit draft" size="lg" onPress={() => edit()} /> : null}
+      {can.addCoverage ? <Button title="Ask for more guards" size="lg" onPress={() => setCoverageOpen(true)} /> : null}
       {can.updateLive ? <Button title="Update request" variant="secondary" size="lg" onPress={() => edit('update')} /> : null}
-      {can.addCoverage ? <Button title="Ask for more guards" variant="secondary" size="lg" onPress={() => setCoverageOpen(true)} /> : null}
-      {can.endRequest ? <Button title="Cancel request" variant="danger" size="lg" onPress={() => ask('cancelled')} /> : null}
+      {can.endRequest ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Cancel request"
+          onPress={() => ask('cancelled')}
+          className="min-h-12 items-center justify-center rounded-xl active:opacity-60">
+          <Text variant="label" tone="danger">
+            Cancel request
+          </Text>
+        </Pressable>
+      ) : null}
 
       <ConfirmDialog
         visible={endingOpen}
