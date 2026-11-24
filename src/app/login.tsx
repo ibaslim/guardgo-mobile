@@ -12,6 +12,7 @@ import { FormScrollView } from '@/components/ui/form-scroll-view';
 import { Icon } from '@/components/ui/icon';
 import { LogoMark } from '@/components/ui/logo-mark';
 import { Screen } from '@/components/ui/screen';
+import { Select } from '@/components/ui/select';
 import { Text } from '@/components/ui/text';
 import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 import { FORM_SERVER_ERROR } from '@/constants/form';
@@ -27,11 +28,25 @@ const schema = z.object({
 
 // Test account, prefilled in development builds only.
 const DEFAULT_VALUES = __DEV__
-  ? { username: 'serviceprovider1@gmail.com', password: '12345678' }
+  ? { username: 'guard1@gmail.com', password: '1qaz!QAZ' }
   : { username: '', password: '' };
+
+// Quick-fill accounts for development builds. Add more here; each shows in the sheet by label.
+const TEST_ACCOUNTS = [
+  { label: 'Platform Guard', username: 'guard1@gmail.com', password: '1qaz!QAZ' },
+  { label: 'Service Provider Guard', username: 'testinvite1@example.com', password: '12345678' },
+  { label: 'Service Provider', username: 'serviceprovider1', password: '12345678' },
+  { label: 'Client', username: 'client_test2@gmail.com', password: '1qaz!QAZ' },
+];
+const TEST_ACCOUNT_OPTIONS = TEST_ACCOUNTS.map((account) => ({
+  label: account.label,
+  value: account.label,
+  description: account.username,
+}));
 
 export default function LoginScreen() {
   const [server, setServer] = useState(getApiUrl);
+  const [account, setAccount] = useState<string | null>(null);
   const form = useApiForm({ schema, defaultValues: DEFAULT_VALUES });
 
   // The server may have changed on the IP Config screen.
@@ -106,6 +121,22 @@ export default function LoginScreen() {
             </View>
 
             <View className="gap-4 rounded-xl border border-border bg-surface p-5 shadow-sm">
+              {__DEV__ ? (
+                <Select
+                  label="Test account"
+                  placeholder="Choose an account to fill in"
+                  icon={ICONS.user}
+                  options={TEST_ACCOUNT_OPTIONS}
+                  value={account}
+                  onChange={(next) => {
+                    setAccount(next);
+                    const picked = TEST_ACCOUNTS.find((item) => item.label === next);
+                    if (!picked) return;
+                    form.setValue('username', picked.username, { shouldValidate: form.formState.isSubmitted });
+                    form.setValue('password', picked.password, { shouldValidate: form.formState.isSubmitted });
+                  }}
+                />
+              ) : null}
               <FormTextField
                 control={form.control}
                 name="username"
