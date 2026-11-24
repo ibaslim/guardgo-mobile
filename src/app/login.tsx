@@ -10,6 +10,7 @@ import { FormPasswordField, FormTextField } from '@/components/form/form-fields'
 import { Button } from '@/components/ui/button';
 import { FormScrollView } from '@/components/ui/form-scroll-view';
 import { Icon } from '@/components/ui/icon';
+import { LogoMark } from '@/components/ui/logo-mark';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { ThemeSwitcher } from '@/components/ui/theme-switcher';
@@ -95,9 +96,7 @@ export default function LoginScreen() {
           {/* The form sits low on the screen, within reach of a thumb. */}
           <View className="flex-1 justify-end gap-8">
             <View className="gap-5">
-              <View className="size-14 items-center justify-center rounded-2xl bg-primary" accessible={false}>
-                <Icon icon={ICONS.shield} size={30} colorVar="--color-on-primary" />
-              </View>
+              <LogoMark size={56} />
               <View className="gap-1.5">
                 <Text variant="display" accessibilityRole="header">
                   Sign in
