@@ -17,16 +17,17 @@ export class ApiError extends Error {
   }
 }
 
-// The server answers errors in three shapes:
+// The server answers errors in four shapes:
 //   { detail: "message" }                                   HTTPException
 //   { detail: [{ loc, msg, type }] }                        FastAPI validation (per the OpenAPI spec)
 //   { validation_errors: [{ field, message }], traceback }  the server's own validation handler
+//   { error: "message", traceback }                         an unhandled server error, in debug mode
 export function toApiError(status: number, body: unknown): ApiError {
   const fieldErrors: Record<string, string> = {};
   let message = `Request failed (${status})`;
 
   if (body && typeof body === 'object') {
-    const { detail, validation_errors, message: bodyMessage } = body as Record<string, unknown>;
+    const { detail, validation_errors, message: bodyMessage, error: crash } = body as Record<string, unknown>;
 
     if (typeof detail === 'string') {
       message = detail;
@@ -40,6 +41,9 @@ export function toApiError(status: number, body: unknown): ApiError {
       }
     } else if (typeof bodyMessage === 'string') {
       message = bodyMessage;
+    } else if (typeof crash === 'string' && crash) {
+      // A server crash in debug mode: { error, traceback }. Shown so the cause isn't hidden behind a generic message.
+      message = crash;
     }
 
     const firstFieldError = Object.entries(fieldErrors)[0];

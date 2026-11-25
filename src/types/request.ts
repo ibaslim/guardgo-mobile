@@ -162,12 +162,45 @@ export type SchedulePayload = {
   active: boolean;
 };
 
+/** The attendance rules a schedule's shifts follow. Minutes, except the geofence (meters) and horizon (days). */
+export type ScheduleRules = {
+  /** How many days ahead shifts are created. More are added as days pass. */
+  horizonDays: number;
+  /** How long before a shift starts a provider must have named the guard. */
+  rosterLeadMinutes: number;
+  /** Until how close to the start a guard can still report leave. */
+  leaveCutoffMinutes: number;
+  /** How long after the start a guard can arrive before being marked late. */
+  lateGraceMinutes: number;
+  /** How long after the start a missing guard is confirmed as a no-show. */
+  noShowMinutes: number;
+  /** How near the site a guard has to be to check in. */
+  geofenceMeters: number;
+};
+
+/** The schedule saved for a request: how it turns into dated shifts, and the rules those shifts follow. */
 export type RequestSchedule = {
   id: string;
   kind: ScheduleKind;
+  /** "2026-11-20" */
   startDate: string;
   endDate: string;
   recurrenceDays: string[];
+  /** IANA name, like "America/Toronto". The shift times are in it. */
+  timezone: string;
+  /** "09:00", 24-hour. An end at or before the start runs overnight. */
+  startTime: string;
+  endTime: string;
+  rules: ScheduleRules;
+  /** False when it was paused (on the web): it creates no shifts. */
+  active: boolean;
+  /**
+   * True when the server made it from the request's own start and end, because the client never set one.
+   * It is then a single shift with the standard rules.
+   */
+  systemGenerated: boolean;
+  /** Shifts made from it so far, when the server says. */
+  shiftCount: number | null;
 };
 
 /** The two ways a live request ends: cancelled before it is done, or closed once the work is over. */
@@ -186,6 +219,8 @@ export type RequestPermissions = {
   addCoverage: boolean;
   /** Stop the request, or mark it finished. */
   endRequest: boolean;
+  /** Set how a published request repeats as shifts, and their attendance rules. A draft does it in its form. */
+  planShifts: boolean;
 };
 
 /** One of the client's saved sites, as the request form can pick it. */

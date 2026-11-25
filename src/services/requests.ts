@@ -1,4 +1,5 @@
 import { ENDPOINTS } from '@/constants/endpoints';
+import { DEFAULT_SCHEDULE_RULES } from '@/constants/schedule';
 import { api, ApiError } from '@/services/api';
 import type { EndStatus, FulfillmentMode, ListRequestsOptions, RequestDetail, RequestPayload, RequestSchedule, RequestStatus, RequestSummary, RequestUpdatePayload, RequestWave, RequestsPage, ScheduleKind, SchedulePayload, StaffingStatus } from '@/types/request';
 import { parseServerTimestamp } from '@/utils/dates';
@@ -234,22 +235,57 @@ export function publishRequest(requestId: string) {
 type RawSchedule = {
   id?: string;
   schedule_type?: string;
+  timezone?: string | null;
   start_date?: string;
   end_date?: string | null;
+  start_time_local?: string | null;
+  end_time_local?: string | null;
   recurrence_days?: string[] | null;
+  generation_horizon_days?: number | null;
+  roster_due_offset_minutes?: number | null;
+  unavailable_cutoff_minutes?: number | null;
+  late_grace_minutes?: number | null;
+  no_show_cutoff_minutes?: number | null;
+  checkin_geofence_meters?: number | null;
+  active?: boolean | null;
+  system_generated?: boolean | null;
+  generated_shift_count?: number | null;
 };
 
-/** The repeat pattern saved for a request, or null when it doesn't repeat (the server answers 404). */
+const SCHEDULE_KINDS: readonly string[] = ['one_time', 'date_range', 'recurring_weekly'];
+
+const whole = (value: number | null | undefined, fallback: number) =>
+  typeof value === 'number' && Number.isFinite(value) ? Math.round(value) : fallback;
+
+/**
+ * The schedule saved for a request, or null when there is none (the server answers 404). A request the
+ * client never planned can still have one the server made itself: see `systemGenerated`.
+ */
 export async function getRequestSchedule(requestId: string): Promise<RequestSchedule | null> {
   try {
     const { schedule } = await api.get<{ schedule?: RawSchedule | null }>(`${ENDPOINTS.requests.list}/${requestId}/schedule`);
     if (!schedule?.id) return null;
+    const rules = DEFAULT_SCHEDULE_RULES;
     return {
       id: schedule.id,
-      kind: (schedule.schedule_type as ScheduleKind) ?? 'one_time',
-      startDate: String(schedule.start_date ?? ''),
-      endDate: String(schedule.end_date ?? ''),
-      recurrenceDays: Array.isArray(schedule.recurrence_days) ? schedule.recurrence_days : [],
+      kind: SCHEDULE_KINDS.includes(String(schedule.schedule_type)) ? (schedule.schedule_type as ScheduleKind) : 'one_time',
+      startDate: text(schedule.start_date),
+      endDate: text(schedule.end_date),
+      recurrenceDays: Array.isArray(schedule.recurrence_days) ? schedule.recurrence_days.map((day) => text(day).toLowerCase()) : [],
+      timezone: text(schedule.timezone),
+      startTime: text(schedule.start_time_local),
+      endTime: text(schedule.end_time_local),
+      rules: {
+        horizonDays: whole(schedule.generation_horizon_days, rules.horizonDays),
+        rosterLeadMinutes: whole(schedule.roster_due_offset_minutes, rules.rosterLeadMinutes),
+        leaveCutoffMinutes: whole(schedule.unavailable_cutoff_minutes, rules.leaveCutoffMinutes),
+        lateGraceMinutes: whole(schedule.late_grace_minutes, rules.lateGraceMinutes),
+        noShowMinutes: whole(schedule.no_show_cutoff_minutes, rules.noShowMinutes),
+        geofenceMeters: whole(schedule.checkin_geofence_meters, rules.geofenceMeters),
+      },
+      active: schedule.active !== false,
+      systemGenerated: schedule.system_generated === true,
+      shiftCount: typeof schedule.generated_shift_count === 'number' ? schedule.generated_shift_count : null,
     };
   } catch (failure) {
     if (failure instanceof ApiError && failure.status === 404) return null;
@@ -257,7 +293,10 @@ export async function getRequestSchedule(requestId: string): Promise<RequestSche
   }
 }
 
-/** Saves the repeat pattern: creates it, or changes the one the request already has. */
+/**
+ * Saves the schedule: creates it, or changes the one the request already has. The server then deletes
+ * the request's upcoming shifts and makes them again from the new schedule.
+ */
 export function saveRequestSchedule(requestId: string, payload: SchedulePayload, exists: boolean) {
   const url = `${ENDPOINTS.requests.list}/${requestId}/schedule`;
   return exists ? api.patch<unknown>(url, payload) : api.post<unknown>(url, payload);

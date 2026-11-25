@@ -1,7 +1,14 @@
 import type { TimeDraft } from '@/types/time';
 import { parseTime } from '@/utils/availability';
 
-export const DEFAULT_TIME_DRAFT: TimeDraft = { hour: 9, minute: 0, period: 'AM' };
+/**
+ * The current time as 12-hour parts: where a picker with no time chosen yet opens. The minutes are
+ * rounded down to a multiple of 5, since the button picker only offers those (and so the hour never rolls over).
+ */
+export function nowDraft(now = new Date()): TimeDraft {
+  const hours = now.getHours();
+  return { hour: hours % 12 === 0 ? 12 : hours % 12, minute: now.getMinutes() - (now.getMinutes() % 5), period: hours >= 12 ? 'PM' : 'AM' };
+}
 
 export const twoDigits = (value: number) => String(value).padStart(2, '0');
 
