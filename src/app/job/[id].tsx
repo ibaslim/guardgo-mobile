@@ -12,6 +12,7 @@ import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { useJobResponder } from '@/hooks/use-job-responder';
 import { useRequestSite } from '@/hooks/use-request-site';
+import { useRoleArea } from '@/hooks/use-session';
 import { getGuardJob, JOB_STATUS_LABELS, jobActions } from '@/services/guard-jobs';
 import type { GuardJob } from '@/types/job';
 import { formatMoney } from '@/utils/format';
@@ -40,7 +41,9 @@ export default function JobScreen() {
   }, [id, attempt]);
 
   const request = useRequestSite(job?.requestId);
-  const actions = job ? jobActions(job) : [];
+  // A client sees who was offered its work, but only the guard or provider answers it.
+  const isClient = useRoleArea() === 'client';
+  const actions = job && !isClient ? jobActions(job) : [];
   const throughShifts = job ? job.scope === 'shift_replacement' || (job.scope === 'request' && job.hasSchedule) : false;
 
   return (
@@ -67,7 +70,7 @@ export default function JobScreen() {
                 <Badge label={JOB_STATUS_LABELS[job.status] ?? job.status} kind={jobBadgeKind(job.status)} />
               </View>
               <Text tone="secondary">{job.siteName}</Text>
-              {job.hourlyPay !== null ? (
+              {job.hourlyPay !== null && !isClient ? (
                 <Text variant="label" className="font-sans-semibold">
                   {formatMoney(job.hourlyPay)} / hr
                 </Text>
@@ -97,13 +100,14 @@ export default function JobScreen() {
           <InfoCard
             title="Job"
             rows={[
+              { label: 'Offered to', value: isClient ? job.assignee : '' },
               { label: 'Guard type', value: sentenceCase(job.guardType) },
               { label: 'Guards needed', value: job.guardsRequired ? String(job.guardsRequired) : '' },
               { label: 'Starts', value: stamp(job.start) },
               { label: 'Ends', value: stamp(job.end) },
               {
-                label: job.status === 'reconfirmation_required' ? 'Reconfirm by' : 'Reply by',
-                value: job.status === 'offered' || job.status === 'reconfirmation_required' ? stamp(job.dueAt) : '',
+                label: job.status === 'reconfirmation_required' ? 'Reconfirm by' : job.status === 'expired' ? 'Reply was due' : 'Reply by',
+                value: ['offered', 'reconfirmation_required', 'expired'].includes(job.status) ? stamp(job.dueAt) : '',
               },
             ]}
           />

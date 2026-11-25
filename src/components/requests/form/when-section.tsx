@@ -131,7 +131,6 @@ export function WhenSection({ form, allowRepeat = true }: { form: RequestForm; a
         dateLabel="Response date"
         timeLabel="Response time"
         minimumDate={today}
-        optional
         hint="Guards must answer before this. Needed to publish."
       />
     </FormSection>

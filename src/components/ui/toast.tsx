@@ -12,15 +12,17 @@ const textColors: Record<ToastVariant, string> = {
 export type ToastProps = {
   message: string;
   variant?: ToastVariant;
+  /** Set to false for text that keeps changing (a countdown), so a screen reader doesn't read out every change. */
+  announce?: boolean;
 };
 
 /** A small tooltip-style pill (light in light mode, dark in dark mode), sized to its text; the text colour shows success, warning or failure. */
-export function Toast({ message, variant = 'failure' }: ToastProps) {
+export function Toast({ message, variant = 'failure', announce = true }: ToastProps) {
   return (
     <View
       className="max-w-[88%] self-center rounded-md border border-border bg-toast px-2 py-1 shadow-md"
-      accessibilityRole={variant === 'success' ? undefined : 'alert'}
-      accessibilityLiveRegion="polite">
+      accessibilityRole={variant === 'success' || !announce ? undefined : 'alert'}
+      accessibilityLiveRegion={announce ? 'polite' : 'none'}>
       <Text variant="caption" tone="inherit" className={`font-sans ${textColors[variant]}`}>
         {message}
       </Text>
