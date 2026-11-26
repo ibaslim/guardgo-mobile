@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { DashboardScreen, toneOf, type DashboardView } from '@/components/dashboard/dashboard-screen';
 import { useDashboard } from '@/hooks/use-dashboard';
 import { SECTION_SIZE, within24Hours } from '@/services/dashboard-data';
+import { offerHref } from '@/services/guard-jobs';
 import { loadProviderDashboard } from '@/services/provider-dashboard';
 import type { ProviderDashboard } from '@/types/dashboard';
 import { attentionOf, invoiceMeta, offerMeta, shiftStaffing, when } from '@/utils/dashboard';
@@ -44,7 +45,7 @@ function viewOf(data: ProviderDashboard): DashboardView {
           subtitle: `${job.siteName}${job.status === 'reconfirmation_required' ? ' · Reconfirm' : ''}`,
           meta: offerMeta(job),
           tone: within24Hours(job.dueAt) ? 'warning' : 'neutral',
-          onPress: go('requests'),
+          onPress: () => router.push(offerHref(job)),
         })),
       },
       {

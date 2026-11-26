@@ -22,6 +22,11 @@ export type AreaTab = {
   icon: AreaIcon;
   /** What the screen will show, used on the home screen and the placeholder screen. */
   description: string;
+  /**
+   * True for the tab that holds the offers and jobs (WorkScreen): the tab dock blinks a dot on it while
+   * work is waiting. The guard's "jobs" and the service provider's "requests".
+   */
+  workAttention?: boolean;
 };
 
 export type AreaConfig = {

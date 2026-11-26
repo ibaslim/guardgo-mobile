@@ -12,6 +12,7 @@ import { Text } from '@/components/ui/text';
 import { useGuardJobs } from '@/hooks/use-guard-jobs';
 import { useGuardShifts } from '@/hooks/use-guard-shifts';
 import { useJobResponder } from '@/hooks/use-job-responder';
+import { offerHref } from '@/services/guard-jobs';
 import type { JobStatus } from '@/types/job';
 
 type Section = 'offers' | 'jobs' | 'shifts';
@@ -111,7 +112,7 @@ export function WorkScreen({ shiftsOnly = false }: { shiftsOnly?: boolean }) {
                   key={job.id}
                   job={job}
                   busy={busyId === job.id}
-                  onOpen={() => router.push(`/job/${job.id}` as Href)}
+                  onOpen={() => router.push(section === 'offers' ? offerHref(job) : (`/job/${job.id}` as Href))}
                   onAct={(action) => respond(job, action)}
                 />
               ))}

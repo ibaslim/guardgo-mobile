@@ -2,7 +2,6 @@ import { BottomTabBarHeightCallbackContext, type BottomTabBarProps } from 'expo-
 import { useContext, useEffect, useState } from 'react';
 import { AppState, Pressable, View, type LayoutChangeEvent } from 'react-native';
 import Animated, {
-  cancelAnimation,
   Easing,
   FadeIn,
   FadeOut,
@@ -10,16 +9,17 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
-  withRepeat,
-  withSequence,
   withTiming,
 } from 'react-native-reanimated';
 import { useCSSVariable } from 'uniwind';
 
+import { BlinkDot } from '@/components/ui/blink-dot';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { useRealtimeRefresh } from '@/hooks/use-realtime';
+import { useJobAttention } from '@/hooks/use-job-attention';
 import { useUnreadCount } from '@/hooks/use-unread-count';
+import { fetchJobAttention } from '@/services/job-attention';
 import { fetchUnreadCount } from '@/services/notifications';
 import type { AreaTab } from '@/types/roles';
 
@@ -35,30 +35,17 @@ const TAB_HEIGHT = 36;
 /** The selected icon turns white once the pill has mostly arrived under it, not before. */
 const RECOLOR_DELAY_MS = 100;
 
-/** A small red dot that fades in and out. It stays solid when the person has reduced motion on. */
-function UnreadDot() {
-  const reduceMotion = useReducedMotion();
-  const opacity = useSharedValue(1);
+/** How often to check a guard's jobs while not connected to Pusher. Slower than the alerts: it takes a few calls. */
+const JOBS_POLL_MS = 30_000;
 
-  useEffect(() => {
-    if (reduceMotion) {
-      opacity.set(1);
-      return;
-    }
-    opacity.set(
-      withRepeat(withSequence(withTiming(0.2, { duration: 600 }), withTiming(1, { duration: 600 })), -1, false)
-    );
-    return () => cancelAnimation(opacity);
-  }, [reduceMotion, opacity]);
-
-  const blink = useAnimatedStyle(() => ({ opacity: opacity.get() }));
-
+/**
+ * A small dot that fades in and out: red for unread alerts, blue (the primary colour) for guard work waiting.
+ * It stays solid when the person has reduced motion on.
+ */
+function AttentionDot({ tone = 'danger' }: { tone?: 'danger' | 'primary' }) {
   return (
-    <Animated.View
-      pointerEvents="none"
-      accessible={false}
-      className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full border border-surface bg-badge-danger"
-      style={blink}
+    <BlinkDot
+      className={`absolute -right-0.5 -top-0.5 size-2.5 rounded-full border border-surface ${tone === 'primary' ? 'bg-primary' : 'bg-badge-danger'}`}
     />
   );
 }
@@ -81,6 +68,9 @@ export function TabDock({ state, descriptors, emitter, navigateToTab, insets, ta
   const reduceMotion = useReducedMotion();
   const unread = useUnreadCount();
   const hasAlerts = tabs.some((tab) => tab.name === 'notifications');
+  // The tab with offers and jobs: the guard's "jobs", the service provider's "requests".
+  const jobsWaiting = useJobAttention();
+  const hasGuardJobs = tabs.some((tab) => tab.workAttention);
 
   // While not connected to Pusher, ask for the count every 10 seconds. With Pusher up, the root bridge
   // (hooks/use-realtime-bridge.ts) updates it on each event, so only the polling is used here.
@@ -103,6 +93,26 @@ export function TabDock({ state, descriptors, emitter, navigateToTab, insets, ta
     });
     return () => subscription.remove();
   }, [hasAlerts, state.index]);
+
+  // The same for the Jobs dot (guard and service provider): an offer or a change on a job (a "requests" event) checks again.
+  useRealtimeRefresh(
+    () => {
+      fetchJobAttention().catch(() => undefined);
+    },
+    { active: hasGuardJobs, sources: ['requests'], pollMs: JOBS_POLL_MS }
+  );
+
+  useEffect(() => {
+    if (!hasGuardJobs) return;
+    const refresh = () => {
+      fetchJobAttention().catch(() => undefined);
+    };
+    refresh();
+    const subscription = AppState.addEventListener('change', (next) => {
+      if (next === 'active') refresh();
+    });
+    return () => subscription.remove();
+  }, [hasGuardJobs, state.index]);
 
   const reportHeight = useContext(BottomTabBarHeightCallbackContext);
   const [shadow, glow, highlight, primary] = useCSSVariable([
@@ -198,7 +208,9 @@ export function TabDock({ state, descriptors, emitter, navigateToTab, insets, ta
                       colorVar={looksSelected === index ? '--color-on-primary' : '--color-content-muted'}
                     />
                     {/* Unread alerts: a blinking dot on the Alerts icon while that tab is not the open one. */}
-                    {tab.name === 'notifications' && unread > 0 && !focused ? <UnreadDot /> : null}
+                    {tab.name === 'notifications' && unread > 0 && !focused ? <AttentionDot /> : null}
+                    {/* Work waiting for a guard or provider (an offer, a job under way, or one still to come): the same dot on Jobs. */}
+                    {tab.workAttention && jobsWaiting && !focused ? <AttentionDot tone="primary" /> : null}
                   </View>
                   {focused ? (
                     <Animated.View

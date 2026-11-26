@@ -81,7 +81,7 @@ export const AREA_CONFIGS: Readonly<Record<RoleArea, AreaConfig>> = {
     focus: { title: 'Next shift', empty: 'No upcoming shifts. Shifts appear here once a job is assigned to you.' },
     tabs: [
       homeTab('Your next shift and recent activity.'),
-      { name: 'jobs', title: 'Jobs', icon: { sf: 'briefcase', md: 'work' }, description: 'Jobs offered and assigned to you.' },
+      { name: 'jobs', title: 'Jobs', icon: { sf: 'briefcase', md: 'work' }, description: 'Jobs offered and assigned to you.', workAttention: true },
       { name: 'leaves', title: 'Leaves', icon: { sf: 'calendar', md: 'event_busy' }, description: 'Request time off and see its status.' },
       { name: 'invoices', title: 'Invoices', icon: { sf: 'doc.text', md: 'receipt_long' }, description: 'Payouts for completed shifts.' },
       { name: 'notifications', title: 'Alerts', icon: { sf: 'bell', md: 'notifications' }, description: 'New job offers and updates about your jobs.' },
@@ -104,7 +104,7 @@ export const AREA_CONFIGS: Readonly<Record<RoleArea, AreaConfig>> = {
     focus: { title: 'Requests to staff', empty: 'Nothing to staff right now. New requests for your guards appear here.' },
     tabs: [
       homeTab('Requests to staff and guard activity.'),
-      { name: 'requests', title: 'Jobs', icon: { sf: 'tray.full', md: 'assignment' }, description: 'Jobs sent to your company and their assignments.' },
+      { name: 'requests', title: 'Jobs', icon: { sf: 'tray.full', md: 'assignment' }, description: 'Jobs sent to your company and their assignments.', workAttention: true },
       { name: 'guards', title: 'Guards', icon: { sf: 'person.2', md: 'groups' }, description: 'Guards in your company and their availability.' },
       { name: 'invoices', title: 'Invoices', icon: { sf: 'doc.text', md: 'receipt_long' }, description: 'Payouts for completed work.' },
       { name: 'notifications', title: 'Alerts', icon: { sf: 'bell', md: 'notifications' }, description: 'Updates about your requests, guards and invoices.' },

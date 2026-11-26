@@ -11,11 +11,10 @@ import type { RequestDetail } from '@/types/request';
 import { distanceMeters, distanceText } from '@/utils/distance';
 
 /**
- * Where the guard has to be: the site's address, a button to show it on the map, and a button to check
- * how far the guard is from it. The phone's location is read only when that button is pressed. Shared by
- * the job (offer) details and the shift details, so both show the same thing.
+ * The two things a guard does with a site: get directions to it, and check how far away they are. The
+ * phone's location is read only when that button is pressed. Renders nothing for a site with no address.
  */
-export function SiteCard({ site, name, title = 'Site' }: { site: RequestDetail['site']; name: string; title?: string }) {
+export function SiteActions({ site }: { site: RequestDetail['site'] }) {
   const [checking, setChecking] = useState(false);
   const [away, setAway] = useState<string | null>(null);
 
@@ -48,6 +47,35 @@ export function SiteCard({ site, name, title = 'Site' }: { site: RequestDetail['
     }
   };
 
+  if (!destination) return null;
+
+  return (
+    <View className="gap-2">
+      <View className="flex-row gap-3">
+        {hasPoint ? (
+          <View className="flex-1">
+            <Button title="How far am I?" variant="secondary" loading={checking} onPress={checkDistance} />
+          </View>
+        ) : null}
+        {/* Directions is the main thing to do with a site, so it is the primary button, on the right. */}
+        <View className="flex-1">
+          <Button title="Directions" icon={ICONS.location} onPress={openMaps} />
+        </View>
+      </View>
+      {away ? (
+        <Text variant="small" tone="secondary" className="text-center" accessibilityLiveRegion="polite">
+          You are about {away} from the site
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+/**
+ * Where the guard has to be: the site's address, then directions and a distance check. Shared by the job
+ * (offer) details and the shift details, so both show the same thing.
+ */
+export function SiteCard({ site, name, title = 'Site' }: { site: RequestDetail['site']; name: string; title?: string }) {
   return (
     <View className="gap-3">
       <InfoCard
@@ -58,17 +86,7 @@ export function SiteCard({ site, name, title = 'Site' }: { site: RequestDetail['
           { label: 'Site contact', value: site.contact },
         ]}
       />
-      {destination ? <Button title="Show on map" variant="secondary" icon={ICONS.location} onPress={openMaps} /> : null}
-      {hasPoint ? (
-        <View className="gap-2">
-          <Button title="How far am I?" variant="outline" loading={checking} onPress={checkDistance} />
-          {away ? (
-            <Text tone="secondary" className="text-center" accessibilityLiveRegion="polite">
-              You are about {away} from the site.
-            </Text>
-          ) : null}
-        </View>
-      ) : null}
+      <SiteActions site={site} />
     </View>
   );
 }
