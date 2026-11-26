@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useController, useWatch, type Control } from 'react-hook-form';
 import { ActivityIndicator, View } from 'react-native';
 
@@ -13,16 +13,17 @@ import { FormSection } from '@/components/ui/form-section';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { useApiForm } from '@/hooks/use-api-form';
+import { IANA_TIMEZONES } from '@/constants/timezones';
 import { schedulePlanSchema } from '@/schemas/request-schedule';
 import { getRequest, getRequestSchedule, requestsErrorMessage, saveRequestSchedule } from '@/services/requests';
 import { toast } from '@/services/toast';
 import type { RequestDetail, RequestSchedule, ScheduleKind } from '@/types/request';
 import { WEEKDAYS } from '@/utils/request-form';
+import { timezoneLabel } from '@/utils/timezone';
 import {
   buildPlanPayload,
   isClientPlan,
   planFromSchedule,
-  planTimezone,
   previewPlan,
   SCHEDULE_KIND_LABELS,
   type SchedulePlanValues,
@@ -45,7 +46,14 @@ function Weekdays({ control }: { control: Control<SchedulePlanValues, unknown, S
 /** The plan form, once the request and its schedule have loaded. */
 function PlanBody({ request, schedule }: Loaded) {
   const form = useApiForm({ schema: schedulePlanSchema, defaultValues: planFromSchedule(request, schedule) });
-  const timezone = planTimezone(request, schedule);
+  const initialTimezone = form.getValues('timezone');
+  // Every IANA zone, plus the saved one if it is an older alias the list doesn't carry, so it still shows.
+  const timezones = useMemo(() => {
+    const names = IANA_TIMEZONES.includes(initialTimezone) ? IANA_TIMEZONES : [initialTimezone, ...IANA_TIMEZONES];
+    // Offsets as they are today, so a zone on daylight saving shows its summer offset in summer.
+    const now = new Date();
+    return names.map((name) => ({ value: name, label: timezoneLabel(name, now) }));
+  }, [initialTimezone]);
   // A plan paused on the web stays paused: this screen doesn't pause or resume one.
   const active = schedule && isClientPlan(schedule) ? schedule.active : true;
   const values = useWatch({ control: form.control }) as SchedulePlanValues;
@@ -58,7 +66,7 @@ function PlanBody({ request, schedule }: Loaded) {
   async function save(plan: SchedulePlanValues) {
     setSaving(true);
     try {
-      await saveRequestSchedule(request.id, buildPlanPayload(plan, timezone, active), schedule !== null);
+      await saveRequestSchedule(request.id, buildPlanPayload(plan, active), schedule !== null);
       toast.success('Shift plan saved.');
       router.back();
     } catch (failure) {
@@ -93,7 +101,16 @@ function PlanBody({ request, schedule }: Loaded) {
           {values.kind === 'recurring_weekly' ? <Weekdays control={form.control} /> : null}
         </FormSection>
 
-        <FormSection title="Hours" description={`Each shift's start and end, in ${timezone} time.`}>
+        <FormSection title="Hours" description={`Each shift's start and end, in ${values.timezone ? timezoneLabel(values.timezone) : 'local'} time.`}>
+          <FormSelect
+            control={form.control}
+            name="timezone"
+            label="Timezone"
+            options={timezones}
+            searchable
+            searchPlaceholder="Search, like Toronto or +05:00"
+            hint="Shift days and hours are worked out in this timezone. It starts as the request's own."
+          />
           <View className="flex-row items-start gap-3">
             <View className="flex-1">
               <FormWheelTimePicker control={form.control} name="start_time" label="Starts" compact />

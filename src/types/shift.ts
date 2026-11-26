@@ -41,6 +41,12 @@ export type ShiftSlot = {
   guardId: string;
   /** Who covers the position: "service_provider" or a direct guard. */
   coverageType: string;
+  /**
+   * The accepted assignment the position belongs to, and its index within it. Together they name the same
+   * position on every shift of a request, which is how a roster is copied from one shift to the next.
+   */
+  assignmentId: string;
+  coverageIndex: number;
   rosterDueAt: Date | null;
   arrivedAt: Date | null;
   confirmedAt: Date | null;

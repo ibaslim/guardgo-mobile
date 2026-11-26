@@ -8,6 +8,8 @@ import { rulesPayload } from '@/utils/request-payload';
 /** Everything the shift plan screen collects. Times are text like "09:30 AM"; the rules are typed numbers. */
 export type SchedulePlanValues = {
   kind: ScheduleKind;
+  /** The IANA timezone the plan's days and hours are in, like "America/Toronto". */
+  timezone: string;
   /** The first day shifts run on; for a one-day plan, the only day. */
   first_day: Date | null;
   /** The last day, for a plan that repeats. */
@@ -121,6 +123,7 @@ export function planFromSchedule(request: RequestDetail, schedule: RequestSchedu
     const firstDay = parseDayKey(schedule.startDate);
     return {
       kind: schedule.kind,
+      timezone: planTimezone(request, schedule),
       first_day: firstDay,
       // A one-day plan's last day is its first; it is set again if the plan is changed to repeat.
       last_day: schedule.kind === 'one_time' ? null : parseDayKey(schedule.endDate),
@@ -134,6 +137,7 @@ export function planFromSchedule(request: RequestDetail, schedule: RequestSchedu
   const rules = schedule ? { ...schedule.rules, horizonDays: DEFAULT_SCHEDULE_RULES.horizonDays } : DEFAULT_SCHEDULE_RULES;
   return {
     kind: 'one_time',
+    timezone: planTimezone(request, schedule),
     first_day: request.start ? startOfDay(request.start) : null,
     last_day: null,
     start_time: request.start ? formatTime12(request.start) : '',
@@ -161,11 +165,11 @@ export function planRules(values: SchedulePlanValues): ScheduleRules {
 }
 
 /** The plan as the server takes it. The plan has to have passed `schedulePlanSchema` first. */
-export function buildPlanPayload(values: SchedulePlanValues, timezone: string, active: boolean): SchedulePayload {
+export function buildPlanPayload(values: SchedulePlanValues, active: boolean): SchedulePayload {
   const first = values.first_day ? dateKey(values.first_day) : '';
   const order = WEEKDAYS.map((day) => day.value as string);
   return {
-    timezone,
+    timezone: values.timezone,
     schedule_type: values.kind,
     start_date: first,
     // A one-day plan ends on the day it starts; the server refuses any other end for it.

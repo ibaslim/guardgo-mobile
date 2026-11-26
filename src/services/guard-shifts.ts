@@ -45,6 +45,20 @@ export async function listGuardShifts(cursor: MonthCursor): Promise<GuardShift[]
     .sort((a, b) => (a.start?.getTime() ?? 0) - (b.start?.getTime() ?? 0));
 }
 
+/** More upcoming shifts than a roster is ever copied to at once; the web lists the same number. */
+const REQUEST_SHIFT_ROWS = 100;
+
+/** One request's shifts from `fromDate` ("2026-03-12", at the site) on, earliest first. */
+export async function listRequestShifts(requestId: string, fromDate: string): Promise<GuardShift[]> {
+  const page = await api.get<RawPage>(ENDPOINTS.dashboard.shifts, {
+    query: { page: 1, rows: REQUEST_SHIFT_ROWS, request_id: requestId, date_from: fromDate },
+  });
+  return (page.items ?? [])
+    .filter((item) => item.id)
+    .map(parseShift)
+    .sort((a, b) => (a.start?.getTime() ?? 0) - (b.start?.getTime() ?? 0));
+}
+
 export function shiftTone(shift: GuardShift): ShiftTone {
   switch (shift.status) {
     case 'in_progress':
@@ -101,6 +115,8 @@ function parseSlot(raw: Raw): ShiftSlot {
     guardName: String(raw.assigned_guard_name ?? ''),
     guardId: String(raw.assigned_guard_tenant_id ?? ''),
     coverageType: lower(raw.coverage_source_type),
+    assignmentId: String(raw.parent_assignment_id ?? ''),
+    coverageIndex: toNumber(raw.coverage_slot_index),
     rosterDueAt: parseServerTimestamp(raw.roster_due_at),
     arrivedAt: parseServerTimestamp(raw.arrived_at),
     confirmedAt: parseServerTimestamp(raw.client_confirmed_at),

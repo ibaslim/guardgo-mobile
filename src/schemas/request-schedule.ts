@@ -12,6 +12,7 @@ const number = z.string();
 
 const shape = z.object({
   kind: z.enum(['one_time', 'date_range', 'recurring_weekly']),
+  timezone: z.string(),
   first_day: day,
   last_day: day,
   start_time: z.string(),
@@ -44,6 +45,7 @@ export const schedulePlanSchema = shape.superRefine((values, ctx) => {
   const fail: Fail = (path, message) => ctx.addIssue({ code: 'custom', path: [path], message });
   const repeats = values.kind !== 'one_time';
 
+  if (isBlank(values.timezone)) fail('timezone', 'Choose the timezone the shifts run in.');
   if (!values.first_day) fail('first_day', repeats ? 'Choose the first day.' : 'Choose the day.');
   if (isBlank(values.start_time) || parseTime(values.start_time) === null) fail('start_time', 'Choose when the shift starts.');
   if (isBlank(values.end_time) || parseTime(values.end_time) === null) fail('end_time', 'Choose when the shift ends.');
