@@ -19,3 +19,15 @@ export function formatFileSize(bytes: number) {
 export function formatMoney(value: number, currency = 'CAD') {
   return value.toLocaleString(undefined, { style: 'currency', currency });
 }
+
+/** Time left as "2d 3h", "2h 05m" or "12:34", getting finer as it runs down. Zero or less is "0:00". */
+export function formatCountdown(ms: number) {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  const days = Math.floor(total / 86_400);
+  const hours = Math.floor((total % 86_400) / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${String(minutes).padStart(2, '0')}m`;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
+}

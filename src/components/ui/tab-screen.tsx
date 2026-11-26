@@ -18,10 +18,12 @@ export type TabScreenProps = {
   onRefresh?: () => void;
   /** Called when the user scrolls near the bottom, e.g. to load the next page of a list. */
   onEndReached?: () => void;
+  /** Floats over the bottom right corner, above the tab bar, e.g. a `Fab`. */
+  floating?: ReactNode;
 };
 
 /** Scrollable screen inside a tab bar, with a title block at the top. */
-export function TabScreen({ title, subtitle, header, hideHeader = false, children, refreshing = false, onRefresh, onEndReached }: TabScreenProps) {
+export function TabScreen({ title, subtitle, header, hideHeader = false, children, refreshing = false, onRefresh, onEndReached, floating }: TabScreenProps) {
   // The tab bar floats over the screen, so the content keeps clear of it at the bottom.
   const tabBarHeight = useContext(BottomTabBarHeightContext) ?? 0;
 
@@ -39,7 +41,7 @@ export function TabScreen({ title, subtitle, header, hideHeader = false, childre
         }
         contentInsetAdjustmentBehavior="automatic"
         contentContainerClassName="gap-4 px-5 pt-0"
-        contentContainerStyle={{ paddingBottom: tabBarHeight + 24 }}
+        contentContainerStyle={{ paddingBottom: tabBarHeight + (floating ? 88 : 24) }}
         refreshControl={onRefresh ? <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> : undefined}>
         {hideHeader ? null : (header ?? (
           <View className="gap-1">
@@ -51,6 +53,12 @@ export function TabScreen({ title, subtitle, header, hideHeader = false, childre
         ))}
         {children}
       </ScrollView>
+      {floating ? (
+        // The free area above the tab bar; a floating button can be dragged anywhere inside it.
+        <View pointerEvents="box-none" className="absolute inset-x-0 top-0" style={{ bottom: tabBarHeight + 16 }}>
+          {floating}
+        </View>
+      ) : null}
     </Screen>
   );
 }

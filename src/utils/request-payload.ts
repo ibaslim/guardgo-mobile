@@ -1,6 +1,7 @@
 import { REQUEST_FORM_DEFAULTS } from '@/schemas/request-form';
+import { DEFAULT_SCHEDULE_RULES } from '@/constants/schedule';
 import type { ClientMetadata } from '@/types/onboarding';
-import type { RequestDetail, RequestPayload, RequestSchedule, RequestUpdatePayload, SavedSite, SchedulePayload } from '@/types/request';
+import type { RequestDetail, RequestPayload, RequestSchedule, RequestUpdatePayload, SavedSite, SchedulePayload, ScheduleRules } from '@/types/request';
 import type { RequestFormValues } from '@/types/request-form';
 import { formatTime12 } from '@/utils/availability';
 import { cityCodeFor, cityLabelFor, asObject, asText } from '@/utils/profile';
@@ -66,8 +67,12 @@ export function buildRequestPayload(values: RequestFormValues, metadata: ClientM
   };
 }
 
-/** The repeat pattern, with the attendance settings the web starts from. Only for a form that repeats. */
-export function buildSchedulePayload(values: RequestFormValues): SchedulePayload {
+/**
+ * The repeat pattern. Only for a form that repeats. The attendance rules are kept from the schedule the
+ * request already has, when the client set one; otherwise they are the standard ones.
+ */
+export function buildSchedulePayload(values: RequestFormValues, existing: RequestSchedule | null = null): SchedulePayload {
+  const rules = existing && !existing.systemGenerated ? existing.rules : DEFAULT_SCHEDULE_RULES;
   return {
     timezone: deviceTimezone(),
     schedule_type: values.repeat === 'recurring_weekly' ? 'recurring_weekly' : 'date_range',
@@ -76,13 +81,20 @@ export function buildSchedulePayload(values: RequestFormValues): SchedulePayload
     start_time_local: to24Hour(values.start_time),
     end_time_local: to24Hour(values.end_time),
     recurrence_days: values.repeat === 'recurring_weekly' ? values.repeat_days : [],
-    generation_horizon_days: 30,
-    roster_due_offset_minutes: 120,
-    unavailable_cutoff_minutes: 60,
-    late_grace_minutes: 15,
-    no_show_cutoff_minutes: 30,
-    checkin_geofence_meters: 200,
+    ...rulesPayload(rules),
     active: true,
+  };
+}
+
+/** The attendance rules as the server takes them. */
+export function rulesPayload(rules: ScheduleRules) {
+  return {
+    generation_horizon_days: rules.horizonDays,
+    roster_due_offset_minutes: rules.rosterLeadMinutes,
+    unavailable_cutoff_minutes: rules.leaveCutoffMinutes,
+    late_grace_minutes: rules.lateGraceMinutes,
+    no_show_cutoff_minutes: rules.noShowMinutes,
+    checkin_geofence_meters: rules.geofenceMeters,
   };
 }
 

@@ -5,6 +5,7 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { EditHeading } from '@/components/account/edit-step-shell';
 import { RosterSection } from '@/components/shifts/roster-section';
+import { ShiftCountdown } from '@/components/shifts/shift-countdown';
 import { SiteCard } from '@/components/shifts/site-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -44,15 +45,18 @@ const STEP_BUTTON = {
 type ManualPosition = { latitude: string; longitude: string };
 
 /** The guard's next move on one position: check in at the site, start once the client confirms, check out. */
-function SlotActions({ slot, manual, onDone }: { slot: ShiftSlot; manual: ManualPosition; onDone: () => void }) {
+function SlotActions({ slot, start, manual, onDone }: { slot: ShiftSlot; start: Date | null; manual: ManualPosition; onDone: () => void }) {
   const [busy, setBusy] = useState(false);
   const step = slotStep(slot);
   if (step === 'none') return null;
 
   if (step === 'wait_for_client') {
     return (
-      <View className="rounded-xl border border-dashed border-border-strong p-4">
-        <Text tone="secondary">You are checked in. You can start once the client confirms you have arrived.</Text>
+      <View className="gap-3">
+        <ShiftCountdown start={start} canStart={false} />
+        <View className="rounded-xl border border-dashed border-border-strong p-4">
+          <Text tone="secondary">You are checked in. You can start once the client confirms you have arrived.</Text>
+        </View>
       </View>
     );
   }
@@ -90,7 +94,7 @@ function SlotActions({ slot, manual, onDone }: { slot: ShiftSlot; manual: Manual
     }
   };
 
-  return (
+  const button = (
     <Button
       title={STEP_BUTTON[step].title}
       variant={step === 'check_out' ? 'danger' : 'primary'}
@@ -98,6 +102,17 @@ function SlotActions({ slot, manual, onDone }: { slot: ShiftSlot; manual: Manual
       onPress={run}
     />
   );
+
+  // Checked in and confirmed: the countdown to the start sits above the Start shift button.
+  if (step === 'start') {
+    return (
+      <View className="gap-3">
+        <ShiftCountdown start={start} canStart />
+        {button}
+      </View>
+    );
+  }
+  return button;
 }
 
 /** One shift the guard works: when and where it is, how many guards it has, and how each position is going. */
@@ -196,7 +211,7 @@ export default function ShiftScreen() {
             detail.slots.map((slot) => (
               <View key={slot.id} className="gap-3">
                 <InfoCard
-                  title={detail.slots.length > 1 ? `Position ${slot.number}` : 'Your position'}
+                  title={detail.slots.length > 1 || !isGuard ? `Position ${slot.number}` : 'Your position'}
                   rows={[
                     { label: 'Status', value: SLOT_STATUS_LABELS[slot.status] ?? slot.status },
                     { label: 'Guard', value: slot.guardName },
@@ -226,12 +241,12 @@ export default function ShiftScreen() {
                     />
                   </View>
                 ) : null}
-                {isGuard ? <SlotActions slot={slot} manual={manual} onDone={reload} /> : null}
+                {isGuard ? <SlotActions slot={slot} start={shift.start} manual={manual} onDone={reload} /> : null}
               </View>
             ))
           ) : (
             <View className="rounded-xl border border-dashed border-border-strong p-4">
-              <Text tone="secondary">No positions on this shift are assigned to you yet.</Text>
+              <Text tone="secondary">{isGuard ? 'No positions on this shift are assigned to you yet.' : 'No guards are on this shift yet.'}</Text>
             </View>
           )}
 

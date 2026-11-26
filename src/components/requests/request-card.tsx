@@ -23,7 +23,11 @@ export type RequestCardProps = {
  */
 export function RequestCard({ request, onPress, footer }: RequestCardProps) {
   const place = [request.siteName, request.city].filter(Boolean).join(', ');
-  const staffing = request.staffing && request.status !== 'draft' ? STAFFING_LABELS[request.staffing] : null;
+  const lapsed = request.staffing === 'expired' && request.status !== 'draft';
+  const staffing = request.staffing && request.status !== 'draft' && !lapsed ? STAFFING_LABELS[request.staffing] : null;
+  // A lapsed offer is the news; "Submitted" no longer says anything useful.
+  const statusLabel = lapsed ? STAFFING_LABELS.expired : STATUS_LABELS[request.status];
+  const statusKind = lapsed ? 'secondary' : STATUS_KINDS[request.status];
 
   const body = (
     <View className="gap-3.5 px-4 py-3.5">
@@ -31,7 +35,7 @@ export function RequestCard({ request, onPress, footer }: RequestCardProps) {
         <Text variant="label" numberOfLines={2} className="min-w-0 flex-1 font-sans-semibold">
           {request.title}
         </Text>
-        <Badge label={STATUS_LABELS[request.status]} kind={STATUS_KINDS[request.status]} />
+        <Badge label={statusLabel} kind={statusKind} />
       </View>
 
       <View className="gap-1.5">
@@ -50,7 +54,7 @@ export function RequestCard({ request, onPress, footer }: RequestCardProps) {
       </View>
 
       <View className="gap-1.5">
-        <CoverageStrip filled={request.filled} required={request.guardsRequired} />
+        <CoverageStrip filled={request.filled} required={request.guardsRequired} muted={lapsed} />
         <View className="flex-row items-center justify-between gap-3">
           <Text variant="caption" tone="muted">
             {coverageText(request.filled, request.guardsRequired)}
@@ -70,7 +74,7 @@ export function RequestCard({ request, onPress, footer }: RequestCardProps) {
       {onPress ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`${request.title}, ${STATUS_LABELS[request.status]}`}
+          accessibilityLabel={`${request.title}, ${statusLabel}`}
           onPress={onPress}
           className="active:bg-surface-muted">
           {body}

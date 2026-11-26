@@ -126,6 +126,8 @@ export default function RootLayout() {
             <Stack.Screen name="shift/[id]" options={{ headerShown: false }} />
             {/* Creating a job request, or editing a draft. It has its own heading with the back chevron. */}
             <Stack.Screen name="request-form" options={{ headerShown: false }} />
+            {/* A client planning how a live request repeats as shifts. It has its own heading with the back chevron. */}
+            <Stack.Screen name="request-schedule/[id]" options={{ headerShown: false }} />
           </Stack.Protected>
           {/*
             Development-only preview. It is only available once signed in and past onboarding: when the

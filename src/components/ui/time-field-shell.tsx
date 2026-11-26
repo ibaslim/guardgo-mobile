@@ -8,7 +8,7 @@ import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
 import type { TimeDraft } from '@/types/time';
 import type { FieldMeta } from '@/types/ui';
-import { DEFAULT_TIME_DRAFT, draftToLabel, draftToText, textToDraft } from '@/utils/time-draft';
+import { draftToLabel, draftToText, nowDraft, textToDraft } from '@/utils/time-draft';
 
 export type TimeFieldProps = FieldMeta & {
   /** "09:30 AM", or an empty string when no time is chosen. */
@@ -28,11 +28,12 @@ type TimeFieldShellProps = TimeFieldProps & {
  */
 export function TimeFieldShell({ value, onChange, placeholder = 'Select', children, ...meta }: TimeFieldShellProps) {
   const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState<TimeDraft>(DEFAULT_TIME_DRAFT);
+  const [draft, setDraft] = useState<TimeDraft>(nowDraft);
   const current = textToDraft(value);
 
   function openPicker() {
-    setDraft(current ?? DEFAULT_TIME_DRAFT);
+    // With no time chosen yet, the picker opens at the current time.
+    setDraft(current ?? nowDraft());
     setOpen(true);
   }
 

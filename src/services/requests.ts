@@ -1,4 +1,5 @@
 import { ENDPOINTS } from '@/constants/endpoints';
+import { DEFAULT_SCHEDULE_RULES } from '@/constants/schedule';
 import { api, ApiError } from '@/services/api';
 import type { EndStatus, FulfillmentMode, ListRequestsOptions, RequestDetail, RequestPayload, RequestSchedule, RequestStatus, RequestSummary, RequestUpdatePayload, RequestWave, RequestsPage, ScheduleKind, SchedulePayload, StaffingStatus } from '@/types/request';
 import { parseServerTimestamp } from '@/utils/dates';
@@ -37,8 +38,21 @@ type RawRequest = {
     client_hourly_quote?: number | null;
     estimated_total_hours?: number | null;
     estimated_client_charge?: number | null;
+    requested_hours_per_position?: number | null;
+    rate_field?: string | null;
   } | null;
-  invoicing_snapshot?: { billing_cycle?: string | null; invoice_recipient_email?: string | null } | null;
+  invoicing_snapshot?: {
+    billing_cycle?: string | null;
+    invoice_recipient_email?: string | null;
+    invoice_note?: string | null;
+    invoice_status?: string | null;
+  } | null;
+  lock_reason?: string | null;
+  published_at?: string | null;
+  cancelled_at?: string | null;
+  closed_at?: string | null;
+  expired_at?: string | null;
+  match_summary?: { eligible_count?: number | null; total_candidates?: number | null } | null;
   requested_start_at?: string | null;
   requested_end_at?: string | null;
   request_expires_at?: string | null;
@@ -146,10 +160,19 @@ function parseDetail(raw: RawRequest): RequestDetail {
           hourlyRate: amount(price?.client_hourly_quote),
           estimatedHours: amount(price?.estimated_total_hours),
           estimatedTotal: amount(price?.estimated_client_charge),
+          hoursEach: amount(price?.requested_hours_per_position),
+          weekend: price?.rate_field === 'weekend_rate',
         }
       : null,
     billingCycle: text(raw.invoicing_snapshot?.billing_cycle),
     invoiceEmail: text(raw.invoicing_snapshot?.invoice_recipient_email),
+    lockReason: text(raw.lock_reason),
+    publishedAt: parseServerTimestamp(raw.published_at),
+    endedAt: parseServerTimestamp(raw.cancelled_at ?? raw.closed_at ?? raw.expired_at),
+    eligibleGuards: amount(raw.match_summary?.eligible_count),
+    candidateTotal: amount(raw.match_summary?.total_candidates),
+    invoiceNote: text(raw.invoicing_snapshot?.invoice_note),
+    invoiceStatus: text(raw.invoicing_snapshot?.invoice_status),
   };
 }
 
@@ -164,6 +187,8 @@ type RawWave = {
   offer_count?: number;
   accepted_slots_at_close?: number;
   wave_expires_at?: string | null;
+  activated_at?: string | null;
+  review_note?: string | null;
 };
 
 export async function listRequestWaves(requestId: string): Promise<RequestWave[]> {
@@ -178,6 +203,8 @@ export async function listRequestWaves(requestId: string): Promise<RequestWave[]
       offers: wave.offer_count ?? 0,
       accepted: wave.accepted_slots_at_close ?? 0,
       expiresAt: parseServerTimestamp(wave.wave_expires_at),
+      activatedAt: parseServerTimestamp(wave.activated_at),
+      reviewNote: text(wave.review_note),
     }))
     .filter((wave) => wave.id)
     .sort((a, b) => b.number - a.number);
@@ -208,22 +235,57 @@ export function publishRequest(requestId: string) {
 type RawSchedule = {
   id?: string;
   schedule_type?: string;
+  timezone?: string | null;
   start_date?: string;
   end_date?: string | null;
+  start_time_local?: string | null;
+  end_time_local?: string | null;
   recurrence_days?: string[] | null;
+  generation_horizon_days?: number | null;
+  roster_due_offset_minutes?: number | null;
+  unavailable_cutoff_minutes?: number | null;
+  late_grace_minutes?: number | null;
+  no_show_cutoff_minutes?: number | null;
+  checkin_geofence_meters?: number | null;
+  active?: boolean | null;
+  system_generated?: boolean | null;
+  generated_shift_count?: number | null;
 };
 
-/** The repeat pattern saved for a request, or null when it doesn't repeat (the server answers 404). */
+const SCHEDULE_KINDS: readonly string[] = ['one_time', 'date_range', 'recurring_weekly'];
+
+const whole = (value: number | null | undefined, fallback: number) =>
+  typeof value === 'number' && Number.isFinite(value) ? Math.round(value) : fallback;
+
+/**
+ * The schedule saved for a request, or null when there is none (the server answers 404). A request the
+ * client never planned can still have one the server made itself: see `systemGenerated`.
+ */
 export async function getRequestSchedule(requestId: string): Promise<RequestSchedule | null> {
   try {
     const { schedule } = await api.get<{ schedule?: RawSchedule | null }>(`${ENDPOINTS.requests.list}/${requestId}/schedule`);
     if (!schedule?.id) return null;
+    const rules = DEFAULT_SCHEDULE_RULES;
     return {
       id: schedule.id,
-      kind: (schedule.schedule_type as ScheduleKind) ?? 'one_time',
-      startDate: String(schedule.start_date ?? ''),
-      endDate: String(schedule.end_date ?? ''),
-      recurrenceDays: Array.isArray(schedule.recurrence_days) ? schedule.recurrence_days : [],
+      kind: SCHEDULE_KINDS.includes(String(schedule.schedule_type)) ? (schedule.schedule_type as ScheduleKind) : 'one_time',
+      startDate: text(schedule.start_date),
+      endDate: text(schedule.end_date),
+      recurrenceDays: Array.isArray(schedule.recurrence_days) ? schedule.recurrence_days.map((day) => text(day).toLowerCase()) : [],
+      timezone: text(schedule.timezone),
+      startTime: text(schedule.start_time_local),
+      endTime: text(schedule.end_time_local),
+      rules: {
+        horizonDays: whole(schedule.generation_horizon_days, rules.horizonDays),
+        rosterLeadMinutes: whole(schedule.roster_due_offset_minutes, rules.rosterLeadMinutes),
+        leaveCutoffMinutes: whole(schedule.unavailable_cutoff_minutes, rules.leaveCutoffMinutes),
+        lateGraceMinutes: whole(schedule.late_grace_minutes, rules.lateGraceMinutes),
+        noShowMinutes: whole(schedule.no_show_cutoff_minutes, rules.noShowMinutes),
+        geofenceMeters: whole(schedule.checkin_geofence_meters, rules.geofenceMeters),
+      },
+      active: schedule.active !== false,
+      systemGenerated: schedule.system_generated === true,
+      shiftCount: typeof schedule.generated_shift_count === 'number' ? schedule.generated_shift_count : null,
     };
   } catch (failure) {
     if (failure instanceof ApiError && failure.status === 404) return null;
@@ -231,7 +293,10 @@ export async function getRequestSchedule(requestId: string): Promise<RequestSche
   }
 }
 
-/** Saves the repeat pattern: creates it, or changes the one the request already has. */
+/**
+ * Saves the schedule: creates it, or changes the one the request already has. The server then deletes
+ * the request's upcoming shifts and makes them again from the new schedule.
+ */
 export function saveRequestSchedule(requestId: string, payload: SchedulePayload, exists: boolean) {
   const url = `${ENDPOINTS.requests.list}/${requestId}/schedule`;
   return exists ? api.patch<unknown>(url, payload) : api.post<unknown>(url, payload);

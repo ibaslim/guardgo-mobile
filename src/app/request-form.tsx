@@ -33,7 +33,7 @@ import {
 } from "@/services/requests";
 import { toast } from "@/services/toast";
 import type { ClientMetadata, MetadataOption } from "@/types/onboarding";
-import type { SavedSite } from "@/types/request";
+import type { RequestSchedule, SavedSite } from "@/types/request";
 import type { RequestFormValues } from "@/types/request-form";
 import { repeats } from "@/utils/request-form";
 import {
@@ -49,7 +49,8 @@ type Loaded = {
   /** The values to start from, and the id and repeat pattern of the draft being edited. */
   initial: RequestFormValues;
   requestId: string | null;
-  hasSchedule: boolean;
+  /** The schedule the draft already has, so saving its repeat keeps the attendance rules set for it. */
+  schedule: RequestSchedule | null;
   invoiceEmail: string;
 };
 
@@ -77,7 +78,7 @@ function RequestFormBody({
   const [confirmOpen, setConfirmOpen] = useState(false);
   // The draft's id once it exists, so a retry after a half-finished save updates it instead of making another.
   const [draftId, setDraftId] = useState(loaded.requestId);
-  const [scheduleSaved, setScheduleSaved] = useState(loaded.hasSchedule);
+  const [scheduleSaved, setScheduleSaved] = useState(loaded.schedule !== null);
 
   const title = updating
     ? "Update request"
@@ -128,7 +129,7 @@ function RequestFormBody({
       if (repeats(values)) {
         await saveRequestSchedule(
           id,
-          buildSchedulePayload(values),
+          buildSchedulePayload(values, loaded.schedule),
           scheduleSaved,
         );
         setScheduleSaved(true);
@@ -259,7 +260,7 @@ export default function RequestFormScreen() {
           savedSites,
           initial: { ...REQUEST_FORM_DEFAULTS, invoice_email: billingEmail },
           requestId: null,
-          hasSchedule: false,
+          schedule: null,
           invoiceEmail: billingEmail,
         };
       }
@@ -271,7 +272,7 @@ export default function RequestFormScreen() {
         savedSites,
         initial: formFromRequest(request, schedule, metadata),
         requestId: id,
-        hasSchedule: schedule !== null,
+        schedule,
         invoiceEmail: request.invoiceEmail,
       };
     })()
