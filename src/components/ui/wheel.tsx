@@ -12,9 +12,13 @@ const LINE_HEIGHT = Platform.OS === 'android' ? ITEM_HEIGHT - 0.01 : ITEM_HEIGHT
 // Rows above and below the chosen one. The chosen row sits in the middle of the wheel.
 const SIDE_ROWS = 2;
 const WHEEL_HEIGHT = ITEM_HEIGHT * (SIDE_ROWS * 2 + 1);
-// A looping wheel scrolls over about this many rows, starts in the middle, and is put back in the
-// middle when it stops, so it never seems to end.
+// A looping wheel scrolls over about this many rows (unless it asks for another number), starts in
+// the middle, and is put back in the middle when it stops, so it never seems to end.
 const LOOP_ROWS = 120;
+// A looping wheel holds at least this many copies of its values, so the middle one always has a whole
+// copy above and below it to scroll into. With only two, the last value sat on the last row and the
+// wheel could not turn past it (59 would not go on to 00).
+const MIN_COPIES = 3;
 const RECENTER_ROWS = 30;
 // A looping column repeats this many values before its first and after its last, so the ends join
 // up when the wheel wraps.
@@ -128,6 +132,8 @@ export type WheelProps = {
   onSelect: (index: number) => void;
   /** Wraps around: after the last value comes the first again. */
   loop?: boolean;
+  /** For a looping wheel: about how many rows it can scroll over before it is put back in the middle. */
+  loopRows?: number;
   accessibilityLabel: string;
 };
 
@@ -136,9 +142,9 @@ export type WheelProps = {
  * Put a few side by side in a row (each takes an equal share of the width). See `WheelTimePickerField`
  * and `WheelDateField`.
  */
-export function Wheel({ labels, selected, onSelect, loop = false, accessibilityLabel }: WheelProps) {
+export function Wheel({ labels, selected, onSelect, loop = false, loopRows = LOOP_ROWS, accessibilityLabel }: WheelProps) {
   const count = labels.length;
-  const repeats = loop ? Math.ceil(LOOP_ROWS / count) : 1;
+  const repeats = loop ? Math.max(MIN_COPIES, Math.ceil(loopRows / count)) : 1;
   const middle = loop ? Math.floor(repeats / 2) * count : 0;
   const rows = count * repeats;
 

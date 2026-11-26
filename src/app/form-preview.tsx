@@ -53,7 +53,17 @@ const schema = z.object({
   notes: z.string().max(200, 'Keep notes under 200 characters.'),
 });
 
-const VARIANTS: ButtonVariant[] = ['primary', 'secondary', 'info', 'outline', 'success', 'warning', 'danger', 'link'];
+const VARIANTS: ButtonVariant[] = [
+  'primary',
+  'secondary',
+  'info',
+  'outline',
+  'success',
+  'warning',
+  'danger',
+  'shine',
+  'link',
+];
 
 /**
  * Android's system toast is drawn by the OS, so it shows above the keyboard. iOS has no equivalent,
@@ -94,6 +104,7 @@ export default function FormPreviewScreen() {
             ))}
           </View>
           <Button title="Save shift" icon={ICONS.check} size="lg" />
+          <Button title="Shine" variant="shine" icon={ICONS.check} size="lg" />
           <View className="flex-row gap-2">
             <Button title="Disabled" disabled className="flex-1" />
             <Button title="Loading" loading className="flex-1" />
