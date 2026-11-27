@@ -22,6 +22,7 @@ export function WheelTimePickerField(props: WheelTimePickerFieldProps) {
         <View className="flex-row gap-2">
           <Wheel
             loop
+            loopRows={96}
             labels={HOUR_LABELS}
             selected={draft.hour - 1}
             onSelect={(index) => setDraft({ ...draft, hour: index + 1 })}
@@ -29,6 +30,7 @@ export function WheelTimePickerField(props: WheelTimePickerFieldProps) {
           />
           <Wheel
             loop
+            loopRows={360}
             labels={MINUTE_LABELS}
             selected={draft.minute}
             onSelect={(index) => setDraft({ ...draft, minute: index })}

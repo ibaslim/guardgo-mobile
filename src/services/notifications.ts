@@ -88,6 +88,8 @@ export function notificationTarget(notification: AppNotification, area: RoleArea
 
   switch (area) {
     case 'guard':
+      // An offer opens its request, with the offer and its answers on top.
+      if (job && request) return `/request/${request}?job=${job}`;
       if (job) return `/job/${job}`;
       if (actionUrl.includes('/leaves') || sourceModule === 'leaves') return '/guard/leaves';
       if (actionUrl.includes('invoices')) return '/guard/invoices';

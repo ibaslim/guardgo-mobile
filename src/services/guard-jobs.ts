@@ -1,3 +1,5 @@
+import type { Href } from 'expo-router';
+
 import { ENDPOINTS } from '@/constants/endpoints';
 import { lower, toDate, toNumber } from '@/services/dashboard-data';
 import { api, ApiError } from '@/services/api';
@@ -114,6 +116,14 @@ export function jobActions(job: GuardJob): JobAction[] {
     default:
       return [];
   }
+}
+
+/**
+ * Where an offer opens: the details of its request, with the offer and its answers on top (as the web's
+ * request drawer). A job whose request isn't known opens on its own.
+ */
+export function offerHref(job: { id: string; requestId: string }): Href {
+  return job.requestId ? { pathname: '/request/[id]', params: { id: job.requestId, job: job.id } } : (`/job/${job.id}` as Href);
 }
 
 export const JOB_STATUS_LABELS: Record<string, string> = {

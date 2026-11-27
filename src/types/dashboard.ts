@@ -41,6 +41,8 @@ export type ClientDashboard = {
 /** A job offered to, or taken by, the signed-in tenant (or, for a client, by whoever covers their request). */
 export type DashboardJob = {
   id: string;
+  /** The request the job belongs to. Empty when the server sent none. */
+  requestId: string;
   title: string;
   siteName: string;
   status: string;

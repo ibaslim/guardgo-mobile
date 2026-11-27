@@ -1,21 +1,17 @@
 import { ActivityIndicator, Pressable, View } from 'react-native';
 
+import { ReplyTimer } from '@/components/jobs/offer-answer';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icons';
 import { JOB_STATUS_LABELS, jobActions } from '@/services/guard-jobs';
-import type { GuardJob, JobAction, JobRail } from '@/types/job';
+import type { GuardJob, JobAction } from '@/types/job';
 import { formatMoney } from '@/utils/format';
-import { jobBadgeKind, jobRail, stamp } from '@/utils/job-status';
+import { jobBadgeKind, stamp } from '@/utils/job-status';
+import { formatWindow } from '@/utils/request-status';
 
-const RAILS: Record<JobRail, string> = {
-  primary: 'bg-primary',
-  success: 'bg-badge-success',
-  warning: 'bg-badge-warning',
-  danger: 'bg-badge-danger',
-  neutral: 'bg-border-strong',
-};
+const TABULAR = { fontVariant: ['tabular-nums' as const] };
 
 export type JobCardProps = {
   job: GuardJob;
@@ -31,79 +27,118 @@ export type JobCardProps = {
   readOnly?: boolean;
 };
 
-/** The line under the site: when the job runs, or when the offer must be answered. */
+/** The quiet line under the details: why an offer has no deadline, or when a lapsed one was due. */
 function whenLine(job: GuardJob) {
-  if (job.status === 'offered' || job.status === 'reconfirmation_required') {
-    return job.dueAt ? `Reply by ${stamp(job.dueAt)}` : 'No reply deadline';
-  }
   if (job.status === 'expired') return job.dueAt ? `No reply by ${stamp(job.dueAt)}` : 'Not answered in time';
-  return job.start ? `Starts ${stamp(job.start)}` : '';
+  if (job.status === 'offered' || job.status === 'reconfirmation_required') return job.dueAt ? '' : 'No reply deadline';
+  return '';
 }
 
 /**
  * A job offered to, or taken by, the guard. Tapping it opens the details. An offer, or a job to
- * reconfirm, also has its two answers in a footer, so it can be dealt with without opening it.
+ * reconfirm, also shows the time left to answer running down and its pay, with Details and Accept in a
+ * footer. Declining asks for a reason, so it is done from the details.
  */
 export function JobCard({ job, busy = false, onOpen, onAct, readOnly = false }: JobCardProps) {
-  const quick = !readOnly && (job.status === 'offered' || job.status === 'reconfirmation_required') ? jobActions(job) : [];
-  const first = readOnly
-    ? job.assignee || (job.forProvider ? 'Service provider' : 'Guard')
-    : job.hourlyPay === null
-      ? null
-      : `${formatMoney(job.hourlyPay)} / hr`;
-  const meta = [first, whenLine(job)].filter(Boolean).join(' · ');
+  const open = job.status === 'offered' || job.status === 'reconfirmation_required';
+  // An offer or a reconfirmation: the timer and pay row, and the answers.
+  const answering = !readOnly && open;
+  // Only the main answer is on the card; declining (which asks for a reason) happens in the details.
+  const accept = answering ? jobActions(job).find((action) => action.kind === 'primary') : undefined;
+  const pay = !readOnly && job.hourlyPay !== null ? `${formatMoney(job.hourlyPay)}/hr` : null;
+  const who = readOnly ? job.assignee || (job.forProvider ? 'Service provider' : 'Guard') : null;
+  // An offer shows its pay next to the timer; any other job keeps it in the quiet line.
+  const meta = [who, answering ? null : pay, whenLine(job)].filter(Boolean).join(' · ');
+  const status = JOB_STATUS_LABELS[job.status] ?? job.status;
 
   return (
     <View className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`${job.title}. ${JOB_STATUS_LABELS[job.status] ?? job.status}. ${job.siteName}`}
+        accessibilityLabel={`${job.title}. ${status}. ${job.siteName}`}
         onPress={onOpen}
         className="active:bg-surface-muted">
-        <View className={`absolute bottom-3 left-0 top-3 w-1 rounded-r-full ${RAILS[jobRail(job)]}`} />
-        <View className="flex-row items-start gap-3 py-3.5 pl-4 pr-3">
-          <View className="min-w-0 flex-1 gap-0.5">
-            <Text variant="label" numberOfLines={2} className="font-sans-semibold text-base">
+        <View className="gap-2 px-4 pb-3 pt-3.5">
+          <View className="flex-row items-start gap-3">
+            <Text variant="label" numberOfLines={2} className="min-w-0 flex-1 font-sans-semibold text-base">
               {job.title}
             </Text>
-            <Text variant="small" tone="secondary" numberOfLines={1}>
+            <Badge label={status} kind={jobBadgeKind(job.status)} />
+          </View>
+
+          <View className="flex-row items-center gap-1.5">
+            <Icon icon={ICONS.location} size={14} tone="muted" />
+            <Text variant="small" tone="secondary" numberOfLines={1} className="min-w-0 flex-1">
               {job.siteName}
             </Text>
-            {meta ? (
-              <Text variant="caption" tone="muted" numberOfLines={2}>
-                {meta}
-              </Text>
-            ) : null}
           </View>
-          <Badge label={JOB_STATUS_LABELS[job.status] ?? job.status} kind={jobBadgeKind(job.status)} />
+
+          {job.start ? (
+            <View className="flex-row items-center gap-1.5">
+              <Icon icon={ICONS.clock} size={14} tone="muted" />
+              <Text variant="small" tone="secondary" numberOfLines={2} style={TABULAR} className="min-w-0 flex-1">
+                {formatWindow(job.start, job.end)}
+              </Text>
+            </View>
+          ) : null}
+
+          {answering && job.dueAt ? (
+            <View className="flex-row items-center gap-1.5">
+              <Icon icon={ICONS.calendar} size={14} tone="muted" />
+              <Text variant="small" tone="secondary" numberOfLines={1} style={TABULAR} className="min-w-0 flex-1">
+                {`${job.status === 'reconfirmation_required' ? 'Reconfirm by' : 'Reply by'} ${stamp(job.dueAt)}`}
+              </Text>
+            </View>
+          ) : null}
+
+          {meta ? (
+            <Text variant="caption" tone="muted" numberOfLines={2} style={TABULAR}>
+              {meta}
+            </Text>
+          ) : null}
+
+          {answering ? (
+            <View className="flex-row items-center justify-between gap-3 pt-1">
+              <View className="min-w-0 flex-1">
+                <ReplyTimer job={job} />
+              </View>
+              {pay ? (
+                <Text variant="label" className="font-sans-semibold" style={TABULAR}>
+                  {pay}
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
         </View>
       </Pressable>
 
-      {quick.length > 0 ? (
+      {accept ? (
         <View className="flex-row border-t border-border">
-          {quick.map((action, index) => (
-            <View key={action.status} className="flex-1 flex-row">
-              {index > 0 ? <View className="w-px bg-border" accessible={false} /> : null}
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`${action.label} ${job.title}`}
-                accessibilityState={{ busy }}
-                disabled={busy}
-                onPress={() => onAct?.(action)}
-                className="h-10 flex-1 items-center justify-center active:bg-surface-muted">
-                {busy && action.kind === 'primary' ? (
-                  <ActivityIndicator colorClassName="accent-primary" />
-                ) : (
-                  <View className="flex-row items-center gap-1.5">
-                    <Icon icon={action.kind === 'danger' ? ICONS.close : ICONS.check} size={16} tone={action.kind === 'danger' ? 'danger' : 'primary'} />
-                    <Text variant="label" tone={action.kind === 'danger' ? 'danger' : 'link'} className="font-sans-semibold">
-                      {action.label}
-                    </Text>
-                  </View>
-                )}
-              </Pressable>
-            </View>
-          ))}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Details of ${job.title}`}
+            onPress={onOpen}
+            className="h-10 flex-1 items-center justify-center active:bg-surface-muted">
+            <Text variant="label" tone="secondary" className="font-sans-semibold">
+              DETAILS
+            </Text>
+          </Pressable>
+          <View className="w-px bg-border" accessible={false} />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${accept.label} ${job.title}`}
+            accessibilityState={{ busy }}
+            disabled={busy}
+            onPress={() => onAct?.(accept)}
+            className="h-10 flex-1 items-center justify-center active:bg-surface-muted">
+            {busy ? (
+              <ActivityIndicator colorClassName="accent-primary" />
+            ) : (
+              <Text variant="label" tone="link" className="font-sans-semibold">
+                {accept.label.toUpperCase()}
+              </Text>
+            )}
+          </Pressable>
         </View>
       ) : null}
     </View>

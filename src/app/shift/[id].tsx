@@ -250,7 +250,7 @@ export default function ShiftScreen() {
             </View>
           )}
 
-          {role === 'provider' ? <RosterSection shiftId={shift.id} slots={detail.slots} onSaved={reload} /> : null}
+          {role === 'provider' ? <RosterSection shift={shift} slots={detail.slots} onSaved={reload} /> : null}
 
           {shift.requestId ? (
             <Button

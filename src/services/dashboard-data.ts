@@ -31,6 +31,7 @@ export function parseJob(raw: Raw): DashboardJob {
   const pay = Number(raw.request?.pricing_snapshot?.[assignee === 'service_provider' ? 'provider_hourly_pay' : 'guard_hourly_pay']);
   return {
     id: String(raw.id ?? ''),
+    requestId: String(raw.request_id ?? raw.request?.id ?? ''),
     title: raw.request?.title || 'Offer',
     siteName: raw.request?.site_name || 'Site unavailable',
     status: lower(raw.assignment_status),

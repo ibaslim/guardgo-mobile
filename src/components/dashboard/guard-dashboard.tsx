@@ -5,6 +5,7 @@ import { DashboardScreen, toneOf, type DashboardSectionView, type DashboardView 
 import { useDashboard } from '@/hooks/use-dashboard';
 import { SECTION_SIZE, within24Hours } from '@/services/dashboard-data';
 import { loadGuardDashboard } from '@/services/guard-dashboard';
+import { offerHref } from '@/services/guard-jobs';
 import type { GuardDashboard } from '@/types/dashboard';
 import { attentionOf, invoiceMeta, offerMeta, token, when } from '@/utils/dashboard';
 import { badgeKindFor } from '@/utils/badge';
@@ -83,7 +84,7 @@ function viewOf(data: GuardDashboard): DashboardView {
           subtitle: `${job.siteName}${job.status === 'reconfirmation_required' ? ' · Reconfirm' : ''}`,
           meta: offerMeta(job, managed ? 'Payout managed by provider' : undefined),
           tone: within24Hours(job.dueAt) ? 'warning' : 'neutral',
-          onPress: openJob(job.id),
+          onPress: () => router.push(offerHref(job)),
         })),
       },
       {

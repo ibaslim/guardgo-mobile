@@ -99,11 +99,18 @@ export default function RootLayout() {
           {/* Opened from an invite link, signed in or not. */}
           <Stack.Screen name="invite/[token]" />
           <Stack.Screen name="reset/[token]" />
-          {/* Signed out (sign-in screen) or signed in (Account > Configurations). */}
-          <Stack.Screen
-            name="server-config"
-            options={{ headerShown: true, title: 'IP Config', headerTitleStyle: { fontFamily: 'IBMPlexSans_600SemiBold' } }}
-          />
+          {/*
+            Signed out (sign-in screen) or signed in (Account > Configurations). Closed while onboarding or
+            waiting for approval: when the current screen goes away, the router falls back to the allowed
+            route with the shortest name, and 'server-config' would beat 'guard-onboarding' and
+            'provider-onboarding', leaving the user on this screen with nothing to go back to.
+          */}
+          <Stack.Protected guard={!isLoggedIn || (!needsOnboarding && !awaitingApproval)}>
+            <Stack.Screen
+              name="server-config"
+              options={{ headerShown: true, title: 'IP Config', headerTitleStyle: { fontFamily: 'IBMPlexSans_600SemiBold' } }}
+            />
+          </Stack.Protected>
           <Stack.Protected guard={!isLoggedIn}>
             <Stack.Screen name="login" options={SHOW_LOGIN} />
             <Stack.Screen name="verify-email" />

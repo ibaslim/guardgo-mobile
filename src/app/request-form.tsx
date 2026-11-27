@@ -1,10 +1,11 @@
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 
 import { EditHeading } from "@/components/account/edit-step-shell";
 import { BillingSection } from "@/components/requests/form/billing-section";
 import { JobSection } from "@/components/requests/form/job-section";
+import { OperationsScheduleCard } from "@/components/requests/operations-schedule-card";
 import { SiteSection } from "@/components/requests/form/site-section";
 import { WhenSection } from "@/components/requests/form/when-section";
 import { Button } from "@/components/ui/button";
@@ -79,6 +80,27 @@ function RequestFormBody({
   // The draft's id once it exists, so a retry after a half-finished save updates it instead of making another.
   const [draftId, setDraftId] = useState(loaded.requestId);
   const [scheduleSaved, setScheduleSaved] = useState(loaded.schedule !== null);
+  // A live request's shift plan is edited on its own screen; this keeps the card showing what was saved there.
+  const [schedule, setSchedule] = useState<RequestSchedule | null | undefined>(
+    loaded.schedule,
+  );
+  const firstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (firstFocus.current) {
+        firstFocus.current = false;
+        return;
+      }
+      if (!updating || !loaded.requestId) return;
+      let active = true;
+      getRequestSchedule(loaded.requestId)
+        .then((value) => active && setSchedule(value))
+        .catch(() => active && setSchedule(undefined));
+      return () => {
+        active = false;
+      };
+    }, [updating, loaded.requestId]),
+  );
 
   const title = updating
     ? "Update request"
@@ -191,6 +213,17 @@ function RequestFormBody({
           savedSites={editing ? [] : loaded.savedSites}
         />
         <WhenSection form={form} allowRepeat={!updating} />
+        {updating && loaded.requestId ? (
+          <OperationsScheduleCard
+            schedule={schedule}
+            onEdit={() =>
+              router.push({
+                pathname: "/request-schedule/[id]",
+                params: { id: loaded.requestId! },
+              })
+            }
+          />
+        ) : null}
         <BillingSection form={form} />
 
         <View className="gap-3">

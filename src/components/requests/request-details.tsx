@@ -1,10 +1,12 @@
 import { Fragment, type ReactNode } from 'react';
 import { View } from 'react-native';
 
+import { AttendanceRulesCard, OperationsScheduleCard } from '@/components/requests/operations-schedule-card';
 import { RequestCard } from '@/components/requests/request-card';
+import { SiteActions } from '@/components/shifts/site-card';
 import { Card } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
-import type { RequestDetail, RequestWave } from '@/types/request';
+import type { RequestDetail, RequestSchedule, RequestWave } from '@/types/request';
 import { formatDate, formatMoney, formatTime } from '@/utils/format';
 import { FULFILLMENT_LABELS, WAVE_LABELS } from '@/utils/request-status';
 
@@ -173,13 +175,23 @@ export type RequestDetailsProps = {
    * price breakdown (including what guards and providers are paid) to guards and providers too.
    */
   showPrice?: boolean;
+  /**
+   * The operations schedule card. `value` is null when the request has none and undefined when it couldn't
+   * be loaded; `onEdit` opens the shift plan (for the client). Leave out to show no schedule card.
+   */
+  schedule?: { value: RequestSchedule | null | undefined; onEdit?: () => void };
+  /** Directions and a distance check under the site, for whoever has to go there. */
+  siteActions?: boolean;
+  /** Shown right under the summary card, e.g. the viewer's own offer. */
+  children?: ReactNode;
 };
 
 /**
  * Everything about one request, read-only: the summary card on top, a line on where it stands, then job,
- * site, instructions, price and offer rounds. Shared by every role's request screen.
+ * site, the operations schedule and attendance rules, price and offer rounds, and the special instructions
+ * last. Shared by every role's request screen.
  */
-export function RequestDetails({ request, waves, showPrice = false }: RequestDetailsProps) {
+export function RequestDetails({ request, waves, showPrice = false, schedule, siteActions = false, children }: RequestDetailsProps) {
   const price = showPrice ? request.pricing : null;
   const currency = price?.currency;
   const note = statusNote(request, waves);
@@ -188,6 +200,8 @@ export function RequestDetails({ request, waves, showPrice = false }: RequestDet
   return (
     <View className="gap-4">
       <RequestCard request={request} />
+
+      {children}
 
       {note ? <StatusNote note={note} /> : null}
 
@@ -211,15 +225,18 @@ export function RequestDetails({ request, waves, showPrice = false }: RequestDet
           { label: 'Manager', value: request.site.contact },
           { label: 'Manager email', value: request.site.email },
         ]}
+        foot={
+          siteActions && request.site.address ? (
+            <View className="border-t border-border p-4">
+              <SiteActions site={request.site} />
+            </View>
+          ) : null
+        }
       />
 
-      {request.instructions ? (
-        <Card title="Special instructions">
-          <View className="p-4">
-            <Text variant="small">{request.instructions}</Text>
-          </View>
-        </Card>
-      ) : null}
+      {schedule ? <OperationsScheduleCard schedule={schedule.value} onEdit={schedule.onEdit} /> : null}
+
+      {schedule?.value ? <AttendanceRulesCard schedule={schedule.value} /> : null}
 
       {price ? (
         <Facts
@@ -252,6 +269,14 @@ export function RequestDetails({ request, waves, showPrice = false }: RequestDet
       ) : null}
 
       {waves && waves.length > 0 ? <RoundsTimeline waves={waves} /> : null}
+
+      {request.instructions ? (
+        <Card title="Special instructions">
+          <View className="p-4">
+            <Text variant="small">{request.instructions}</Text>
+          </View>
+        </Card>
+      ) : null}
     </View>
   );
 }

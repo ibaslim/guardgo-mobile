@@ -71,5 +71,3 @@ export type JobAction = {
   /** Set for a service provider's acceptance: how many guard positions it can cover. The app asks first. */
   slots?: { min: number; max: number };
 };
-
-export type JobRail = 'primary' | 'success' | 'warning' | 'danger' | 'neutral';
